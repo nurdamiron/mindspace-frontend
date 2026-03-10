@@ -8,15 +8,10 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      api.get('/auth/me')
-        .then(setUser)
-        .catch(() => localStorage.removeItem('token'))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    api.get('/auth/me')
+      .then(setUser)
+      .catch(() => localStorage.removeItem('token'))
+      .finally(() => setLoading(false));
   }, []);
 
   async function login(email, password) {
@@ -26,7 +21,8 @@ export function AuthProvider({ children }) {
     return data.user;
   }
 
-  function logout() {
+  async function logout() {
+    await api.post('/auth/logout').catch(() => {});
     localStorage.removeItem('token');
     setUser(null);
   }
@@ -38,6 +34,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   return useContext(AuthContext);
 }

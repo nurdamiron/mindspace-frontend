@@ -16,6 +16,7 @@ export default function Schedule() {
   const [noteForm, setNoteForm] = useState({ condition_before: 5, condition_after: 7, recommend_followup: false, tags: '', notes: '' });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     api.get(`/psychologist/schedule?period=${period}`)
       .then(setSessions)
@@ -68,7 +69,7 @@ export default function Schedule() {
             <div className="empty-state-title">Нет записей</div>
             <div className="empty-state-desc">На выбранный период консультаций нет</div>
           </div>
-        ) : (
+        ) : period === 'today' || period === 'all' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {sessions.map(s => {
               const badge = STATUS_BADGE[s.status] || STATUS_BADGE.scheduled;
@@ -119,6 +120,73 @@ export default function Schedule() {
                 </div>
               );
             })}
+          </div>
+        ) : (
+          <div className="calendar-grid fade-in">
+            {(() => {
+              // Calculate current week dates
+              const today = new Date();
+              const startOfWeek = new Date(today);
+              startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // start on Monday
+              
+              const weekDays = Array.from({length: 7}).map((_, i) => {
+                const d = new Date(startOfWeek);
+                d.setDate(d.getDate() + i);
+                return d;
+              });
+
+              // Generate hours (08:00 to 20:00)
+              const hours = Array.from({length: 13}).map((_, i) => i + 8);
+
+              return (
+                <>
+                  <div className="calendar-header">
+                    <div className="calendar-col-header" style={{ borderLeft: 'none' }}></div>
+                    {weekDays.map(d => (
+                      <div key={d.toISOString()} className="calendar-col-header">
+                        {d.toLocaleDateString('ru', { weekday: 'short' })}
+                        <div className="date">{d.getDate()}</div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="calendar-body">
+                    {hours.map(hour => (
+                      <div key={hour} className="calendar-row">
+                        <div className="calendar-time-col">
+                          {hour.toString().padStart(2, '0')}:00
+                        </div>
+                        
+                        {weekDays.map(day => {
+                          const dateStr = day.toISOString().split('T')[0];
+                          const cellEvents = sessions.filter(s => {
+                            const [h] = s.start_time.split(':');
+                            return s.date.startsWith(dateStr) && parseInt(h) === hour;
+                          });
+
+                          return (
+                            <div key={dateStr} className="calendar-cell">
+                              {cellEvents.map(ev => (
+                                <div 
+                                  key={ev.appointment_id} 
+                                  className={`calendar-event ${ev.status === 'completed' ? 'completed' : ''}`}
+                                  onClick={() => setNoteModal(ev)}
+                                >
+                                  <div className="calendar-event-title">Студент #{ev.student_id}</div>
+                                  <div className="calendar-event-time">
+                                    {ev.start_time.slice(0, 5)} - {ev.end_time.slice(0, 5)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
           </div>
         )
       }

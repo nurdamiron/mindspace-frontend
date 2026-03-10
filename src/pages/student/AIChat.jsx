@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { api } from '../../api/client';
 
 export default function AIChat() {
@@ -73,7 +74,13 @@ export default function AIChat() {
           )}
 
           {messages.map((m, i) => (
-            <div key={i} className={`chat-bubble ${m.role}`}>{m.content}</div>
+            <div key={i} className={`chat-bubble ${m.role}`}>
+              {m.role === 'assistant' ? (
+                <ReactMarkdown>{m.content}</ReactMarkdown>
+              ) : (
+                m.content
+              )}
+            </div>
           ))}
 
           {loading && (

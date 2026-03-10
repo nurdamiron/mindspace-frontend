@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { api } from '../../api/client';
 
 const COLORS = ['#6366f1', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
@@ -23,8 +24,12 @@ export default function Psychologists() {
     setSelected(psych);
     setSelectedSlot(null);
     setSlots([]);
-    const data = await api.get(`/student/psychologists/${psych.id}/slots`);
-    setSlots(data);
+    try {
+      const data = await api.get(`/student/psychologists/${psych.id}/slots`);
+      setSlots(data);
+    } catch {
+      toast.error('Ошибка загрузки слотов');
+    }
   }
 
   async function book() {
@@ -38,8 +43,9 @@ export default function Psychologists() {
         format,
       });
       setSuccess(true);
+      toast.success('Успешная запись!');
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setBooking(false);
     }

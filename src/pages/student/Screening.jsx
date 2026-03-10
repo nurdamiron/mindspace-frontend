@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { api } from '../../api/client';
 
 const QUESTIONS = [
@@ -24,13 +25,17 @@ export default function Screening() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!allAnswered) return;
+    if (!allAnswered) {
+      toast.error('Пожалуйста, ответьте на все вопросы');
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.post('/student/surveys', { type: 'screening', answers });
       setResult(res);
+      toast.success('Результаты успешно сохранены!');
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

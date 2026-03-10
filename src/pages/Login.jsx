@@ -1,28 +1,41 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+
+const loginSchema = z.object({
+  email: z.string().email('Некорректный email адрес').min(1, 'Email обязателен'),
+  password: z.string().min(6, 'Минимальная длина пароля - 6 символов'),
+});
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function onSubmit(data) {
     setError('');
-    setLoading(true);
     try {
-      const user = await login(email, password);
+      const user = await login(data.email, data.password);
+      toast.success('Успешный вход!');
       if (user.role === 'student') navigate('/student/dashboard');
       else if (user.role === 'psychologist') navigate('/psychologist/schedule');
       else navigate('/admin/dashboard');
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
+      toast.error(err.message);
     }
   }
 
@@ -32,8 +45,8 @@ export default function Login() {
       psychologist: ['psych1@university.kz', 'password123'],
       admin: ['admin@university.kz', 'password123'],
     };
-    setEmail(demos[role][0]);
-    setPassword(demos[role][1]);
+    setValue('email', demos[role][0]);
+    setValue('password', demos[role][1]);
     setError('');
   }
 
@@ -48,7 +61,7 @@ export default function Login() {
           </div>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
           {error && <div className="login-error">⚠️ {error}</div>}
 
           <div className="form-group">
@@ -58,10 +71,9 @@ export default function Login() {
               className="form-input"
               type="email"
               placeholder="your@university.kz"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
+              {...register('email')}
             />
+            {errors.email && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.email.message}</p>}
           </div>
 
           <div className="form-group">
@@ -71,14 +83,13 @@ export default function Login() {
               className="form-input"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
+              {...register('password')}
             />
+            {errors.password && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.password.message}</p>}
           </div>
 
-          <button id="login-submit" className="btn btn-primary w-full btn-lg" type="submit" disabled={loading}>
-            {loading ? '⏳ Вход...' : '→ Войти'}
+          <button id="login-submit" className="btn btn-primary w-full btn-lg" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? '⏳ Вход...' : '→ Войти'}
           </button>
         </form>
 

@@ -1,39 +1,56 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'react-hot-toast';
 import { api } from '../../api/client';
+
+const psychSchema = z.object({
+  name: z.string().min(2, 'Имя обязательно'),
+  email: z.string().email('Некорректный email'),
+  specialization: z.string().optional(),
+  languages: z.string().optional(),
+  experience_years: z.coerce.number().min(0, 'Некорректный опыт').optional(),
+  password: z.string().min(6, 'Пароль от 6 символов'),
+  bio: z.string().optional(),
+});
 
 export default function PsychologistManagement() {
   const [psychologists, setPsychologists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ email: '', password: 'password123', name: '', specialization: '', languages: '', experience_years: '', bio: '' });
-  const [saving, setSaving] = useState(false);
+  
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
+    resolver: zodResolver(psychSchema),
+    defaultValues: {
+      password: 'password123',
+    }
+  });
 
   useEffect(() => {
     api.get('/admin/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
-  async function addPsychologist(e) {
-    e.preventDefault();
-    setSaving(true);
+  async function addPsychologist(data) {
     try {
-      const added = await api.post('/admin/psychologists', form);
+      const added = await api.post('/admin/psychologists', data);
       setPsychologists(p => [...p, added]);
-      setForm({ email: '', password: 'password123', name: '', specialization: '', languages: '', experience_years: '', bio: '' });
+      reset();
       setShowForm(false);
+      toast.success('Психолог добавлен успешно!');
     } catch (err) {
-      alert(err.message);
-    } finally {
-      setSaving(false);
+      toast.error(err.message);
     }
   }
 
   async function deletePsych(id) {
-    if (!confirm('Удалить психолога?')) return;
+    if (!window.confirm('Удалить психолога?')) return;
     try {
       await api.delete(`/admin/psychologists/${id}`);
       setPsychologists(p => p.filter(x => x.id !== id));
+      toast.success('Психолог удален');
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   }
 
@@ -54,38 +71,42 @@ export default function PsychologistManagement() {
       {showForm && (
         <div className="card mb-24 fade-in">
           <div className="section-title">➕ Новый психолог</div>
-          <form onSubmit={addPsychologist} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <form onSubmit={handleSubmit(addPsychologist)} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div className="form-group">
               <label className="form-label">Имя *</label>
-              <input className="form-input" required value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} placeholder="Д-р Имя Фамилия" />
+              <input className="form-input" {...register('name')} placeholder="Д-р Имя Фамилия" />
+              {errors.name && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.name.message}</p>}
             </div>
             <div className="form-group">
               <label className="form-label">Email *</label>
-              <input className="form-input" type="email" required value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))} placeholder="psych@university.kz" />
+              <input className="form-input" type="email" {...register('email')} placeholder="psych@university.kz" />
+              {errors.email && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.email.message}</p>}
             </div>
             <div className="form-group">
               <label className="form-label">Специализация</label>
-              <input className="form-input" value={form.specialization} onChange={e => setForm(f => ({...f, specialization: e.target.value}))} placeholder="Стресс, тревожность..." />
+              <input className="form-input" {...register('specialization')} placeholder="Стресс, тревожность..." />
             </div>
             <div className="form-group">
               <label className="form-label">Языки</label>
-              <input className="form-input" value={form.languages} onChange={e => setForm(f => ({...f, languages: e.target.value}))} placeholder="Казахский, Русский" />
+              <input className="form-input" {...register('languages')} placeholder="Казахский, Русский" />
             </div>
             <div className="form-group">
               <label className="form-label">Опыт (лет)</label>
-              <input className="form-input" type="number" value={form.experience_years} onChange={e => setForm(f => ({...f, experience_years: e.target.value}))} placeholder="5" />
+              <input className="form-input" type="number" {...register('experience_years')} placeholder="5" />
+              {errors.experience_years && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.experience_years.message}</p>}
             </div>
             <div className="form-group">
-              <label className="form-label">Пароль</label>
-              <input className="form-input" value={form.password} onChange={e => setForm(f => ({...f, password: e.target.value}))} />
+              <label className="form-label">Пароль (стандартный)</label>
+              <input className="form-input" {...register('password')} />
+              {errors.password && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.password.message}</p>}
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Биография</label>
-              <textarea className="form-input" value={form.bio} onChange={e => setForm(f => ({...f, bio: e.target.value}))} placeholder="Краткое описание..." />
+              <textarea className="form-input" {...register('bio')} placeholder="Краткое описание..." />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <button className="btn btn-primary" type="submit" disabled={saving}>
-                {saving ? '⏳ Сохраняем...' : '✅ Добавить психолога'}
+              <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? '⏳ Сохраняем...' : '✅ Добавить психолога'}
               </button>
             </div>
           </form>

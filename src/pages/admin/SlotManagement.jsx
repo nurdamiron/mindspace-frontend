@@ -23,7 +23,6 @@ export default function SlotManagement() {
     e.preventDefault();
     setSaving(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
       const res = await api.post('/admin/slots', {
         psychologist_id: form.psychologist_id,
         date: form.date,

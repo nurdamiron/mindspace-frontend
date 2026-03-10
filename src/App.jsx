@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
@@ -46,6 +47,7 @@ function RootRedirect() {
 export default function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />

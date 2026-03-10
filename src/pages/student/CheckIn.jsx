@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'react-hot-toast';
 import { api } from '../../api/client';
 
 const METRICS = [
@@ -10,24 +14,42 @@ const METRICS = [
   { key: 'productivity', label: 'Продуктивность', emojis: ['📵', '📉', '📊', '📈', '🔥'] },
 ];
 
+const checkInSchema = z.object({
+  mood: z.number().min(1).max(5),
+  stress: z.number().min(1).max(5),
+  sleep: z.number().min(1).max(5),
+  energy: z.number().min(1).max(5),
+  productivity: z.number().min(1).max(5),
+  notes: z.string().optional(),
+});
+
 export default function CheckIn() {
   const navigate = useNavigate();
-  const [values, setValues] = useState({ mood: 3, stress: 3, sleep: 3, energy: 3, productivity: 3 });
-  const [notes, setNotes] = useState('');
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { isSubmitting },
+  } = useForm({
+    resolver: zodResolver(checkInSchema),
+    defaultValues: {
+      mood: 3, stress: 3, sleep: 3, energy: 3, productivity: 3, notes: ''
+    }
+  });
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const watchValues = watch();
+
+  async function onSubmit(data) {
     try {
-      await api.post('/student/check-ins', { ...values, notes });
+      await api.post('/student/check-ins', data);
       setSuccess(true);
+      toast.success('Чек-ин сохранён!');
       setTimeout(() => navigate('/student/dashboard'), 1500);
     } catch (err) {
-      alert(err.message);
-    } finally {
-      setLoading(false);
+      toast.error(err.message);
     }
   }
 
@@ -48,26 +70,25 @@ export default function CheckIn() {
         <div className="page-subtitle">Оцени своё состояние по каждому показателю от 1 до 5</div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
           {METRICS.map(m => (
             <div key={m.key} className="scale-group">
               <div className="scale-header">
                 <span className="scale-label">{m.label}</span>
                 <span className="scale-value">
-                  {m.emojis[values[m.key] - 1]} {values[m.key]}
+                  {m.emojis[watchValues[m.key] - 1]} {watchValues[m.key]}
                 </span>
               </div>
               <input
                 type="range"
                 min={1} max={5} step={1}
-                value={values[m.key]}
-                onChange={e => setValues(v => ({ ...v, [m.key]: Number(e.target.value) }))}
+                {...register(m.key, { valueAsNumber: true })}
                 className="scale-slider"
               />
               <div className="scale-emoji-row">
                 {m.emojis.map((emoji, i) => (
-                  <span key={i} style={{ opacity: values[m.key] === i + 1 ? 1 : 0.35, fontSize: 20, transition: 'opacity 0.15s' }}>
+                  <span key={i} style={{ opacity: watchValues[m.key] === i + 1 ? 1 : 0.35, fontSize: 20, transition: 'opacity 0.15s' }}>
                     {emoji}
                   </span>
                 ))}
@@ -80,13 +101,12 @@ export default function CheckIn() {
             <textarea
               className="form-input"
               placeholder="Что произошло сегодня? Как ты себя чувствуешь?.."
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
+              {...register('notes')}
             />
           </div>
 
-          <button className="btn btn-primary btn-lg" type="submit" disabled={loading}>
-            {loading ? '⏳ Сохраняем...' : '✅ Сохранить чек-ин'}
+          <button className="btn btn-primary btn-lg" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? '⏳ Сохраняем...' : '✅ Сохранить чек-ин'}
           </button>
         </div>
       </form>

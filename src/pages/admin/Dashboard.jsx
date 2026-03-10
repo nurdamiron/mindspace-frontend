@@ -52,14 +52,47 @@ export default function AdminDashboard() {
   };
 
   const metrics = avgMetrics || {};
-  const stressPct = ((parseFloat(metrics.avg_stress) || 0) / 5 * 100).toFixed(0);
   const highStressPct = totalStudents > 0 ? ((highStressStudents / totalStudents) * 100).toFixed(0) : 0;
+
+  function downloadCSV() {
+    if (!riskByFaculty || riskByFaculty.length === 0) return;
+    
+    const headers = ['Факультет', 'Ср. стресс', 'Ср. настроение', 'Активных студентов', 'Риск'];
+    const rows = riskByFaculty.map(r => {
+      const risk = parseFloat(r.avg_stress) >= 3.5 ? 'Высокий' : parseFloat(r.avg_stress) >= 2.5 ? 'Умеренный' : 'Низкий';
+      return [r.faculty, r.avg_stress, r.avg_mood, r.active_students, risk];
+    });
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    // Add BOM for Excel UTF-8 support
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `mindspace_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <div className="page-title">🏛️ Панель управления</div>
-        <div className="page-subtitle">Агрегированная статистика по университету</div>
+      <div className="page-header flex justify-between items-center">
+        <div>
+          <div className="page-title">🏛️ Панель управления</div>
+          <div className="page-subtitle">Агрегированная статистика по университету</div>
+        </div>
+        <button 
+          className="btn btn-secondary" 
+          onClick={downloadCSV}
+          disabled={!riskByFaculty || riskByFaculty.length === 0}
+        >
+          ⬇️ Скачать отчет (CSV)
+        </button>
       </div>
 
       {/* KPI cards */}
