@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
 
 function getToken() {
   return localStorage.getItem('token');
@@ -21,7 +21,8 @@ async function request(path, options = {}) {
     body: options.body ? JSON.stringify(options.body) : undefined,
   };
 
-  let res = await fetch(`${BASE_URL}${path}`, fetchOptions);
+  const url = `${BASE_URL}${path.startsWith('/') ? path : '/' + path}`;
+  let res = await fetch(url, fetchOptions);
 
   if (res.status === 401 && path !== '/auth/login' && path !== '/auth/refresh') {
     try {
