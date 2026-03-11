@@ -2,6 +2,15 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Деплой на Vercel
+
+Чтобы избежать ошибки **405 Method Not Allowed** при логине:
+
+1. **Разверните backend** (Render, Railway и т.п.) и получите его URL.
+2. В Vercel → Project Settings → Environment Variables добавьте:
+   - `VERCEL_BACKEND_URL` = URL backend (например `https://your-app.onrender.com`, без `/api` в конце).
+3. Пересоберите и задеплойте проект.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh

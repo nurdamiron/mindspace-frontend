@@ -1,4 +1,13 @@
-const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
+// В продакшене: если VITE_API_URL не задан — используем тот же домен (proxy на Vercel)
+const getBaseUrl = () => {
+  const env = import.meta.env.VITE_API_URL;
+  if (env && env !== 'http://localhost:3001/api') return env.replace(/\/$/, '');
+  if (import.meta.env.PROD && typeof window !== 'undefined') {
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:3001/api';
+};
+const BASE_URL = getBaseUrl();
 
 function getToken() {
   return localStorage.getItem('token');
