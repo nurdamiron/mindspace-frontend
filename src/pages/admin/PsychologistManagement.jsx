@@ -2,15 +2,23 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
+import { Plus, Trash2, Users, Loader2, X } from 'lucide-react';
 import { api } from '../../api/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 const psychSchema = z.object({
   name: z.string().min(2, 'Имя обязательно'),
   email: z.string().email('Некорректный email'),
   specialization: z.string().optional(),
   languages: z.string().optional(),
-  experience_years: z.coerce.number().min(0, 'Некорректный опыт').optional(),
+  experience_years: z.coerce.number().min(0).optional(),
   password: z.string().min(6, 'Пароль от 6 символов'),
   bio: z.string().optional(),
 });
@@ -19,12 +27,10 @@ export default function PsychologistManagement() {
   const [psychologists, setPsychologists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  
+
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(psychSchema),
-    defaultValues: {
-      password: 'password123',
-    }
+    defaultValues: { password: 'password123' },
   });
 
   useEffect(() => {
@@ -34,10 +40,10 @@ export default function PsychologistManagement() {
   async function addPsychologist(data) {
     try {
       const added = await api.post('/admin/psychologists', data);
-      setPsychologists(p => [...p, added]);
+      setPsychologists((p) => [...p, added]);
       reset();
       setShowForm(false);
-      toast.success('Психолог добавлен успешно!');
+      toast.success('Психолог добавлен');
     } catch (err) {
       toast.error(err.message);
     }
@@ -47,93 +53,143 @@ export default function PsychologistManagement() {
     if (!window.confirm('Удалить психолога?')) return;
     try {
       await api.delete(`/admin/psychologists/${id}`);
-      setPsychologists(p => p.filter(x => x.id !== id));
-      toast.success('Психолог удален');
+      setPsychologists((p) => p.filter((x) => x.id !== id));
+      toast.success('Психолог удалён');
     } catch (err) {
       toast.error(err.message);
     }
   }
 
-  if (loading) return <div className="loading-center"><div className="spinner"></div></div>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="w-5 h-5 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="fade-in">
-      <div className="page-header flex items-center justify-between">
+    <div className="fade-in space-y-5">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <div className="page-title">👨‍⚕️ Управление психологами</div>
-          <div className="page-subtitle">{psychologists.length} специалистов в системе</div>
+          <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">Управление психологами</h1>
+          <p className="text-sm text-zinc-500 mt-1">{psychologists.length} специалистов в системе</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          {showForm ? '✕ Отмена' : '+ Добавить'}
-        </button>
+        <Button onClick={() => setShowForm(!showForm)} variant={showForm ? 'secondary' : 'default'}>
+          {showForm ? (
+            <>
+              <X className="w-4 h-4" />
+              Отмена
+            </>
+          ) : (
+            <>
+              <Plus className="w-4 h-4" />
+              Добавить
+            </>
+          )}
+        </Button>
       </div>
 
+      {/* Add form */}
       {showForm && (
-        <div className="card mb-24 fade-in">
-          <div className="section-title">➕ Новый психолог</div>
-          <form onSubmit={handleSubmit(addPsychologist)} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <div className="form-group">
-              <label className="form-label">Имя *</label>
-              <input className="form-input" {...register('name')} placeholder="Д-р Имя Фамилия" />
-              {errors.name && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.name.message}</p>}
-            </div>
-            <div className="form-group">
-              <label className="form-label">Email *</label>
-              <input className="form-input" type="email" {...register('email')} placeholder="psych@university.kz" />
-              {errors.email && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.email.message}</p>}
-            </div>
-            <div className="form-group">
-              <label className="form-label">Специализация</label>
-              <input className="form-input" {...register('specialization')} placeholder="Стресс, тревожность..." />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Языки</label>
-              <input className="form-input" {...register('languages')} placeholder="Казахский, Русский" />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Опыт (лет)</label>
-              <input className="form-input" type="number" {...register('experience_years')} placeholder="5" />
-              {errors.experience_years && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.experience_years.message}</p>}
-            </div>
-            <div className="form-group">
-              <label className="form-label">Пароль (стандартный)</label>
-              <input className="form-input" {...register('password')} />
-              {errors.password && <p className="text-sm" style={{color: 'var(--red)', marginTop: 4}}>{errors.password.message}</p>}
-            </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Биография</label>
-              <textarea className="form-input" {...register('bio')} placeholder="Краткое описание..." />
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? '⏳ Сохраняем...' : '✅ Добавить психолога'}
-              </button>
-            </div>
-          </form>
-        </div>
+        <Card className="border-zinc-800 bg-zinc-900 fade-in">
+          <CardContent className="p-6">
+            <h2 className="text-sm font-semibold text-zinc-200 mb-5">Новый психолог</h2>
+            <form onSubmit={handleSubmit(addPsychologist)}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                {[
+                  { name: 'name', label: 'Имя', placeholder: 'Д-р Имя Фамилия', required: true },
+                  { name: 'email', label: 'Email', placeholder: 'psych@university.kz', type: 'email', required: true },
+                  { name: 'specialization', label: 'Специализация', placeholder: 'Стресс, тревожность...' },
+                  { name: 'languages', label: 'Языки', placeholder: 'Казахский, Русский' },
+                  { name: 'experience_years', label: 'Опыт (лет)', placeholder: '5', type: 'number' },
+                  { name: 'password', label: 'Пароль', required: true },
+                ].map((f) => (
+                  <div key={f.name} className="space-y-1.5">
+                    <Label htmlFor={f.name}>
+                      {f.label}
+                      {f.required && <span className="text-zinc-600 ml-1">*</span>}
+                    </Label>
+                    <Input
+                      id={f.name}
+                      type={f.type || 'text'}
+                      placeholder={f.placeholder}
+                      {...register(f.name)}
+                    />
+                    {errors[f.name] && (
+                      <p className="text-xs text-red-400">{errors[f.name].message}</p>
+                    )}
+                  </div>
+                ))}
+
+                <div className="col-span-2 space-y-1.5">
+                  <Label htmlFor="bio">Биография</Label>
+                  <Textarea id="bio" placeholder="Краткое описание..." {...register('bio')} />
+                </div>
+              </div>
+
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Сохраняем...
+                  </>
+                ) : (
+                  'Добавить психолога'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {psychologists.map((p, i) => (
-          <div key={p.id} className="card card-sm flex items-center gap-16">
-            <div style={{ width: 48, height: 48, borderRadius: '50%', background: `rgba(${i % 2 === 0 ? '99,102,241' : '16,185,129'},0.2)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 16, flexShrink: 0, color: i % 2 === 0 ? 'var(--accent-light)' : 'var(--green-light)' }}>
-              {p.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-            </div>
-
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700 }}>{p.name}</div>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{p.email} · {p.specialization}</div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                {p.experience_years && <span className="badge badge-purple">🏆 {p.experience_years} лет</span>}
-                {p.completed_sessions > 0 && <span className="badge badge-green">✅ {p.completed_sessions} сессий</span>}
-                {p.total_students > 0 && <span className="badge badge-gray">👤 {p.total_students} студентов</span>}
-              </div>
-            </div>
-
-            <button className="btn btn-danger btn-sm" onClick={() => deletePsych(p.id)}>Удалить</button>
+      {/* List */}
+      {psychologists.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
+            <Users className="w-5 h-5 text-zinc-500" />
           </div>
-        ))}
-      </div>
+          <p className="text-sm text-zinc-600">Нет психологов в системе</p>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {psychologists.map((p, i) => (
+            <Card key={p.id} className="border-zinc-800 bg-zinc-900 hover:border-zinc-700 transition-colors">
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 shrink-0">
+                  {p.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">
+                    {p.email}
+                    {p.specialization && ` · ${p.specialization}`}
+                  </div>
+                  <div className="flex gap-1.5 mt-2 flex-wrap">
+                    {p.experience_years && (
+                      <Badge variant="secondary" className="text-xs">{p.experience_years} лет опыта</Badge>
+                    )}
+                    {p.completed_sessions > 0 && (
+                      <Badge variant="success" className="text-xs">{p.completed_sessions} сессий</Badge>
+                    )}
+                    {p.total_students > 0 && (
+                      <Badge variant="outline" className="text-xs">{p.total_students} студентов</Badge>
+                    )}
+                  </div>
+                </div>
+
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => deletePsych(p.id)}
+                  className="shrink-0"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

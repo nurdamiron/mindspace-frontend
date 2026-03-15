@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { CheckCircle2, ChevronRight, CalendarDays, Loader2 } from 'lucide-react';
 import { api } from '../../api/client';
-
-const COLORS = ['#6366f1', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 export default function Psychologists() {
   const [psychologists, setPsychologists] = useState([]);
@@ -43,7 +51,7 @@ export default function Psychologists() {
         format,
       });
       setSuccess(true);
-      toast.success('Успешная запись!');
+      toast.success('Запись создана');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -51,15 +59,32 @@ export default function Psychologists() {
     }
   }
 
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="w-5 h-5 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
+    </div>
+  );
+
   if (success) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 20 }}>
-        <div style={{ fontSize: 72 }}>🎉</div>
-        <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--green-light)' }}>Запись создана!</div>
-        <div className="text-muted">Вы записались к {selected?.name}</div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <a href="/student/appointments" className="btn btn-primary">📅 Мои записи</a>
-          <a href="/student/dashboard" className="btn btn-secondary">На главную</a>
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-5">
+        <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center">
+          <CheckCircle2 className="w-7 h-7 text-zinc-300" />
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-semibold text-zinc-100">Запись создана</p>
+          <p className="text-sm text-zinc-500 mt-1">Вы записались к {selected?.name}</p>
+        </div>
+        <div className="flex gap-3">
+          <Button asChild>
+            <Link to="/student/appointments" className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" />
+              Мои записи
+            </Link>
+          </Button>
+          <Button variant="secondary" asChild>
+            <Link to="/student/dashboard">На главную</Link>
+          </Button>
         </div>
       </div>
     );
@@ -73,151 +98,185 @@ export default function Psychologists() {
   }, {});
 
   const filteredDates = filterDate
-    ? Object.keys(groupedSlots).filter(d => d === filterDate)
+    ? Object.keys(groupedSlots).filter((d) => d === filterDate)
     : Object.keys(groupedSlots).slice(0, 5);
 
-  if (loading) return <div className="loading-center"><div className="spinner"></div></div>;
-
   return (
-    <div className="fade-in">
-      <div className="page-header">
-        <div className="page-title">👨‍⚕️ Выбор психолога</div>
-        <div className="page-subtitle">Выбери специалиста и удобное время</div>
+    <div className="fade-in space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">Выбор психолога</h1>
+        <p className="text-sm text-zinc-500 mt-1">Выберите специалиста и удобное время</p>
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: selected ? '1fr 1.4fr' : '1fr' }}>
+      <div className={cn('grid gap-5', selected ? 'grid-cols-1 lg:grid-cols-[1fr_1.4fr]' : 'grid-cols-1 max-w-2xl')}>
         {/* Psychologist list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div className="section-title">Специалисты</div>
-          {psychologists.map((p, i) => (
-            <div
+        <div className="space-y-2.5">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-1">
+            Специалисты
+          </h2>
+          {psychologists.map((p) => (
+            <button
               key={p.id}
-              className={`psych-card${selected?.id === p.id ? ' selected' : ''}`}
               onClick={() => selectPsychologist(p)}
+              className={cn(
+                'w-full text-left rounded-lg border p-4 transition-colors',
+                selected?.id === p.id
+                  ? 'border-zinc-600 bg-zinc-800'
+                  : 'border-zinc-800 bg-zinc-900 hover:border-zinc-700'
+              )}
             >
-              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                <div className="psych-avatar" style={{ background: COLORS[i % COLORS.length] + '30', color: COLORS[i % COLORS.length] }}>
-                  {p.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 shrink-0">
+                  {p.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div className="psych-name">{p.name}</div>
-                  <div className="psych-spec">{p.specialization}</div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                    {p.experience_years && <span className="badge badge-purple">🏆 {p.experience_years} лет опыта</span>}
-                    {p.languages && p.languages.split(',').map(l => (
-                      <span key={l} className="badge badge-gray">🌐 {l.trim()}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">{p.specialization}</div>
+                  <div className="flex gap-1.5 flex-wrap mt-2">
+                    {p.experience_years && (
+                      <Badge variant="secondary" className="text-xs">
+                        {p.experience_years} лет опыта
+                      </Badge>
+                    )}
+                    {p.languages && p.languages.split(',').map((l) => (
+                      <Badge key={l} variant="outline" className="text-xs">{l.trim()}</Badge>
                     ))}
                   </div>
+                  {p.bio && (
+                    <p className="text-xs text-zinc-600 mt-2 leading-relaxed line-clamp-2">{p.bio}</p>
+                  )}
                 </div>
-                <div style={{ color: selected?.id === p.id ? 'var(--accent)' : 'var(--text-muted)', fontSize: 20 }}>
-                  {selected?.id === p.id ? '✓' : '›'}
-                </div>
+                <ChevronRight className={cn(
+                  'w-4 h-4 shrink-0 transition-colors',
+                  selected?.id === p.id ? 'text-zinc-300' : 'text-zinc-700'
+                )} />
               </div>
-              {p.bio && <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>{p.bio}</p>}
-            </div>
+            </button>
           ))}
         </div>
 
         {/* Booking panel */}
         {selected && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div className="card">
-              <div className="section-title">📅 Свободные слоты — {selected.name}</div>
-
-              {Object.keys(groupedSlots).length > 0 && (
-                <div className="form-group mb-16">
-                  <label className="form-label">Фильтр по дате</label>
-                  <select className="form-input" value={filterDate} onChange={e => setFilterDate(e.target.value)}>
-                    <option value="">Все даты (ближайшие 5)</option>
-                    {Object.keys(groupedSlots).map(d => (
-                      <option key={d} value={d}>{new Date(d).toLocaleDateString('ru', { weekday: 'long', month: 'long', day: 'numeric' })}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {filteredDates.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-state-icon">📭</div>
-                  <div className="empty-state-desc">Нет доступных слотов</div>
-                </div>
-              ) : filteredDates.map(date => (
-                <div key={date} style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 10 }}>
-                    📆 {new Date(date).toLocaleDateString('ru', { weekday: 'long', day: 'numeric', month: 'long' })}
+          <div className="space-y-4 fade-in">
+            <Card className="border-zinc-800 bg-zinc-900">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-zinc-300">
+                  Свободные слоты — {selected.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Object.keys(groupedSlots).length > 0 && (
+                  <div className="space-y-1.5">
+                    <Label>Фильтр по дате</Label>
+                    <Select value={filterDate} onValueChange={setFilterDate}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Все ближайшие даты" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Все даты (ближайшие 5)</SelectItem>
+                        {Object.keys(groupedSlots).map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {new Date(d).toLocaleDateString('ru', { weekday: 'long', month: 'long', day: 'numeric' })}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="slots-grid">
-                    {groupedSlots[date].map(slot => (
-                      <button
-                        key={slot.id}
-                        className={`slot-btn${selectedSlot?.id === slot.id ? ' selected' : ''}`}
-                        onClick={() => setSelectedSlot(slot)}
-                      >
-                        {slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
-                      </button>
-                    ))}
+                )}
+
+                {filteredDates.length === 0 ? (
+                  <div className="text-center py-8 text-sm text-zinc-600">
+                    Нет доступных слотов
                   </div>
-                </div>
-              ))}
-            </div>
+                ) : filteredDates.map((date) => (
+                  <div key={date}>
+                    <p className="text-xs font-medium text-zinc-500 mb-2.5">
+                      {new Date(date).toLocaleDateString('ru', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                      {groupedSlots[date].map((slot) => (
+                        <button
+                          key={slot.id}
+                          onClick={() => setSelectedSlot(slot)}
+                          className={cn(
+                            'px-2.5 py-2 rounded-md text-xs font-medium border transition-colors',
+                            selectedSlot?.id === slot.id
+                              ? 'bg-zinc-50 text-zinc-900 border-zinc-50'
+                              : 'border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200 bg-zinc-900'
+                          )}
+                        >
+                          {slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
 
             {selectedSlot && (
-              <div className="card fade-in">
-                <div className="section-title">✏️ Детали записи</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div className="form-group">
-                    <label className="form-label">Формат встречи</label>
-                    <div style={{ display: 'flex', gap: 10 }}>
-                      {['offline', 'online'].map(f => (
+              <Card className="border-zinc-800 bg-zinc-900 fade-in">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-zinc-300">Детали записи</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label>Формат встречи</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['offline', 'online'].map((f) => (
                         <button
                           key={f}
                           type="button"
-                          className="btn btn-secondary"
-                          style={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            background: format === f ? 'rgba(99,102,241,0.12)' : undefined,
-                            border: format === f ? '1px solid var(--accent)' : undefined,
-                            color: format === f ? 'var(--accent-light)' : undefined,
-                          }}
                           onClick={() => setFormat(f)}
+                          className={cn(
+                            'py-2 rounded-md text-sm border transition-colors font-medium',
+                            format === f
+                              ? 'bg-zinc-50 text-zinc-900 border-zinc-50'
+                              : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                          )}
                         >
-                          {f === 'offline' ? '🏢 Очно' : '💻 Онлайн'}
+                          {f === 'offline' ? 'Очно' : 'Онлайн'}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Причина обращения (необязательно)</label>
-                    <textarea
-                      className="form-input"
-                      placeholder="Опишите вкратце, с чем хотите разобраться..."
+                  <div className="space-y-1.5">
+                    <Label>
+                      Причина обращения <span className="text-zinc-600">(необязательно)</span>
+                    </Label>
+                    <Textarea
+                      placeholder="Опишите кратко, с чем хотите разобраться..."
                       value={reason}
-                      onChange={e => setReason(e.target.value)}
+                      onChange={(e) => setReason(e.target.value)}
                     />
                   </div>
 
-                  <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', padding: 16, fontSize: 14 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span className="text-muted">Психолог:</span>
-                      <span className="font-bold">{selected.name}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span className="text-muted">Дата:</span>
-                      <span className="font-bold">{new Date(selectedSlot.date).toLocaleDateString('ru', { day: 'numeric', month: 'long' })}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span className="text-muted">Время:</span>
-                      <span className="font-bold">{selectedSlot.start_time.slice(0, 5)}–{selectedSlot.end_time.slice(0, 5)}</span>
-                    </div>
+                  <div className="rounded-md bg-zinc-800 p-3.5 space-y-1.5 text-sm">
+                    {[
+                      ['Психолог', selected.name],
+                      ['Дата', new Date(selectedSlot.date).toLocaleDateString('ru', { day: 'numeric', month: 'long' })],
+                      ['Время', `${selectedSlot.start_time.slice(0, 5)}–${selectedSlot.end_time.slice(0, 5)}`],
+                    ].map(([k, v]) => (
+                      <div key={k} className="flex justify-between">
+                        <span className="text-zinc-500">{k}:</span>
+                        <span className="font-medium text-zinc-200">{v}</span>
+                      </div>
+                    ))}
                   </div>
 
-                  <button className="btn btn-success btn-lg" onClick={book} disabled={booking}>
-                    {booking ? '⏳ Записываемся...' : '✅ Подтвердить запись'}
-                  </button>
-                </div>
-              </div>
+                  <Button className="w-full" onClick={book} disabled={booking}>
+                    {booking ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Записываемся...
+                      </>
+                    ) : (
+                      'Подтвердить запись'
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </div>
         )}
