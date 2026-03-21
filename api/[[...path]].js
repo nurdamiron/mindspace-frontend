@@ -21,10 +21,17 @@ export default async function handler(req, res) {
     });
   }
 
-  const path = req.query.path || [];
-  const pathStr = Array.isArray(path) ? path.join('/') : path;
+  // Build path: prefer catch-all param, fall back to req.url
+  let pathStr = '';
+  if (req.query.path) {
+    const p = req.query.path;
+    pathStr = Array.isArray(p) ? p.join('/') : String(p);
+  } else {
+    // req.url relative to function: e.g. '/health' or '/auth/login?foo=bar'
+    pathStr = (req.url || '/').split('?')[0].replace(/^\//, '');
+  }
   const base = backendUrl.replace(/\/$/, '');
-  const query = (req.url || '').includes('?') ? req.url.split('?')[1] || '' : '';
+  const query = (req.url || '').includes('?') ? req.url.split('?').slice(1).join('?') : '';
   const targetUrl = query ? `${base}/api/${pathStr}?${query}` : `${base}/api/${pathStr}`;
 
   try {
