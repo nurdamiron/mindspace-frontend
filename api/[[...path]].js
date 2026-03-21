@@ -21,17 +21,12 @@ export default async function handler(req, res) {
     });
   }
 
-  // Build path: prefer catch-all param, fall back to req.url
-  let pathStr = '';
-  if (req.query.path) {
-    const p = req.query.path;
-    pathStr = Array.isArray(p) ? p.join('/') : String(p);
-  } else {
-    // req.url relative to function: e.g. '/health' or '/auth/login?foo=bar'
-    pathStr = (req.url || '/').split('?')[0].replace(/^\//, '');
-  }
+  // Build path from req.url (e.g. '/api/health' or '/api/auth/login?foo=bar')
+  // Strip /api prefix since we re-add it when building targetUrl
+  const [rawPath, ...queryParts] = (req.url || '/api').split('?');
+  const pathStr = rawPath.replace(/^\/api\/?/, '');
+  const query = queryParts.join('?');
   const base = backendUrl.replace(/\/$/, '');
-  const query = (req.url || '').includes('?') ? req.url.split('?').slice(1).join('?') : '';
   const targetUrl = query ? `${base}/api/${pathStr}?${query}` : `${base}/api/${pathStr}`;
 
   try {
