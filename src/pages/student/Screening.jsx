@@ -1,35 +1,45 @@
+// useState — компонент күйін басқару үшін
 import { useState } from 'react';
+// Link — ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — жүктелу және интерфейс үшін
 import { Loader2, MessageSquare, Users } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — батырма, карта, белгі, бөлгіш
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-// Психологиялық скрининг формасының компоненті
+// Screening — психологиялық скрининг формасының компоненті
 export default function Screening() {
   const { t } = useTranslation();
+  // answers — пайдаланушының жауаптарын сақтайтын объект
   const [answers, setAnswers] = useState({});
+  // result — скрининг нәтижесі
   const [result, setResult] = useState(null);
+  // loading — жіберу жүктелу күйі
   const [loading, setLoading] = useState(false);
 
   // Сұрақтар мен жауап нұсқаларын аудармадан алады
   const questions = t('student.screening.questions', { returnObjects: true });
   const options = t('student.screening.options', { returnObjects: true });
 
-  // Сұрақтарды id-мен нысанға айналдырады
+  // QUESTIONS — сұрақтарды id-мен нысанға айналдырады
   const QUESTIONS = Array.isArray(questions)
     ? questions.map((text, i) => ({ id: `q${i + 1}`, text }))
     : [];
 
-  // Барлық сұрақтарға жауап берілгенін тексереді
+  // allAnswered — барлық сұрақтарға жауап берілгенін тексереді
   const allAnswered = QUESTIONS.every((q) => answers[q.id] !== undefined);
   const answeredCount = Object.keys(answers).length;
 
-  // Скрининг жауаптарын серверге жіберіп, нәтиже алады
+  // handleSubmit — скрининг жауаптарын серверге жіберіп, нәтиже алады
   async function handleSubmit(e) {
     e.preventDefault();
     if (!allAnswered) {
@@ -51,7 +61,7 @@ export default function Screening() {
   // Нәтиже экраны: қауіп деңгейі, ұпай және ұсынылған әрекеттер
   if (result) {
     const riskKey = result.risk_level || 'low';
-    // Қауіп деңгейіне сәйкес Badge вариантын анықтайды
+    // RISK_VARIANTS — қауіп деңгейіне сәйкес Badge вариантын анықтайды
     const RISK_VARIANTS = { low: 'success', moderate: 'warning', high: 'destructive' };
     return (
       <div className="fade-in max-w-[620px] space-y-5">

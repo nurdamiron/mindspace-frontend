@@ -1,12 +1,19 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Bar, Line — баған және сызықтық диаграмма компоненттері
 import { Bar, Line } from 'react-chartjs-2';
+// Chart.js компоненттері — барлық диаграмма типтері үшін
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement,
   PointElement, LineElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
+// Lucide иконалары — пайдаланушылар, белсенділік, күнтізбе, ескерту, жүктеу
 import { Users, Activity, CalendarDays, AlertTriangle, Download } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — карта, батырма, белгі, скелет, кесте
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +23,7 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 // Chart.js компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-// Барлық диаграммалар үшін ортақ стиль параметрлері
+// CHART_OPTS — барлық диаграммалар үшін ортақ стиль параметрлері
 const CHART_OPTS = {
   responsive: true,
   maintainAspectRatio: false,
@@ -30,9 +37,12 @@ const CHART_OPTS = {
   },
 };
 
+// AdminDashboard — әкімші бақылау тақтасы беті
 export default function AdminDashboard() {
   const { t, i18n } = useTranslation();
+  // data — бақылау тақтасы деректері
   const [data, setData] = useState(null);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
 
   // Беттің жүктелуінде бақылу тақтасы деректерін алу
@@ -60,12 +70,12 @@ export default function AdminDashboard() {
     facultyStats, highStressStudents, avgMetrics, riskByFaculty,
   } = data || {};
 
-  // Жоғары стресс деңгейіндегі студенттер үлесін есептеу
+  // highStressPct — жоғары стресс деңгейіндегі студенттер үлесін есептеу
   const highStressPct = totalStudents > 0
     ? ((highStressStudents / totalStudents) * 100).toFixed(0)
     : 0;
 
-  // Апталық сессия трендінің диаграмма деректерін қалыптастыру
+  // trendChart — апталық сессия трендінің диаграмма деректері
   const trendChart = {
     labels: (weeklyTrend || []).map((w) =>
       new Date(w.date).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })
@@ -79,7 +89,7 @@ export default function AdminDashboard() {
     }],
   };
 
-  // Факультет бойынша студент және сессия санының диаграмма деректері
+  // facultyChart — факультет бойынша студент және сессия санының диаграмма деректері
   const facultyChart = {
     labels: (facultyStats || []).map((f) => f.faculty),
     datasets: [
@@ -88,7 +98,7 @@ export default function AdminDashboard() {
     ],
   };
 
-  // Орташа метрикалар және олардың кілттері
+  // METRIC_KEYS — орташа метрикалар және олардың кілттері
   const metrics = avgMetrics || {};
   const METRIC_KEYS = [
     { key: 'avg_mood', label: t('metrics.mood') },
@@ -98,7 +108,7 @@ export default function AdminDashboard() {
     { key: 'avg_productivity', label: t('metrics.productivity') },
   ];
 
-  // Факультет тәуекел деректерін CSV файлы ретінде жүктеу
+  // downloadCSV — факультет тәуекел деректерін CSV файлы ретінде жүктеу
   function downloadCSV() {
     if (!riskByFaculty || riskByFaculty.length === 0) return;
     const headers = t('admin.dashboard.csvHeaders', { returnObjects: true });

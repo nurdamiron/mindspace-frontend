@@ -1,30 +1,43 @@
+// useState — компонент күйін басқару үшін
 import { useState } from 'react';
+// useNavigate, Link — маршруттау және сілтемелер үшін
 import { useNavigate, Link } from 'react-router-dom';
+// useForm — форманы басқару үшін
 import { useForm } from 'react-hook-form';
+// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
+// z — форма валидация схемасын жасау үшін
 import { z } from 'zod';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — email, құпиясөз және интерфейс элементтері үшін
 import { Mail, Lock, BrainCircuit, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// useAuth — аутентификация контекстінен login функциясын алу үшін
 import { useAuth } from '../context/AuthContext';
+// shadcn/ui компоненттері — UI элементтері
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-// Тест жүйеге кіру үшін демо аккаунттар тізімі
+// DEMO_ACCOUNTS — тест жүйеге кіру үшін демо аккаунттар тізімі
 const DEMO_ACCOUNTS = [
   { role: 'student', email: 'student1@university.kz' },
   { role: 'psychologist', email: 'psych1@university.kz' },
   { role: 'admin', email: 'admin@university.kz' },
 ];
 
+// Login — жүйеге кіру беті
 export default function Login() {
   const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
+  // error — кіру қатесін сақтайтын күй
   const [error, setError] = useState('');
+  // showPassword — құпиясөздің көрінуін басқаратын күй
   const [showPassword, setShowPassword] = useState(false);
 
   // Кіру формасының валидациясы — email форматы мен құпиясөз ұзындығы
@@ -41,7 +54,7 @@ export default function Login() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(loginSchema) });
 
-  // Форманы жіберу — кіру және рөлге қарай бағыттау
+  // onSubmit — форманы жіберу және рөлге қарай бағыттау функциясы
   async function onSubmit(data) {
     setError('');
     try {
@@ -55,7 +68,7 @@ export default function Login() {
     }
   }
 
-  // Демо аккаунт деректерін форма өрістеріне автоматты толтыру
+  // fillDemo — демо аккаунт деректерін форма өрістеріне автоматты толтыру
   function fillDemo(role) {
     const account = DEMO_ACCOUNTS.find((d) => d.role === role);
     if (account) {
@@ -124,6 +137,7 @@ export default function Login() {
                     className="pl-9 pr-10"
                     {...register('password')}
                   />
+                  {/* Көрсету/жасыру ауыстырғышы */}
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}

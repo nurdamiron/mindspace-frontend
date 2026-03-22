@@ -1,9 +1,16 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Link — ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — растау, навигация, күнтізбе, жүктелу
 import { CheckCircle2, ChevronRight, CalendarDays, Loader2 } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — батырма, белгі, карта, белгіше, мәтін аймағы, бөлгіш, тізім
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,22 +18,32 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// cn — шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
 
-// Психологтар тізімі және жазылу беті
+// Psychologists — психологтар тізімі және жазылу беті
 export default function Psychologists() {
   const { t, i18n } = useTranslation();
 
-  // Компонент күйлері
+  // psychologists — психологтар тізімі
   const [psychologists, setPsychologists] = useState([]);
+  // selected — таңдалған психолог
   const [selected, setSelected] = useState(null);
+  // slots — таңдалған психологтың бос слоттары
   const [slots, setSlots] = useState([]);
+  // selectedSlot — таңдалған слот
   const [selectedSlot, setSelectedSlot] = useState(null);
+  // reason — жазылу себебі
   const [reason, setReason] = useState('');
+  // format — кездесу форматы (онлайн/офлайн)
   const [format, setFormat] = useState('offline');
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // booking — жазылу жүктелу күйі
   const [booking, setBooking] = useState(false);
+  // success — жазылу сәтті болды күйі
   const [success, setSuccess] = useState(false);
+  // filterDate — слотты күн бойынша сүзгілеу
   const [filterDate, setFilterDate] = useState('');
 
   // Беттің жүктелуінде психологтар тізімін API-дан алу
@@ -34,7 +51,7 @@ export default function Psychologists() {
     api.get('/student/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
-  // Психологты таңдап, оның бос уақыт слоттарын жүктеу
+  // selectPsychologist — психологты таңдап, оның бос уақыт слоттарын жүктеу
   async function selectPsychologist(psych) {
     setSelected(psych);
     setSelectedSlot(null);
@@ -47,7 +64,7 @@ export default function Psychologists() {
     }
   }
 
-  // Таңдалған слотқа жазылу сұранысын жіберу
+  // book — таңдалған слотқа жазылу сұранысын жіберу
   async function book() {
     if (!selectedSlot) return;
     setBooking(true);
@@ -101,7 +118,7 @@ export default function Psychologists() {
     );
   }
 
-  // Слоттарды күн бойынша топтастыру
+  // groupedSlots — слоттарды күн бойынша топтастыру
   const groupedSlots = slots.reduce((acc, slot) => {
     const d = slot.date;
     if (!acc[d]) acc[d] = [];
@@ -109,7 +126,7 @@ export default function Psychologists() {
     return acc;
   }, {});
 
-  // Фильтр бойынша күндерді сүзу немесе алғашқы 5 күнді алу
+  // filteredDates — фильтр бойынша күндерді сүзу немесе алғашқы 5 күнді алу
   const filteredDates = filterDate
     ? Object.keys(groupedSlots).filter((d) => d === filterDate)
     : Object.keys(groupedSlots).slice(0, 5);

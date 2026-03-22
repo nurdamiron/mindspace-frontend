@@ -1,12 +1,22 @@
+// useEffect, useMemo, useState — жанама әсерлер, мемоизация және күй үшін
 import { useEffect, useMemo, useState } from 'react';
+// useForm — форманы басқару үшін
 import { useForm } from 'react-hook-form';
+// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
+// z — форма валидация схемасын жасау үшін
 import { z } from 'zod';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — жүктелу, пайдаланушы, құлып, көз
 import { Loader2, User, Lock, Eye, EyeOff } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// useAuth — пайдаланушы деректері мен setUser функциясы үшін
 import { useAuth } from '../../context/AuthContext';
+// shadcn/ui компоненттері — батырма, енгізу, белгіше, мәтін аймағы, карта, бөлгіш
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,8 +24,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-// Құпия сөз өрісі — көрсету/жасыру мүмкіндігімен
+// PasswordField — құпия сөз өрісі: көрсету/жасыру мүмкіндігімен
 function PasswordField({ id, label, registration, error }) {
+  // show — құпия сөздің көрінуін басқару күйі
   const [show, setShow] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -42,11 +53,11 @@ function PasswordField({ id, label, registration, error }) {
   );
 }
 
-// Құпия сөзді өзгерту бөлімі
+// PasswordSection — құпия сөзді өзгерту бөлімі
 function PasswordSection() {
   const { t } = useTranslation();
 
-  // Құпия сөз валидация схемасы — сәйкестік тексеруімен
+  // pwSchema — құпия сөз валидация схемасы: сәйкестік тексеруімен
   const pwSchema = useMemo(() => z.object({
     current_password: z.string().min(1, t('common.errors.required')),
     new_password: z.string().min(6, t('common.errors.minPassword')),
@@ -56,12 +67,13 @@ function PasswordSection() {
     path: ['confirm_password'],
   }), [t]);
 
+  // Форма күйін және валидациясын инициализациялау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(pwSchema),
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
-  // Құпия сөзді API арқылы жаңартатын функция
+  // onSubmit — құпия сөзді API арқылы жаңартатын функция
   async function onSubmit(data) {
     try {
       await api.patch('/auth/password', {
@@ -85,12 +97,14 @@ function PasswordSection() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Ағымдағы құпия сөз өрісі */}
           <PasswordField
             id="pw_current"
             label={t('student.profile.currentPassword')}
             registration={register('current_password')}
             error={errors.current_password}
           />
+          {/* Жаңа және растау құпия сөз өрістері */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <PasswordField
               id="pw_new"
@@ -114,12 +128,12 @@ function PasswordSection() {
   );
 }
 
-// Психолог профилі беті
+// PsychProfile — психолог профилі беті
 export default function PsychProfile() {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
 
-  // Профиль формасының валидация схемасы
+  // schema — профиль формасының валидация схемасы
   const schema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     specialization: z.string().optional(),
@@ -128,6 +142,7 @@ export default function PsychProfile() {
     bio: z.string().optional(),
   }), [t]);
 
+  // Форма күйін және валидациясын инициализациялау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting, isDirty } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { name: '', specialization: '', languages: '', experience_years: '', bio: '' },
@@ -146,7 +161,7 @@ export default function PsychProfile() {
     });
   }, [reset]);
 
-  // Профильді жаңартатын функция
+  // onSubmit — профильді жаңартатын функция
   async function onSubmit(data) {
     try {
       const updated = await api.patch('/psychologist/profile', {
@@ -165,7 +180,7 @@ export default function PsychProfile() {
     }
   }
 
-  // Аватар үшін аты-жөн бастапқы әріптерін алу
+  // initials — аватар үшін аты-жөн бастапқы әріптерін алу
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (

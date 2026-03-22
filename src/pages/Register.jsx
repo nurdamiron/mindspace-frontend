@@ -1,11 +1,20 @@
+// useNavigate, Link — маршруттау және сілтемелер үшін
 import { useNavigate, Link } from 'react-router-dom';
+// useForm — форманы басқару үшін
 import { useForm } from 'react-hook-form';
+// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
+// z — форма валидация схемасын жасау үшін
 import { z } from 'zod';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — форма өрістері үшін иконалар
 import { Mail, Lock, BrainCircuit, User, ArrowRight, Loader2 } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// useAuth — аутентификация контекстінен login функциясын алу үшін
 import { useAuth } from '../context/AuthContext';
+// shadcn/ui компоненттері — UI элементтері
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 
+// Register — жаңа студент тіркелу беті
 export default function Register() {
   const { t } = useTranslation();
   const { login } = useAuth();
@@ -38,7 +48,7 @@ export default function Register() {
 
   const courseValue = watch('course');
 
-  // Тіркелу сұранысын API-ге жіберу және сәтті болса студент дашбордына бағыттау
+  // onSubmit — тіркелу сұранысын API-ге жіберу және студент дашбордына бағыттау
   async function onSubmit(data) {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/register`, {
@@ -119,6 +129,7 @@ export default function Register() {
                   </div>
                   {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
                 </div>
+                {/* Құпиясөзді растау өрісі */}
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-confirm">{t('auth.register.password')}</Label>
                   <Input id="reg-confirm" type="password" placeholder="••••••" {...register('confirm')} />
@@ -134,6 +145,7 @@ export default function Register() {
                   <Label htmlFor="reg-faculty">{t('auth.register.faculty')}</Label>
                   <Input id="reg-faculty" placeholder={t('auth.register.facultyPlaceholder')} {...register('faculty')} />
                 </div>
+                {/* Курс таңдау тізімі */}
                 <div className="space-y-1.5">
                   <Label>{t('auth.register.course')}</Label>
                   <Select onValueChange={(v) => setValue('course', v)}>

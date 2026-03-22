@@ -1,11 +1,20 @@
+// useState, useEffect, useMemo — күй, жанама әсерлер және мемоизация үшін
 import { useState, useEffect, useMemo } from 'react';
+// useForm — форманы басқару үшін
 import { useForm } from 'react-hook-form';
+// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
+// z — форма валидация схемасын жасау үшін
 import { z } from 'zod';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — қосу, жою, пайдаланушылар, жүктелу, жабу
 import { Plus, Trash2, Users, Loader2, X } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — батырма, енгізу, белгіше, мәтін аймағы, белгі, карта
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,13 +22,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
+// PsychologistManagement — психологтарды басқару беті
 export default function PsychologistManagement() {
   const { t } = useTranslation();
+  // psychologists — психологтар тізімі
   const [psychologists, setPsychologists] = useState([]);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // showForm — психолог қосу формасының көрінуі
   const [showForm, setShowForm] = useState(false);
 
-  // Психолог қосу формасының валидация схемасы
+  // psychSchema — психолог қосу формасының валидация схемасы
   const psychSchema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     email: z.string().email(t('common.errors.invalidEmail')),
@@ -30,7 +43,7 @@ export default function PsychologistManagement() {
     bio: z.string().optional(),
   }), [t]);
 
-  // React Hook Form инициализациясы Zod валидациясымен
+  // Форма күйін және валидациясын инициализациялау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(psychSchema),
     defaultValues: { password: 'password123' },
@@ -41,7 +54,7 @@ export default function PsychologistManagement() {
     api.get('/admin/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
-  // Жаңа психолог қосу және тізімді жаңарту
+  // addPsychologist — жаңа психолог қосу және тізімді жаңарту
   async function addPsychologist(data) {
     try {
       const added = await api.post('/admin/psychologists', data);
@@ -54,7 +67,7 @@ export default function PsychologistManagement() {
     }
   }
 
-  // Психологты растаудан кейін жою
+  // deletePsych — психологты растаудан кейін жою
   async function deletePsych(id) {
     if (!window.confirm(t('admin.psychologistMgmt.deleteConfirm'))) return;
     try {

@@ -1,45 +1,61 @@
+// useState, useEffect, useCallback — күй, жанама әсерлер және мемоизацияланған функция үшін
 import { useState, useEffect, useCallback } from 'react';
+// useNavigate — бағдарламалық навигация үшін
 import { useNavigate } from 'react-router-dom';
+// Lucide иконалары — іздеу, пайдаланушылар, беттеу
 import { Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — белгі, батырма, карта, енгізу, тізім, скелет
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+// cn — шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
 
-// Соңғы белсенділіктен өткен күн санын есептеу
+// daysSince — соңғы белсенділіктен өткен күн санын есептеу
 function daysSince(dateStr) {
   if (!dateStr) return null;
   return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
 }
 
-// Бір беттегі студенттер саны
+// PAGE_SIZE — бір беттегі студенттер саны
 const PAGE_SIZE = 25;
 
+// AdminStudents — әкімші студенттер тізімі беті
 export default function AdminStudents() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // students — студенттер тізімі
   const [students, setStudents] = useState([]);
+  // faculties — факультеттер тізімі
   const [faculties, setFaculties] = useState([]);
+  // total — жалпы студент саны
   const [total, setTotal] = useState(0);
+  // page — ағымдағы бет нөмірі
   const [page, setPage] = useState(1);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // search — іздеу жолы
   const [search, setSearch] = useState('');
+  // faculty — таңдалған факультет сүзгісі
   const [faculty, setFaculty] = useState('');
+  // risk — таңдалған тәуекел деңгейі сүзгісі
   const [risk, setRisk] = useState('');
 
-  // Тәуекел деңгейлерінің белгі конфигурациясы
+  // RISK_CONFIG — тәуекел деңгейлерінің белгі конфигурациясы
   const RISK_CONFIG = {
     low: { label: t('risk.low'), variant: 'success' },
     moderate: { label: t('risk.moderate'), variant: 'warning' },
     high: { label: t('risk.high'), variant: 'destructive' },
   };
 
-  // Сүзгі параметрлері бойынша студенттер тізімін API-дан жүктеу
+  // loadStudents — сүзгі параметрлері бойынша студенттер тізімін API-дан жүктеу
   const loadStudents = useCallback(async () => {
     setLoading(true);
     try {
@@ -71,7 +87,7 @@ export default function AdminStudents() {
     return () => clearTimeout(timer);
   }, [loadStudents]);
 
-  // Жалпы бет санын есептеу
+  // totalPages — жалпы бет санын есептеу
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
@@ -158,7 +174,7 @@ export default function AdminStudents() {
                 {students.map((s) => {
                   const riskConfig = RISK_CONFIG[s.last_risk];
                   const days = daysSince(s.last_checkin);
-                  // Студент атынан бастапқы әріптерді шығарып алу
+                  // initials — студент атынан бастапқы әріптерді шығарып алу
                   const initials = s.name?.split(' ').map((n) => n[0]).join('').slice(0, 2) || '?';
                   return (
                     <tr

@@ -1,13 +1,21 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// useParams, Link — URL параметрлері мен ішкі сілтемелер үшін
 import { useParams, Link } from 'react-router-dom';
+// Line — сызықтық диаграмма компоненті
 import { Line } from 'react-chartjs-2';
+// Chart.js компоненттері — сызықтық диаграмма үшін
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, Title, Tooltip, Filler
 } from 'chart.js';
+// Lucide иконалары — артқа, күнтізбе, растау, ескерту
 import { ArrowLeft, CalendarDays, CheckCircle2, AlertTriangle } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — карта, белгі, батырма, қойындылар, скелет
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,20 +25,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 // Chart.js сызықтық диаграмма компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler);
 
+// AdminStudentDetail — әкімші студент толық ақпараты беті
 export default function AdminStudentDetail() {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
+  // data — студент туралы толық деректер
   const [data, setData] = useState(null);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
 
-  // Тәуекел деңгейлерінің белгі конфигурациясы
+  // RISK_CONFIG — тәуекел деңгейлерінің белгі конфигурациясы
   const RISK_CONFIG = {
     low: { label: t('risk.low'), variant: 'success' },
     moderate: { label: t('risk.moderate'), variant: 'warning' },
     high: { label: t('risk.high'), variant: 'destructive' },
   };
 
-  // Диаграммада көрсетілетін метрикалар және олардың стильдері
+  // METRICS — диаграммада көрсетілетін метрикалар және олардың стильдері
   const METRICS = [
     { key: 'mood', label: t('metrics.mood'), color: '#e4e4e7', dash: [] },
     { key: 'stress', label: t('metrics.stress'), color: '#a1a1aa', dash: [6, 3] },
@@ -75,12 +86,12 @@ export default function AdminStudentDetail() {
   const latestSurvey = surveys[0];
   const completedAppts = appointments.filter(a => a.status === 'completed');
 
-  // Диаграмма X-осі үшін күн белгілері
+  // labels — диаграмма X-осі үшін күн белгілері
   const labels = checkIns.map(c =>
     new Date(c.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   );
 
-  // Метрика диаграммасының деректер жиыны
+  // chartData — метрика диаграммасының деректер жиыны
   const chartData = {
     labels,
     datasets: METRICS.map(m => ({
@@ -94,7 +105,7 @@ export default function AdminStudentDetail() {
     })),
   };
 
-  // Диаграмма стиль параметрлері
+  // chartOptions — диаграмма стиль параметрлері
   const chartOptions = {
     responsive: true, maintainAspectRatio: false,
     plugins: {

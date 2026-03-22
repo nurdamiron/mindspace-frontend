@@ -1,19 +1,29 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Link — ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
+// ReactMarkdown — Markdown мәтінін HTML форматында көрсету үшін
 import ReactMarkdown from 'react-markdown';
+// Chart.js компоненттері — сызықтық диаграмма үшін
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
   Title, Tooltip, Legend, Filler
 } from 'chart.js';
+// Line — сызықтық диаграмма компоненті
 import { Line } from 'react-chartjs-2';
+// Lucide иконалары — метрикалар, іс-әрекеттер және интерфейс үшін
 import {
   Smile, Zap, Moon, Battery, Target,
   CheckSquare, Brain, MessageSquare, Users,
   ArrowRight, CalendarDays, Sparkles, AlertTriangle, Loader2, X,
 } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// useAuth — ағымдағы пайдаланушы деректерін алу үшін
 import { useAuth } from '../../context/AuthContext';
+// shadcn/ui компоненттері — карта, батырма, бөлгіш, скелет
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -22,13 +32,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 // Chart.js компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-// Метрика иконалары, түстері және сызба параметрлері
+// METRIC_ICONS — метрика атауын иконаға сәйкестендіретін объект
 const METRIC_ICONS = { mood: Smile, stress: Zap, sleep: Moon, energy: Battery, productivity: Target };
+// METRIC_COLORS — метрика атауын диаграмма түсіне сәйкестендіретін объект
 const METRIC_COLORS = { mood: '#60a5fa', stress: '#f87171', sleep: '#a78bfa', energy: '#fbbf24', productivity: '#34d399' };
+// CHART_COLORS — диаграмма жолдарының реттелген түстер массиві
 const CHART_COLORS = ['#60a5fa', '#f87171', '#a78bfa', '#fbbf24', '#34d399'];
+// CHART_DASH — диаграмма жолдарының штрих үлгілері
 const CHART_DASH = [[], [], [], [], []];
 
-// Стресс, көңіл-күй және ұйқы деңгейіне байланысты ескертулерді есептейді
+// computeAlerts — стресс, көңіл-күй және ұйқы деңгейіне байланысты ескертулерді есептейді
 function computeAlerts(checkIns, weeklyAverages) {
   const alerts = [];
   if (!checkIns || checkIns.length === 0) return alerts;
@@ -57,15 +70,21 @@ function computeAlerts(checkIns, weeklyAverages) {
   return alerts;
 }
 
-// Студент бақылау тақтасының негізгі компоненті
+// StudentDashboard — студент бақылау тақтасының негізгі компоненті
 export default function StudentDashboard() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  // stats — серверден алынған статистика деректері
   const [stats, setStats] = useState(null);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // activeMetrics — диаграммада көрсетілетін белсенді метрикалар
   const [activeMetrics, setActiveMetrics] = useState(['mood', 'stress', 'sleep']);
+  // insight — AI-инсайт мәтіні
   const [insight, setInsight] = useState(null);
+  // insightLoading — AI инсайт жүктелу күйі
   const [insightLoading, setInsightLoading] = useState(false);
+  // insightError — AI инсайт қате хабарламасы
   const [insightError, setInsightError] = useState(null);
 
   const METRIC_KEYS = ['mood', 'stress', 'sleep', 'energy', 'productivity'];
@@ -75,7 +94,7 @@ export default function StudentDashboard() {
     api.get('/student/stats').then(setStats).finally(() => setLoading(false));
   }, []);
 
-  // AI-инсайт жүктеу функциясы
+  // loadInsight — AI-инсайт жүктеу функциясы
   async function loadInsight() {
     setInsightLoading(true);
     setInsightError(null);
@@ -103,13 +122,14 @@ export default function StudentDashboard() {
     </div>
   );
 
-  // Check-in тізімін және сызба белгілерін дайындайды
+  // checkIns — check-in тізімін дайындайды
   const checkIns = stats?.checkIns || [];
+  // labels — диаграмма X осіндегі күн белгілері
   const labels = checkIns.map((c) =>
     new Date(c.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   );
 
-  // Сызба үшін деректер жиынын белсенді метрикалар бойынша құрады
+  // chartData — сызба үшін деректер жиынын белсенді метрикалар бойынша құрады
   const chartData = {
     labels,
     datasets: activeMetrics.map((key, i) => {
@@ -129,7 +149,7 @@ export default function StudentDashboard() {
     }),
   };
 
-  // Сызбаның визуалды параметрлері
+  // chartOptions — сызбаның визуалды параметрлері
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -151,12 +171,14 @@ export default function StudentDashboard() {
     },
   };
 
-  // Апталық орташа мәндерді, кездесулерді және ескертулерді дайындайды
+  // avgs — апталық орташа мәндер
   const avgs = stats?.weeklyAverages || {};
+  // appts — кездесу санақтары
   const appts = stats?.appointments || {};
+  // alerts — есептелген ескертулер тізімі
   const alerts = computeAlerts(checkIns, avgs);
 
-  // Жылдам сілтемелер тізімі
+  // QUICK_ACTIONS — жылдам сілтемелер тізімі
   const QUICK_ACTIONS = [
     { label: t('student.dashboard.actions.checkin'), href: '/student/checkin', icon: CheckSquare, primary: true },
     { label: t('student.dashboard.actions.screening'), href: '/student/screening', icon: Brain },
@@ -320,6 +342,7 @@ export default function StudentDashboard() {
               <span className="text-sm text-zinc-500">{t('student.dashboard.loadingInsight')}</span>
             </div>
           )}
+          {/* Қате хабарламасы */}
           {insightError && (
             <p className="text-sm text-red-400">{insightError}</p>
           )}

@@ -1,14 +1,23 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// useParams, Link — URL параметрлері мен ішкі сілтемелер үшін
 import { useParams, Link } from 'react-router-dom';
+// Line — сызықтық диаграмма компоненті
 import { Line } from 'react-chartjs-2';
+// ReactMarkdown — AI жиынтығын Markdown форматында шығару үшін
 import ReactMarkdown from 'react-markdown';
+// Chart.js компоненттері — сызықтық диаграмма үшін
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
   Title, Tooltip, Filler
 } from 'chart.js';
+// Lucide иконалары — навигация, күнтізбе, растау, ескерту, жарқырау, жүктелу
 import { ArrowLeft, CalendarDays, CheckCircle2, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — карта, белгі, батырма, қойындылар
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +26,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 // Chart.js компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler);
 
-// Метрика сызықтарының түстері мен стильдері
+// METRIC_COLORS — метрика сызықтарының түстері мен стильдері
 const METRIC_COLORS = {
   mood:       { color: '#60a5fa', dash: [] },
   stress:     { color: '#f87171', dash: [] },
@@ -25,14 +34,19 @@ const METRIC_COLORS = {
   energy:     { color: '#fbbf24', dash: [] },
 };
 
-// Студент картасы — толық ақпарат, сеанс тарихы және AI талдауы
+// StudentCard — студент картасы: толық ақпарат, сеанс тарихы және AI талдауы
 export default function StudentCard() {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
+  // data — студент туралы толық деректер
   const [data, setData] = useState(null);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // aiSummary — AI жиынтығы мәтіні
   const [aiSummary, setAiSummary] = useState(null);
+  // aiLoading — AI жиынтығы жүктелу күйі
   const [aiLoading, setAiLoading] = useState(false);
+  // aiError — AI қатесі хабарламасы
   const [aiError, setAiError] = useState(null);
 
   // Студент деректерін идентификатор бойынша жүктеу
@@ -40,7 +54,7 @@ export default function StudentCard() {
     api.get(`/psychologist/students/${id}`).then(setData).finally(() => setLoading(false));
   }, [id]);
 
-  // AI жиынтығын серверден сұрататын функция
+  // loadAiSummary — AI жиынтығын серверден сұрататын функция
   async function loadAiSummary() {
     setAiLoading(true);
     setAiError(null);
@@ -54,7 +68,7 @@ export default function StudentCard() {
     }
   }
 
-  // Тәуекел деңгейлерінің белгі конфигурациясы
+  // RISK_CONFIG — тәуекел деңгейлерінің белгі конфигурациясы
   const RISK_CONFIG = {
     low: { label: t('risk.low'), variant: 'success' },
     moderate: { label: t('risk.moderate'), variant: 'warning' },
@@ -84,12 +98,12 @@ export default function StudentCard() {
   const { student, checkIns, appointments, surveys } = data;
   const METRIC_KEYS = ['mood', 'stress', 'sleep', 'energy'];
 
-  // Графиктің X өсі үшін күн белгілері
+  // labels — графиктің X өсі үшін күн белгілері
   const labels = checkIns.map((c) =>
     new Date(c.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   );
 
-  // Метрика сызықтық диаграммасының деректері
+  // chartData — метрика сызықтық диаграммасының деректері
   const chartData = {
     labels,
     datasets: METRIC_KEYS.map((key) => {
@@ -109,7 +123,7 @@ export default function StudentCard() {
     }),
   };
 
-  // Диаграмма стиль баптаулары
+  // chartOptions — диаграмма стиль баптаулары
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -123,8 +137,9 @@ export default function StudentCard() {
     },
   };
 
-  // Соңғы сауалнама және аяқталған кездесулер
+  // latestSurvey — соңғы сауалнама нәтижесі
   const latestSurvey = surveys[0];
+  // completedAppts — аяқталған кездесулер тізімі
   const completedAppts = appointments.filter((a) => a.status === 'completed');
 
   return (

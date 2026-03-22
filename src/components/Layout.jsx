@@ -1,5 +1,8 @@
+// useState — мобильді мәзір күйін басқару үшін
 import { useState } from 'react';
+// Outlet, NavLink, useNavigate — маршруттау және навигация үшін
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+// Lucide иконалары — навигация элементтері үшін иконалар
 import {
   BarChart2,
   CheckSquare,
@@ -17,19 +20,25 @@ import {
   X,
   UserCircle,
 } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// useAuth — пайдаланушы және logout функциясы үшін
 import { useAuth } from '../context/AuthContext';
+// Separator — бөлгіш сызық компоненті
 import { Separator } from '@/components/ui/separator';
+// cn — шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
 
+// Layout — барлық рөлдерге ортақ бүйірлік панель орналасуы
 export default function Layout() {
   // Аударма және аутентификация контекстін алу
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  // mobileOpen — мобильді мәзірдің ашық/жабық күйі
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Әр рөлге арналған навигация элементтері
+  // navConfig — әр рөлге арналған навигация элементтері
   const navConfig = {
     student: [
       { to: '/student/dashboard', icon: BarChart2, label: t('nav.student.dashboard') },
@@ -55,32 +64,32 @@ export default function Layout() {
     ],
   };
 
-  // Рөл атауларын аудару
+  // roleLabels — рөл атауларының аудармалары
   const roleLabels = {
     student: t('nav.roles.student'),
     psychologist: t('nav.roles.psychologist'),
     admin: t('nav.roles.admin'),
   };
 
-  // Жүйеден шығу және логин бетіне бағыттау
+  // handleLogout — жүйеден шығу және логин бетіне бағыттау
   function handleLogout() {
     logout();
     navigate('/login');
   }
 
-  // Мобильді мәзірді жабу
+  // closeMobile — мобильді мәзірді жабу
   function closeMobile() {
     setMobileOpen(false);
   }
 
-  // Ағымдағы пайдаланушы рөліне сәйкес навигация элементтерін алу
+  // navItems — ағымдағы рөлге сәйкес навигация элементтерін алу
   const navItems = navConfig[user?.role] || [];
-  // Пайдаланушы атының бас әріптерін алу
+  // initials — пайдаланушы атының бас әріптерін алу
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
     : '?';
 
-  // Бүйірлік панельдің мазмұны — лого, навигация, тіл ауыстырғыш, пайдаланушы
+  // SidebarContent — бүйірлік панельдің ішкі мазмұны: лого, навигация, тіл, пайдаланушы
   const SidebarContent = () => (
     <>
       {/* Логотип блогы */}
@@ -165,6 +174,7 @@ export default function Layout() {
       {/* Пайдаланушы ақпараты және шығу түймесі */}
       <div className="px-3 py-3 border-t border-zinc-800 shrink-0">
         <div className="flex items-center gap-3 px-2 py-2 rounded-md bg-zinc-800/50">
+          {/* Пайдаланушы аватары */}
           <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-semibold text-zinc-200 shrink-0">
             {initials}
           </div>
@@ -174,6 +184,7 @@ export default function Layout() {
             </div>
             <div className="text-[10px] text-zinc-500">{roleLabels[user?.role]}</div>
           </div>
+          {/* Жүйеден шығу батырмасы */}
           <button
             onClick={handleLogout}
             className="p-1 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700 transition-colors shrink-0"

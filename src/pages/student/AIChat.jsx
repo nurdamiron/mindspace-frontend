@@ -1,22 +1,31 @@
+// useState, useEffect, useRef — күй, жанама әсерлер және DOM сілтемесі үшін
 import { useState, useEffect, useRef } from 'react';
+// ReactMarkdown — AI хабарламаларын Markdown форматында көрсету үшін
 import ReactMarkdown from 'react-markdown';
+// Send — хабарлама жіберу иконасы
 import { Send } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — батырма, енгізу өрісі, белгі
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
-// AI чат беті — студент пен AI арасындағы хабарлама алмасу компоненті
+// AIChat — AI чат беті: студент пен AI арасындағы хабарлама алмасу компоненті
 export default function AIChat() {
   const { t } = useTranslation();
+  // messages — чат хабарламалары тізімі
   const [messages, setMessages] = useState([]);
+  // input — хабарлама енгізу өрісінің мәні
   const [input, setInput] = useState('');
+  // loading — AI жауабы күту күйі
   const [loading, setLoading] = useState(false);
-  // Чаттың төменгі жағына автоматты айналдыру үшін ref
+  // bottomRef — чаттың төменгі жағына автоматты айналдыру үшін ref
   const bottomRef = useRef(null);
 
-  // Аудармадан жылдам хабарлама нұсқаларын алады
+  // quickMessages — аудармадан жылдам хабарлама нұсқаларын алады
   const quickMessages = t('student.aiChat.quickMessages', { returnObjects: true });
 
   // Бет жүктелгенде чат тарихын серверден алады
@@ -29,7 +38,7 @@ export default function AIChat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Хабарлама жіберу функциясы: пайдаланушы хабарын қосып, AI жауабын алады
+  // sendMessage — хабарлама жіберу функциясы: пайдаланушы хабарын қосып, AI жауабын алады
   async function sendMessage(e) {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -107,7 +116,7 @@ export default function AIChat() {
                     : 'bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-tl-sm'
                 }`}
               >
-                {/* AI хабарламасын Markdown форматында, пайдаланушыны қарапайым мәтін ретінде көрсетеді */}
+                {/* AI хабарламасын Markdown форматында, пайдаланушыны қарапайым мәтін ретінде */}
                 {m.role === 'assistant' ? (
                   <ReactMarkdown className="prose prose-sm prose-invert max-w-none">
                     {m.content}

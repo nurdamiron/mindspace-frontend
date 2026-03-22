@@ -1,19 +1,28 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Bar — баған диаграммасы компоненті
 import { Bar } from 'react-chartjs-2';
+// Chart.js компоненттері — баған диаграммасы үшін
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+// Lucide иконалары — KPI карточкалары үшін
 import { CalendarDays, CheckCircle2, Users } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — карта, скелет
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Chart.js компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// Психолог статистикасы беті
+// PsychStats — психолог статистикасы беті
 export default function PsychStats() {
   const { t, i18n } = useTranslation();
+  // stats — статистика деректері
   const [stats, setStats] = useState(null);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
 
   // Статистика деректерін API-дан жүктеу
@@ -36,7 +45,7 @@ export default function PsychStats() {
 
   const { sessions, uniqueStudents, weeklyLoad, tagStats } = stats || {};
 
-  // Апталық жүктеме диаграммасының деректері
+  // barData — апталық жүктеме диаграммасының деректері
   const barData = {
     labels: (weeklyLoad || []).map((w) =>
       new Date(w.date).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })
@@ -51,7 +60,7 @@ export default function PsychStats() {
     }],
   };
 
-  // Баған диаграммасының стиль баптаулары
+  // barOptions — баған диаграммасының стиль баптаулары
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -72,7 +81,7 @@ export default function PsychStats() {
     },
   };
 
-  // KPI карточкаларының конфигурациясы
+  // STAT_CARDS — KPI карточкаларының конфигурациясы
   const STAT_CARDS = [
     { icon: CalendarDays, label: t('psychologist.stats.completedSessions'), value: sessions?.total || 0 },
     { icon: CheckCircle2, label: t('status.completed'), value: sessions?.completed || 0 },
@@ -108,7 +117,7 @@ export default function PsychStats() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Апталық сеанстар бар диаграммасы */}
+        {/* Апталық сеанстар баған диаграммасы */}
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-zinc-300">{t('psychologist.stats.sessionsByWeek')}</CardTitle>

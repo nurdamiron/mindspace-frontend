@@ -1,9 +1,16 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Link — ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — файл, растау, тізім, күнтізбе
 import { FileText, CheckCircle, ClipboardList, CalendarDays } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — батырма, белгі, карта, белгіше, мәтін аймағы, слайдер, бөлгіш, диалог, скелет
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,9 +20,10 @@ import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+// cn — шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
 
-// Апта күнтізбесін көрсететін компонент
+// WeekCalendar — апта күнтізбесін көрсететін компонент
 function WeekCalendar({ sessions, onNoteClick }) {
   const { i18n } = useTranslation();
   const today = new Date();
@@ -25,14 +33,14 @@ function WeekCalendar({ sessions, onNoteClick }) {
   const dow = today.getDay();
   startOfWeek.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
 
-  // Аптаның 7 күнін массив ретінде қалыптастыру
+  // weekDays — аптаның 7 күнін массив ретінде қалыптастыру
   const weekDays = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(startOfWeek);
     d.setDate(d.getDate() + i);
     return d;
   });
 
-  // 08:00 – 20:00 сағат аралықтарын жасау
+  // hours — 08:00 – 20:00 сағат аралықтарын жасау
   const hours = Array.from({ length: 13 }).map((_, i) => i + 8);
 
   return (
@@ -102,18 +110,23 @@ function WeekCalendar({ sessions, onNoteClick }) {
   );
 }
 
-// Кесте беті — психологтің барлық кездесулерін басқарады
+// Schedule — кесте беті: психологтің барлық кездесулерін басқарады
 export default function Schedule() {
   const { t, i18n } = useTranslation();
+  // sessions — сеанстар тізімі
   const [sessions, setSessions] = useState([]);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // period — таңдалған кезең сүзгісі
   const [period, setPeriod] = useState('today');
 
-  // Ескерту диалогы үшін таңдалған сеанс
+  // noteModal — ескерту диалогы үшін таңдалған сеанс
   const [noteModal, setNoteModal] = useState(null);
+  // noteForm — ескерту жазу формасының күйі
   const [noteForm, setNoteForm] = useState({
     condition_before: 5, condition_after: 7, recommend_followup: false, tags: '', notes: '',
   });
+  // saving — ескерту сақтау күйі
   const [saving, setSaving] = useState(false);
 
   // Кезең өзгерген сайын сеанстарды API-дан жүктеу
@@ -124,7 +137,7 @@ export default function Schedule() {
       .finally(() => setLoading(false));
   }, [period]);
 
-  // Сеансты аяқталды деп белгілейтін функция
+  // completeSession — сеансты аяқталды деп белгілейтін функция
   async function completeSession(id) {
     try {
       await api.patch(`/psychologist/appointments/${id}/complete`);
@@ -137,7 +150,7 @@ export default function Schedule() {
     }
   }
 
-  // Сеанс жазбасын серверге сақтайтын функция
+  // saveNote — сеанс жазбасын серверге сақтайтын функция
   async function saveNote() {
     setSaving(true);
     try {
@@ -151,14 +164,14 @@ export default function Schedule() {
     }
   }
 
-  // Статус белгілерінің конфигурациясы
+  // STATUS_CONFIG — статус белгілерінің конфигурациясы
   const STATUS_CONFIG = {
     scheduled: { label: t('psychologist.schedule.status.scheduled'), variant: 'default' },
     completed: { label: t('psychologist.schedule.status.completed'), variant: 'success' },
     cancelled: { label: t('psychologist.schedule.status.cancelled'), variant: 'secondary' },
   };
 
-  // Кезең сүзгісінің мәндері
+  // PERIODS — кезең сүзгісінің мәндері
   const PERIODS = [
     ['today', t('psychologist.schedule.today')],
     ['week', t('psychologist.schedule.week')],

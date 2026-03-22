@@ -1,9 +1,16 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Link — ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
+// Lucide иконалары — рейтинг, пайдаланушылар, күнтізбе, жабу, уақыт, формат
 import { Star, Users, CalendarDays, X, Clock, Wifi, MapPin } from 'lucide-react';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — диалог, батырма, белгі, белгіше, мәтін аймағы, скелет
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Жұлдызды рейтинг компоненті — оқу немесе өзгерту режимінде жұмыс істейді
+// StarRating — жұлдызды рейтинг компоненті: оқу немесе өзгерту режимінде жұмыс істейді
 function StarRating({ score, onChange, readOnly }) {
   return (
     <div className="flex gap-1">
@@ -35,7 +42,7 @@ function StarRating({ score, onChange, readOnly }) {
   );
 }
 
-// Кездесу статусына сәйкес стиль конфигурациясы
+// STATUS_STYLES — кездесу статусына сәйкес стиль конфигурациясы
 const STATUS_STYLES = {
   scheduled: { variant: 'default', dot: 'bg-zinc-400' },
   completed: { variant: 'success', dot: 'bg-emerald-400' },
@@ -43,16 +50,24 @@ const STATUS_STYLES = {
   no_show:   { variant: 'destructive', dot: 'bg-red-400' },
 };
 
-// Студенттің кездесулер беті
+// Appointments — студенттің кездесулер беті
 export default function Appointments() {
   const { t, i18n } = useTranslation();
+  // appointments — кездесулер тізімі
   const [appointments, setAppointments] = useState([]);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // feedbackModal — кері байланыс диалогындағы кездесу
   const [feedbackModal, setFeedbackModal] = useState(null);
+  // feedbackScore — кері байланыс ұпайы
   const [feedbackScore, setFeedbackScore] = useState(5);
+  // feedbackText — кері байланыс мәтіні
   const [feedbackText, setFeedbackText] = useState('');
+  // submitting — кері байланыс жіберу күйі
   const [submitting, setSubmitting] = useState(false);
+  // cancelling — болдырмау процесіндегі кездесу идентификаторы
   const [cancelling, setCancelling] = useState(null);
+  // confirmCancel — болдырмауды растау диалогындағы кездесу
   const [confirmCancel, setConfirmCancel] = useState(null);
 
   // Бет жүктелгенде кездесулерді серверден алады
@@ -60,7 +75,7 @@ export default function Appointments() {
     api.get('/student/appointments').then(setAppointments).finally(() => setLoading(false));
   }, []);
 
-  // Кездесуді болдырмау — статусты жергілікті жаңартады
+  // cancelAppointment — кездесуді болдырмау: статусты жергілікті жаңартады
   async function cancelAppointment(id) {
     setCancelling(id);
     try {
@@ -77,7 +92,7 @@ export default function Appointments() {
     }
   }
 
-  // Кері байланыс жіберу — ұпай мен мәтінді серверге сақтайды
+  // submitFeedback — кері байланыс жіберу: ұпай мен мәтінді серверге сақтайды
   async function submitFeedback() {
     setSubmitting(true);
     try {
@@ -115,7 +130,7 @@ export default function Appointments() {
   const upcoming = appointments.filter(a => a.status === 'scheduled');
   const past = appointments.filter(a => a.status !== 'scheduled');
 
-  // Жеке кездесу картасы компоненті
+  // AppointmentCard — жеке кездесу картасы компоненті
   function AppointmentCard({ a }) {
     const config = STATUS_STYLES[a.status] || STATUS_STYLES.scheduled;
     const date = new Date(a.date);

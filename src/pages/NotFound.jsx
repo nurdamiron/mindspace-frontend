@@ -1,9 +1,13 @@
+// Link — беттер арасында навигация сілтемелерін жасау үшін
 import { Link } from 'react-router-dom';
+// ArrowLeft — артқа оралу иконасы
 import { ArrowLeft } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// Button — shadcn/ui батырма компоненті
 import { Button } from '@/components/ui/button';
 
-// 404 қате беті — табылмаған маршрут үшін көрсетіледі
+// NotFound — 404 қате беті — табылмаған маршрут үшін көрсетіледі
 export default function NotFound() {
   const { t } = useTranslation();
   return (

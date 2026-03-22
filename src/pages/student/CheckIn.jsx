@@ -1,12 +1,22 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// useNavigate — бет ауысу үшін
 import { useNavigate } from 'react-router-dom';
+// useForm — форманы басқару үшін
 import { useForm } from 'react-hook-form';
+// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
+// z — форма валидация схемасын жасау үшін
 import { z } from 'zod';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// CheckCircle2, Loader2 — растау және жүктелу иконалары
 import { CheckCircle2, Loader2 } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — батырма, карта, белгі, слайдер, мәтін аймағы, бөлгіш
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -14,7 +24,7 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 
-// Check-in формасының валидация схемасы — барлық метрикалар 1-5 аралығында
+// checkInSchema — Check-in формасының валидация схемасы: барлық метрикалар 1-5 аралығында
 const checkInSchema = z.object({
   mood: z.number().min(1).max(5),
   stress: z.number().min(1).max(5),
@@ -24,14 +34,16 @@ const checkInSchema = z.object({
   notes: z.string().optional(),
 });
 
-// Бағаланатын метрикалар тізімі
+// METRIC_KEYS — бағаланатын метрикалар тізімі
 const METRIC_KEYS = ['mood', 'stress', 'sleep', 'energy', 'productivity'];
 
-// Күнделікті check-in формасының компоненті
+// CheckIn — күнделікті check-in формасының компоненті
 export default function CheckIn() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // success — форма сәтті жіберілді күйі
   const [success, setSuccess] = useState(false);
+  // alreadyDone — бүгін check-in жасалды күйі
   const [alreadyDone, setAlreadyDone] = useState(false);
 
   // Бүгін check-in жасалған-жасалмағанын тексереді
@@ -54,10 +66,10 @@ export default function CheckIn() {
     defaultValues: { mood: 3, stress: 3, sleep: 3, energy: 3, productivity: 3, notes: '' },
   });
 
-  // Слайдер мәндерін нақты уақытта қадағалайды
+  // watchValues — слайдер мәндерін нақты уақытта қадағалайды
   const watchValues = watch();
 
-  // Шкала белгілерін аудармадан алады
+  // SCALE_LABELS — шкала белгілерін аудармадан алады
   const SCALE_LABELS = {
     1: t('student.checkIn.scale.1'),
     2: t('student.checkIn.scale.2'),
@@ -66,7 +78,7 @@ export default function CheckIn() {
     5: t('student.checkIn.scale.5'),
   };
 
-  // Форманы жіберу: деректерді серверге жазады
+  // onSubmit — форманы жіберу: деректерді серверге жазады
   async function onSubmit(data) {
     try {
       await api.post('/student/check-ins', data);

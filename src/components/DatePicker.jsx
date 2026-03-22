@@ -1,24 +1,30 @@
+// useState, useRef, useEffect — күй, DOM сілтемесі және жанама әсерлер үшін
 import { useState, useRef, useEffect } from 'react';
+// ChevronLeft, ChevronRight, Calendar — навигация және күнтізбе иконалары
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+// useTranslation — тіл параметрлері мен аударма үшін
 import { useTranslation } from 'react-i18next';
+// cn — шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
 
-// Берілген жыл мен айдағы күндер санын қайтарады
+// getDaysInMonth — берілген жыл мен айдағы күндер санын қайтарады
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-// Айдың бірінші күні дүйсенбіден бастап нешінші күн екенін анықтайды
+// getFirstDayOfMonth — айдың бірінші күні дүйсенбіден бастап нешінші күн екенін анықтайды
 function getFirstDayOfMonth(year, month) {
   const d = new Date(year, month, 1).getDay();
   return (d + 6) % 7;
 }
 
+// DatePicker — ашылмалы күнтізбе бар күн таңдағыш компоненті
 export function DatePicker({ value, onChange, minDate, placeholder }) {
   const { i18n, t } = useTranslation();
+  // open — күнтізбенің ашық/жабық күйі
   const [open, setOpen] = useState(false);
 
-  // Бастапқы көріністі мән немесе бүгінгі күн негізінде орнату
+  // view — ағымдағы көрсетілетін жыл мен ай
   const [view, setView] = useState(() => {
     if (value) {
       const d = new Date(value + 'T00:00:00');
@@ -43,7 +49,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     return () => document.removeEventListener('pointerdown', handlePointer);
   }, []);
 
-  // Таңдалған мәнді локальді форматта көрсету
+  // displayValue — таңдалған мәнді локальді форматта көрсету
   const displayValue = value
     ? new Date(value + 'T00:00:00').toLocaleDateString(i18n.language, {
         day: 'numeric', month: 'long', year: 'numeric',
@@ -53,18 +59,18 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
   const daysInMonth = getDaysInMonth(view.year, view.month);
   const firstDay = getFirstDayOfMonth(view.year, view.month);
 
-  // Ай атауын локальді форматта алу
+  // monthLabel — ай атауын локальді форматта алу
   const monthLabel = new Date(view.year, view.month, 1).toLocaleDateString(i18n.language, {
     month: 'long', year: 'numeric',
   });
 
-  // Дүйсенбіден басталатын апта күндерінің қысқартылған атаулары
+  // weekdays — дүйсенбіден басталатын апта күндерінің қысқартылған атаулары
   const weekdays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(2024, 0, i + 1);
     return d.toLocaleDateString(i18n.language, { weekday: 'short' }).slice(0, 2);
   });
 
-  // Алдыңғы айға өту
+  // prevMonth — алдыңғы айға өту
   function prevMonth() {
     setView((v) => {
       const d = new Date(v.year, v.month - 1, 1);
@@ -72,7 +78,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     });
   }
 
-  // Келесі айға өту
+  // nextMonth — келесі айға өту
   function nextMonth() {
     setView((v) => {
       const d = new Date(v.year, v.month + 1, 1);
@@ -80,21 +86,21 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     });
   }
 
-  // Күнді таңдап, YYYY-MM-DD форматында onChange-ке жіберу
+  // selectDay — күнді таңдап, YYYY-MM-DD форматында onChange-ке жіберу
   function selectDay(day) {
     const pad = (n) => String(n).padStart(2, '0');
     onChange(`${view.year}-${pad(view.month + 1)}-${pad(day)}`);
     setOpen(false);
   }
 
-  // Күн минималды шектен кіші болса өшіріледі
+  // isDisabled — күн минималды шектен кіші болса өшіреді
   function isDisabled(day) {
     const d = new Date(view.year, view.month, day);
     d.setHours(0, 0, 0, 0);
     return d < min;
   }
 
-  // Күн таңдалған мәнмен сәйкес келетінін тексеру
+  // isSelected — күн таңдалған мәнмен сәйкес келетінін тексеру
   function isSelected(day) {
     if (!value) return false;
     const sel = new Date(value + 'T00:00:00');
@@ -105,7 +111,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     );
   }
 
-  // Бүгінгі күнді анықтау
+  // isToday — бүгінгі күнді анықтау
   function isToday(day) {
     const now = new Date();
     return (
@@ -115,7 +121,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     );
   }
 
-  // Күнтізбе торының ұяшықтарын құру (бос және нақты күндер)
+  // cells — күнтізбе торының ұяшықтарын құру (бос және нақты күндер)
   const cells = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
@@ -175,6 +181,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
             {cells.map((day, i) => (
               <div key={i} className="aspect-square">
                 {day && (
+                  // Жеке күн батырмасы — таңдалған, бүгінгі немесе өшірілген стильдерімен
                   <button
                     type="button"
                     onClick={() => !isDisabled(day) && selectDay(day)}

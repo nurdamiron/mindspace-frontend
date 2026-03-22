@@ -1,22 +1,35 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Lucide иконалары — жүктелу, қосу, күнтізбе, жою, баптаулар
 import { Loader2, Plus, CalendarDays, Trash2, Settings } from 'lucide-react';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — батырма, белгіше, белгі, карта
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// cn — шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
+// DatePicker — күн таңдағыш компоненті
 import { DatePicker } from '@/components/DatePicker';
 
-// Психологтің бос уақыт слоттарын басқару беті
+// PsychSlots — психологтің бос уақыт слоттарын басқару беті
 export default function PsychSlots() {
   const { t, i18n } = useTranslation();
+  // slots — слоттар тізімі
   const [slots, setSlots] = useState([]);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // form — жаңа слот формасының деректері
   const [form, setForm] = useState({ date: '', start_time: '09:00', end_time: '10:00' });
+  // saving — жасау/сақтау процесінің күйі
   const [saving, setSaving] = useState(false);
+  // deletingSlot — жойылу процесіндегі слот идентификаторы
   const [deletingSlot, setDeletingSlot] = useState(null);
 
   // Слоттарды API-дан жүктеу
@@ -24,7 +37,7 @@ export default function PsychSlots() {
     api.get('/psychologist/slots').then(setSlots).finally(() => setLoading(false));
   }, []);
 
-  // Жеке слот жасайтын функция
+  // createSlot — жеке слот жасайтын функция
   async function createSlot(e) {
     e.preventDefault();
     if (!form.date) { toast.error(t('psychologist.slots.selectDate')); return; }
@@ -44,7 +57,7 @@ export default function PsychSlots() {
     }
   }
 
-  // Таңдалған күнге толық жұмыс күні слоттарын жасайтын функция
+  // generateFullDay — таңдалған күнге толық жұмыс күні слоттарын жасайтын функция
   async function generateFullDay() {
     if (!form.date) { toast.error(t('psychologist.slots.selectDate')); return; }
     setSaving(true);
@@ -67,7 +80,7 @@ export default function PsychSlots() {
     }
   }
 
-  // Слотты жоятын функция
+  // deleteSlot — слотты жоятын функция
   async function deleteSlot(id) {
     setDeletingSlot(id);
     try {
@@ -81,7 +94,7 @@ export default function PsychSlots() {
     }
   }
 
-  // Слоттарды күн бойынша топтастыру
+  // grouped — слоттарды күн бойынша топтастыру
   const grouped = slots.reduce((acc, slot) => {
     const key = slot.date;
     if (!acc[key]) acc[key] = { date: slot.date, slots: [] };

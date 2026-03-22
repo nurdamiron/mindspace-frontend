@@ -1,12 +1,22 @@
+// useEffect, useState, useMemo — жанама әсерлер, күй және мемоизация үшін
 import { useEffect, useState, useMemo } from 'react';
+// useForm — форманы басқару үшін
 import { useForm } from 'react-hook-form';
+// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
+// z — форма валидация схемасын жасау үшін
 import { z } from 'zod';
+// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
+// Lucide иконалары — жүктелу, пайдаланушы, құпиясөз иконалары
 import { Loader2, User, Lock, Eye, EyeOff } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// useAuth — пайдаланушы деректері мен setUser функциясы үшін
 import { useAuth } from '../../context/AuthContext';
+// shadcn/ui компоненттері — батырма, енгізу, белгіше, карта, бөлгіш, тізім
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,9 +24,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Құпия сөз өрісі — көру/жасыру мүмкіндігімен
+// PasswordField — құпия сөз өрісі: көру/жасыру мүмкіндігімен
 function PasswordField({ id, label, registration, error }) {
-  // Құпия сөздің көрінуін басқару күйі
+  // show — құпия сөздің көрінуін басқару күйі
   const [show, setShow] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -43,11 +53,11 @@ function PasswordField({ id, label, registration, error }) {
   );
 }
 
-// Құпия сөзді өзгерту бөлімі
+// PasswordSection — құпия сөзді өзгерту бөлімі
 function PasswordSection() {
   const { t } = useTranslation();
 
-  // Zod валидация схемасы — жаңа және растау сөздері сәйкес болуы керек
+  // pwSchema — Zod валидация схемасы: жаңа және растау сөздері сәйкес болуы керек
   const pwSchema = useMemo(() => z.object({
     current_password: z.string().min(1, t('common.errors.required')),
     new_password: z.string().min(6, t('common.errors.minPassword')),
@@ -63,7 +73,7 @@ function PasswordSection() {
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
-  // Құпия сөзді серверге жіберу
+  // onSubmit — құпия сөзді серверге жіберу
   async function onSubmit(data) {
     try {
       await api.patch('/auth/password', {
@@ -118,12 +128,12 @@ function PasswordSection() {
   );
 }
 
-// Студент профилі беті
+// Profile — студент профилі беті
 export default function Profile() {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
 
-  // Профиль деректерін валидациялау схемасы
+  // schema — профиль деректерін валидациялау схемасы
   const schema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     faculty: z.string().optional(),
@@ -138,7 +148,7 @@ export default function Profile() {
     defaultValues: { name: '', faculty: '', course: '', gender: '', age: '' },
   });
 
-  // Жыныс өрісін бақылау
+  // genderValue — жыныс өрісін бақылау
   const genderValue = watch('gender');
 
   // Компонент жүктелгенде профиль деректерін API-дан алу
@@ -154,7 +164,7 @@ export default function Profile() {
     });
   }, [reset]);
 
-  // Профиль деректерін серверге сақтау
+  // onSubmit — профиль деректерін серверге сақтау
   async function onSubmit(data) {
     try {
       const updated = await api.patch('/student/profile', {
@@ -173,7 +183,7 @@ export default function Profile() {
     }
   }
 
-  // Пайдаланушы атының бас әріптерінен аватар мәтіні
+  // initials — пайдаланушы атының бас әріптерінен аватар мәтіні
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (

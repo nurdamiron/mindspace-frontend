@@ -1,25 +1,34 @@
+// useState, useEffect — компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
+// Link — ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
+// Lucide иконалары — пайдаланушылар, іздеу
 import { Users, Search } from 'lucide-react';
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
+// api — серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
+// shadcn/ui компоненттері — карта, белгі, енгізу, скелет
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Тәуекел деңгейлері белгілерінің варианттары
+// RISK_CONFIG — тәуекел деңгейлері белгілерінің варианттары
 const RISK_CONFIG = {
   low: { variant: 'success' },
   moderate: { variant: 'warning' },
   high: { variant: 'destructive' },
 };
 
-// Психологтің студенттер тізімі беті
+// PsychStudents — психологтің студенттер тізімі беті
 export default function PsychStudents() {
   const { t, i18n } = useTranslation();
+  // students — студенттер тізімі
   const [students, setStudents] = useState([]);
+  // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
+  // search — іздеу жолы
   const [search, setSearch] = useState('');
 
   // Студенттерді API-дан жүктеу
@@ -27,7 +36,7 @@ export default function PsychStudents() {
     api.get('/psychologist/students').then(setStudents).finally(() => setLoading(false));
   }, []);
 
-  // Факультет немесе идентификатор бойынша іздеу сүзгісі
+  // filtered — факультет немесе идентификатор бойынша іздеу сүзгісі
   const filtered = students.filter((s) =>
     !search ||
     s.faculty?.toLowerCase().includes(search.toLowerCase()) ||
