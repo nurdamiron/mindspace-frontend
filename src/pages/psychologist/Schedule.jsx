@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FileText, CheckCircle, ClipboardList, CalendarDays } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-// ─── Week Calendar ────────────────────────────────────────────────
 function WeekCalendar({ sessions, onNoteClick }) {
+  const { i18n } = useTranslation();
   const today = new Date();
   const startOfWeek = new Date(today);
   const dow = today.getDay();
@@ -31,7 +32,6 @@ function WeekCalendar({ sessions, onNoteClick }) {
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900 overflow-x-auto overflow-y-auto min-w-0">
-      {/* Header row */}
       <div className="grid border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10"
         style={{ gridTemplateColumns: '56px repeat(7, 1fr)' }}>
         <div className="border-r border-zinc-800" />
@@ -40,7 +40,7 @@ function WeekCalendar({ sessions, onNoteClick }) {
           return (
             <div key={d.toISOString()} className="px-2 py-2.5 text-center border-r border-zinc-800 last:border-r-0">
               <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
-                {d.toLocaleDateString('ru', { weekday: 'short' })}
+                {d.toLocaleDateString(i18n.language, { weekday: 'short' })}
               </div>
               <div className={cn(
                 'text-sm font-semibold mt-0.5 w-7 h-7 rounded-full flex items-center justify-center mx-auto',
@@ -53,7 +53,6 @@ function WeekCalendar({ sessions, onNoteClick }) {
         })}
       </div>
 
-      {/* Body */}
       {hours.map((hour) => (
         <div key={hour} className="grid border-b border-zinc-800 last:border-b-0"
           style={{ gridTemplateColumns: '56px repeat(7, 1fr)' }}>
@@ -92,13 +91,8 @@ function WeekCalendar({ sessions, onNoteClick }) {
   );
 }
 
-const STATUS_CONFIG = {
-  scheduled: { label: 'Запланировано', variant: 'default' },
-  completed: { label: 'Проведено', variant: 'success' },
-  cancelled: { label: 'Отменено', variant: 'secondary' },
-};
-
 export default function Schedule() {
+  const { t, i18n } = useTranslation();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('today');
@@ -121,7 +115,7 @@ export default function Schedule() {
       setSessions((s) =>
         s.map((ses) => ses.appointment_id === id ? { ...ses, status: 'completed' } : ses)
       );
-      toast.success('Сессия завершена');
+      toast.success(t('status.completed'));
     } catch (err) {
       toast.error(err.message);
     }
@@ -131,7 +125,7 @@ export default function Schedule() {
     setSaving(true);
     try {
       await api.post(`/psychologist/sessions/${noteModal.appointment_id}/notes`, noteForm);
-      toast.success('Заметка сохранена');
+      toast.success(t('psychologist.schedule.noteDialog.success'));
       setNoteModal(null);
     } catch (err) {
       toast.error(err.message);
@@ -140,23 +134,39 @@ export default function Schedule() {
     }
   }
 
+  const STATUS_CONFIG = {
+    scheduled: { label: t('psychologist.schedule.status.scheduled'), variant: 'default' },
+    completed: { label: t('psychologist.schedule.status.completed'), variant: 'success' },
+    cancelled: { label: t('psychologist.schedule.status.cancelled'), variant: 'secondary' },
+  };
+
+  const PERIODS = [
+    ['today', t('psychologist.schedule.today')],
+    ['week', t('psychologist.schedule.week')],
+    ['all', t('psychologist.schedule.month')],
+  ];
+
   return (
     <div className="fade-in space-y-5">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">Моё расписание</h1>
-          <p className="text-sm text-zinc-500 mt-1">Управление консультациями</p>
+          <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('psychologist.schedule.title')}</h1>
+          <p className="text-sm text-zinc-500 mt-1">{t('psychologist.schedule.subtitle')}</p>
         </div>
-        <div className="flex gap-1.5">
-          {[['today', 'Сегодня'], ['week', 'Неделя'], ['all', 'Все']].map(([val, label]) => (
-            <Button
+        <div className="inline-flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1 gap-0.5 self-start sm:self-auto">
+          {PERIODS.map(([val, label]) => (
+            <button
               key={val}
-              variant={period === val ? 'default' : 'secondary'}
-              size="sm"
               onClick={() => setPeriod(val)}
+              className={cn(
+                'px-4 py-1.5 rounded-md text-sm font-medium transition-all',
+                period === val
+                  ? 'bg-zinc-700 text-zinc-50 shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              )}
             >
               {label}
-            </Button>
+            </button>
           ))}
         </div>
       </div>
@@ -171,8 +181,8 @@ export default function Schedule() {
             <CalendarDays className="w-5 h-5 text-zinc-500" />
           </div>
           <div className="text-center">
-            <p className="font-medium text-zinc-300">Нет записей</p>
-            <p className="text-sm text-zinc-600 mt-1">На выбранный период консультаций нет</p>
+            <p className="font-medium text-zinc-300">{t('psychologist.schedule.noSessions')}</p>
+            <p className="text-sm text-zinc-600 mt-1">{t('psychologist.schedule.noSessionsHint')}</p>
           </div>
         </div>
       ) : period === 'week' ? (
@@ -198,16 +208,16 @@ export default function Schedule() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="font-medium text-sm text-zinc-100">
-                        Студент #{s.student_id}
+                        {t('psychologist.schedule.sessionWith')} #{s.student_id}
                       </span>
                       {s.faculty && <span className="text-zinc-500 text-xs">· {s.faculty}</span>}
                       <Badge variant={config.variant}>{config.label}</Badge>
                     </div>
                     <div className="text-xs text-zinc-600 flex flex-wrap gap-2">
-                      <span>{d.toLocaleDateString('ru', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                      <span>{d.toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}</span>
                       <span>·</span>
-                      <span>{s.format === 'online' ? 'Онлайн' : 'Очно'}</span>
-                      {s.course && <><span>·</span><span>{s.course} курс</span></>}
+                      <span>{s.format === 'online' ? t('psychologist.schedule.format.online') : t('psychologist.schedule.format.offline')}</span>
+                      {s.course && <><span>·</span><span>{s.course} {t('common.course')}</span></>}
                     </div>
                     {s.reason && (
                       <p className="text-xs text-zinc-600 mt-1.5 line-clamp-1">{s.reason}</p>
@@ -219,25 +229,25 @@ export default function Schedule() {
                     <Button variant="secondary" size="sm" asChild>
                       <Link to={`/psychologist/students/${s.student_id}`} className="flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" />
-                        Карточка
+                        {t('psychologist.studentCard.title')}
                       </Link>
                     </Button>
                     {s.status === 'scheduled' && (
                       <>
                         <Button size="sm" onClick={() => completeSession(s.appointment_id)} className="flex items-center gap-1.5">
                           <CheckCircle className="w-3.5 h-3.5" />
-                          Завершить
+                          {t('psychologist.schedule.status.completed')}
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => setNoteModal(s)} className="flex items-center gap-1.5">
                           <ClipboardList className="w-3.5 h-3.5" />
-                          Заметка
+                          {t('psychologist.schedule.addNote')}
                         </Button>
                       </>
                     )}
                     {s.status === 'completed' && !s.note_id && (
                       <Button variant="outline" size="sm" onClick={() => setNoteModal(s)} className="flex items-center gap-1.5">
                         <ClipboardList className="w-3.5 h-3.5" />
-                        Заметка
+                        {t('psychologist.schedule.addNote')}
                       </Button>
                     )}
                   </div>
@@ -252,13 +262,13 @@ export default function Schedule() {
       <Dialog open={!!noteModal} onOpenChange={(open) => !open && setNoteModal(null)}>
         <DialogContent className="max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Заметка по сессии</DialogTitle>
+            <DialogTitle>{t('psychologist.schedule.noteDialog.title')}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-5 py-2">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Состояние до (1–10)</Label>
+                <Label>{t('psychologist.schedule.noteDialog.conditionBefore')}</Label>
                 <span className="text-lg font-bold text-zinc-100">{noteForm.condition_before}</span>
               </div>
               <Slider
@@ -270,7 +280,7 @@ export default function Schedule() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Состояние после (1–10)</Label>
+                <Label>{t('psychologist.schedule.noteDialog.conditionAfter')}</Label>
                 <span className="text-lg font-bold text-zinc-100">{noteForm.condition_after}</span>
               </div>
               <Slider
@@ -281,19 +291,19 @@ export default function Schedule() {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Теги <span className="text-zinc-600">(через запятую)</span></Label>
+              <Label>{t('psychologist.schedule.noteDialog.tags')}</Label>
               <input
                 className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
-                placeholder="стресс, выгорание, экзамены"
+                placeholder={t('psychologist.schedule.noteDialog.tagsPlaceholder')}
                 value={noteForm.tags}
                 onChange={(e) => setNoteForm((f) => ({ ...f, tags: e.target.value }))}
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label>Заметки</Label>
+              <Label>{t('psychologist.schedule.noteDialog.notes')}</Label>
               <Textarea
-                placeholder="Наблюдения, рекомендации..."
+                placeholder={t('psychologist.schedule.noteDialog.notesPlaceholder')}
                 value={noteForm.notes}
                 onChange={(e) => setNoteForm((f) => ({ ...f, notes: e.target.value }))}
               />
@@ -306,13 +316,15 @@ export default function Schedule() {
                 onChange={(e) => setNoteForm((f) => ({ ...f, recommend_followup: e.target.checked }))}
                 className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 accent-zinc-400"
               />
-              <span className="text-sm text-zinc-300">Рекомендовать повторную встречу</span>
+              <span className="text-sm text-zinc-300">{t('psychologist.schedule.recommendFollowup')}</span>
             </label>
           </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="secondary" onClick={() => setNoteModal(null)}>Отмена</Button>
-            <Button onClick={saveNote} disabled={saving}>Сохранить</Button>
+            <Button variant="secondary" onClick={() => setNoteModal(null)}>{t('common.cancel')}</Button>
+            <Button onClick={saveNote} disabled={saving}>
+              {saving ? t('psychologist.schedule.noteDialog.saving') : t('psychologist.schedule.noteDialog.save')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
