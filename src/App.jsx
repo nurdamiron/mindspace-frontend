@@ -21,6 +21,8 @@ import PsychSchedule from './pages/psychologist/Schedule';
 import StudentCard from './pages/psychologist/StudentCard';
 import PsychStats from './pages/psychologist/Stats';
 import PsychProfile from './pages/psychologist/Profile';
+import PsychStudents from './pages/psychologist/Students';
+import PsychSlots from './pages/psychologist/Slots';
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -78,6 +80,7 @@ export default function App() {
           <Route path="/student" element={
             <ProtectedRoute roles={['student']}><Layout /></ProtectedRoute>
           }>
+            <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="checkin" element={<CheckIn />} />
             <Route path="screening" element={<Screening />} />
@@ -91,16 +94,20 @@ export default function App() {
           <Route path="/psychologist" element={
             <ProtectedRoute roles={['psychologist']}><Layout /></ProtectedRoute>
           }>
+            <Route index element={<Navigate to="schedule" replace />} />
             <Route path="schedule" element={<PsychSchedule />} />
             <Route path="students/:id" element={<StudentCard />} />
             <Route path="stats" element={<PsychStats />} />
             <Route path="profile" element={<PsychProfile />} />
+            <Route path="students" element={<PsychStudents />} />
+            <Route path="slots" element={<PsychSlots />} />
           </Route>
 
           {/* Admin */}
           <Route path="/admin" element={
             <ProtectedRoute roles={['admin']}><Layout /></ProtectedRoute>
           }>
+            <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="psychologists" element={<PsychologistManagement />} />
             <Route path="slots" element={<SlotManagement />} />

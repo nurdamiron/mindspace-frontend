@@ -15,23 +15,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
+// Апта күнтізбесін көрсететін компонент
 function WeekCalendar({ sessions, onNoteClick }) {
   const { i18n } = useTranslation();
   const today = new Date();
+
+  // Аптаның басын (дүйсенбі) анықтау
   const startOfWeek = new Date(today);
   const dow = today.getDay();
   startOfWeek.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
 
+  // Аптаның 7 күнін массив ретінде қалыптастыру
   const weekDays = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(startOfWeek);
     d.setDate(d.getDate() + i);
     return d;
   });
 
+  // 08:00 – 20:00 сағат аралықтарын жасау
   const hours = Array.from({ length: 13 }).map((_, i) => i + 8);
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900 overflow-x-auto overflow-y-auto min-w-0">
+      {/* Апта күндерінің тақырып жолы */}
       <div className="grid border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10"
         style={{ gridTemplateColumns: '56px repeat(7, 1fr)' }}>
         <div className="border-r border-zinc-800" />
@@ -39,9 +45,11 @@ function WeekCalendar({ sessions, onNoteClick }) {
           const isToday = d.toDateString() === today.toDateString();
           return (
             <div key={d.toISOString()} className="px-2 py-2.5 text-center border-r border-zinc-800 last:border-r-0">
+              {/* Қысқартылған күн атауы */}
               <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
                 {d.toLocaleDateString(i18n.language, { weekday: 'short' })}
               </div>
+              {/* Бүгінгі күнді дөңгелекпен белгілеу */}
               <div className={cn(
                 'text-sm font-semibold mt-0.5 w-7 h-7 rounded-full flex items-center justify-center mx-auto',
                 isToday ? 'bg-zinc-50 text-zinc-900' : 'text-zinc-300'
@@ -53,6 +61,7 @@ function WeekCalendar({ sessions, onNoteClick }) {
         })}
       </div>
 
+      {/* Сағат бойынша жолдар */}
       {hours.map((hour) => (
         <div key={hour} className="grid border-b border-zinc-800 last:border-b-0"
           style={{ gridTemplateColumns: '56px repeat(7, 1fr)' }}>
@@ -61,12 +70,14 @@ function WeekCalendar({ sessions, onNoteClick }) {
           </div>
           {weekDays.map((day) => {
             const dateStr = day.toISOString().split('T')[0];
+            // Осы ұяшыққа тиесілі сеанстарды сүзу
             const events = sessions.filter((s) => {
               const [h] = s.start_time.split(':');
               return s.date?.startsWith(dateStr) && parseInt(h) === hour;
             });
             return (
               <div key={dateStr} className="border-r border-zinc-800 last:border-r-0 min-h-[52px] p-1 space-y-1">
+                {/* Әр сеансты батырма түрінде шығару */}
                 {events.map((ev) => (
                   <button
                     key={ev.appointment_id}
@@ -91,17 +102,21 @@ function WeekCalendar({ sessions, onNoteClick }) {
   );
 }
 
+// Кесте беті — психологтің барлық кездесулерін басқарады
 export default function Schedule() {
   const { t, i18n } = useTranslation();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('today');
+
+  // Ескерту диалогы үшін таңдалған сеанс
   const [noteModal, setNoteModal] = useState(null);
   const [noteForm, setNoteForm] = useState({
     condition_before: 5, condition_after: 7, recommend_followup: false, tags: '', notes: '',
   });
   const [saving, setSaving] = useState(false);
 
+  // Кезең өзгерген сайын сеанстарды API-дан жүктеу
   useEffect(() => {
     setLoading(true);
     api.get(`/psychologist/schedule?period=${period}`)
@@ -109,6 +124,7 @@ export default function Schedule() {
       .finally(() => setLoading(false));
   }, [period]);
 
+  // Сеансты аяқталды деп белгілейтін функция
   async function completeSession(id) {
     try {
       await api.patch(`/psychologist/appointments/${id}/complete`);
@@ -121,6 +137,7 @@ export default function Schedule() {
     }
   }
 
+  // Сеанс жазбасын серверге сақтайтын функция
   async function saveNote() {
     setSaving(true);
     try {
@@ -134,12 +151,14 @@ export default function Schedule() {
     }
   }
 
+  // Статус белгілерінің конфигурациясы
   const STATUS_CONFIG = {
     scheduled: { label: t('psychologist.schedule.status.scheduled'), variant: 'default' },
     completed: { label: t('psychologist.schedule.status.completed'), variant: 'success' },
     cancelled: { label: t('psychologist.schedule.status.cancelled'), variant: 'secondary' },
   };
 
+  // Кезең сүзгісінің мәндері
   const PERIODS = [
     ['today', t('psychologist.schedule.today')],
     ['week', t('psychologist.schedule.week')],
@@ -148,6 +167,7 @@ export default function Schedule() {
 
   return (
     <div className="fade-in space-y-5">
+      {/* Тақырып және кезең сүзгісі */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('psychologist.schedule.title')}</h1>
@@ -171,11 +191,13 @@ export default function Schedule() {
         </div>
       </div>
 
+      {/* Жүктелу, бос күй немесе сеанс тізімі */}
       {loading ? (
         <div className="space-y-3">
           {[1,2,3].map(i => <Skeleton key={i} className="h-20" />)}
         </div>
       ) : sessions.length === 0 ? (
+        // Сеанс жоқ кезіндегі бос күй
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
             <CalendarDays className="w-5 h-5 text-zinc-500" />
@@ -186,8 +208,10 @@ export default function Schedule() {
           </div>
         </div>
       ) : period === 'week' ? (
+        // Апталық күнтізбе түрінде көрсету
         <WeekCalendar sessions={sessions} onNoteClick={setNoteModal} />
       ) : (
+        // Тізім түрінде көрсету
         <div className="space-y-3">
           {sessions.map((s) => {
             const config = STATUS_CONFIG[s.status] || STATUS_CONFIG.scheduled;
@@ -195,7 +219,7 @@ export default function Schedule() {
             return (
               <Card key={s.appointment_id} className="border-zinc-800 bg-zinc-900 hover:border-zinc-700 transition-colors">
                 <CardContent className="p-5 flex items-start gap-4">
-                  {/* Time */}
+                  {/* Сеанс уақыты */}
                   <div className="text-center shrink-0 w-14">
                     <div className="text-base font-bold text-zinc-100">{s.start_time?.slice(0, 5)}</div>
                     <div className="text-xs text-zinc-600 my-0.5">|</div>
@@ -204,7 +228,7 @@ export default function Schedule() {
 
                   <Separator orientation="vertical" className="h-auto self-stretch bg-zinc-800" />
 
-                  {/* Info */}
+                  {/* Сеанс туралы негізгі ақпарат */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="font-medium text-sm text-zinc-100">
@@ -224,7 +248,7 @@ export default function Schedule() {
                     )}
                   </div>
 
-                  {/* Actions */}
+                  {/* Сеанс іс-әрекеттері */}
                   <div className="flex flex-col gap-1.5 shrink-0">
                     <Button variant="secondary" size="sm" asChild>
                       <Link to={`/psychologist/students/${s.student_id}`} className="flex items-center gap-1.5">
@@ -258,7 +282,7 @@ export default function Schedule() {
         </div>
       )}
 
-      {/* Note Dialog */}
+      {/* Ескерту жазу диалогы */}
       <Dialog open={!!noteModal} onOpenChange={(open) => !open && setNoteModal(null)}>
         <DialogContent className="max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -266,6 +290,7 @@ export default function Schedule() {
           </DialogHeader>
 
           <div className="space-y-5 py-2">
+            {/* Сеансқа дейінгі жағдай сырғытқышы */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>{t('psychologist.schedule.noteDialog.conditionBefore')}</Label>
@@ -278,6 +303,7 @@ export default function Schedule() {
               />
             </div>
 
+            {/* Сеанстан кейінгі жағдай сырғытқышы */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>{t('psychologist.schedule.noteDialog.conditionAfter')}</Label>
@@ -290,6 +316,7 @@ export default function Schedule() {
               />
             </div>
 
+            {/* Тегтер өрісі */}
             <div className="space-y-1.5">
               <Label>{t('psychologist.schedule.noteDialog.tags')}</Label>
               <input
@@ -300,6 +327,7 @@ export default function Schedule() {
               />
             </div>
 
+            {/* Жазба мәтіні өрісі */}
             <div className="space-y-1.5">
               <Label>{t('psychologist.schedule.noteDialog.notes')}</Label>
               <Textarea
@@ -309,6 +337,7 @@ export default function Schedule() {
               />
             </div>
 
+            {/* Қайта кездесу ұсыну жалаушасы */}
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"

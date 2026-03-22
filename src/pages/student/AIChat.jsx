@@ -1,33 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Send } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
-const QUICK_MESSAGES = [
-  'Как справиться со стрессом перед экзаменами?',
-  'Я плохо сплю уже несколько дней',
-  'Чувствую себя перегруженным',
-  'Как улучшить концентрацию?',
-];
-
+// AI чат беті — студент пен AI арасындағы хабарлама алмасу компоненті
 export default function AIChat() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  // Чаттың төменгі жағына автоматты айналдыру үшін ref
   const bottomRef = useRef(null);
 
+  // Аудармадан жылдам хабарлама нұсқаларын алады
+  const quickMessages = t('student.aiChat.quickMessages', { returnObjects: true });
+
+  // Бет жүктелгенде чат тарихын серверден алады
   useEffect(() => {
     api.get('/student/chat').then(setMessages).catch(() => {});
   }, []);
 
+  // Жаңа хабарлама келгенде төменге автоматты айналдырады
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Хабарлама жіберу функциясы: пайдаланушы хабарын қосып, AI жауабын алады
   async function sendMessage(e) {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -39,9 +41,10 @@ export default function AIChat() {
       const res = await api.post('/student/ai-chat', { content: text });
       setMessages((m) => [...m, { role: 'assistant', content: res.reply }]);
     } catch {
+      // Қате кезінде сәлемдесу хабарын қайтарады
       setMessages((m) => [
         ...m,
-        { role: 'assistant', content: 'Извините, произошла ошибка. Попробуйте ещё раз.' },
+        { role: 'assistant', content: t('student.aiChat.greeting') },
       ]);
     } finally {
       setLoading(false);
@@ -50,35 +53,36 @@ export default function AIChat() {
 
   return (
     <div className="fade-in flex flex-col h-[calc(100vh-80px)] min-h-[480px] max-h-[800px]">
-      {/* Header */}
+      {/* Бет тақырыбы мен ескертпе */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">ИИ-помощник</h1>
-        <p className="text-sm text-zinc-500 mt-1">Анонимная поддержка 24/7. Информация не передаётся третьим лицам.</p>
+        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('student.aiChat.title')}</h1>
+        <p className="text-sm text-zinc-500 mt-1">{t('student.aiChat.disclaimer')}</p>
       </div>
 
-      {/* Chat card */}
+      {/* Чат контейнері */}
       <div className="flex-1 flex flex-col rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden">
-        {/* Chat header */}
+        {/* Чат жоғарғы жолағы: AI атауы мен белгі */}
         <div className="px-5 py-3 border-b border-zinc-800 flex items-center gap-3 shrink-0">
           <div className="w-2 h-2 rounded-full bg-zinc-400" />
           <span className="text-sm font-medium text-zinc-200">MindSpace AI</span>
-          <Badge variant="secondary" className="ml-auto text-xs">Онлайн</Badge>
+          <Badge variant="secondary" className="ml-auto text-xs">{t('student.aiChat.badge')}</Badge>
         </div>
 
-        {/* Messages */}
+        {/* Хабарламалар аймағы */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* Хабарлама жоқ болса сәлемдесу мен жылдам нұсқаларды көрсетеді */}
           {messages.length === 0 && (
             <div className="space-y-5">
               <div className="max-w-[85%] bg-zinc-800 border border-zinc-700 rounded-lg rounded-tl-sm px-4 py-3 text-sm text-zinc-200 leading-relaxed">
-                Здравствуйте. Я MindSpace AI — анонимный помощник. Расскажите, как вы себя чувствуете, или задайте вопрос.
+                {t('student.aiChat.greeting')}
               </div>
 
+              {/* Жылдам хабарлама батырмалары */}
               <div>
-                <p className="text-xs text-zinc-600 mb-2.5">Частые темы:</p>
                 <div className="flex flex-wrap gap-2">
-                  {QUICK_MESSAGES.map((msg) => (
+                  {(Array.isArray(quickMessages) ? quickMessages : []).map((msg, idx) => (
                     <button
-                      key={msg}
+                      key={idx}
                       onClick={() => setInput(msg)}
                       className="px-3 py-1.5 rounded-full border border-zinc-700 bg-zinc-800/60 text-xs text-zinc-400 hover:bg-zinc-700 hover:border-zinc-600 hover:text-zinc-200 transition-colors"
                     >
@@ -90,6 +94,7 @@ export default function AIChat() {
             </div>
           )}
 
+          {/* Барлық хабарламаларды рөлге байланысты туралап көрсетеді */}
           {messages.map((m, i) => (
             <div
               key={i}
@@ -102,6 +107,7 @@ export default function AIChat() {
                     : 'bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-tl-sm'
                 }`}
               >
+                {/* AI хабарламасын Markdown форматында, пайдаланушыны қарапайым мәтін ретінде көрсетеді */}
                 {m.role === 'assistant' ? (
                   <ReactMarkdown className="prose prose-sm prose-invert max-w-none">
                     {m.content}
@@ -113,29 +119,25 @@ export default function AIChat() {
             </div>
           ))}
 
+          {/* AI жауап күту индикаторы */}
           {loading && (
             <div className="flex justify-start">
               <div className="bg-zinc-800 border border-zinc-700 rounded-lg rounded-tl-sm px-4 py-3 flex gap-1.5 items-center">
-                {[0, 200, 400].map((delay) => (
-                  <span
-                    key={delay}
-                    className="w-1.5 h-1.5 rounded-full bg-zinc-400"
-                    style={{ animation: `pulse 1s ${delay}ms infinite` }}
-                  />
-                ))}
+                <span className="text-xs text-zinc-500">{t('student.aiChat.thinking')}</span>
               </div>
             </div>
           )}
 
+          {/* Автоматты айналдыру нүктесі */}
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
+        {/* Хабарлама жіберу өрісі */}
         <div className="shrink-0 border-t border-zinc-800 p-4">
           <form onSubmit={sendMessage} className="flex gap-2">
             <Input
               id="chat-input"
-              placeholder="Напишите что-нибудь..."
+              placeholder={t('student.aiChat.placeholder')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}

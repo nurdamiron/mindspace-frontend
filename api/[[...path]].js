@@ -1,10 +1,7 @@
 /**
  * Vercel Serverless Proxy — проксирует /api/* на backend.
- * Требует: VERCEL_BACKEND_URL (например https://your-backend.onrender.com)
+ * Требует: VERCEL_BACKEND_URL (например http://IP:PORT)
  */
-export const config = {
-  runtime: 'nodejs',
-};
 
 function getBody(req) {
   if (['GET', 'HEAD'].includes(req.method)) return undefined;

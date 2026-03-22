@@ -1,29 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-const RISK_CONFIG = {
-  low: { label: 'Низкий', variant: 'success' },
-  moderate: { label: 'Умеренный', variant: 'warning' },
-  high: { label: 'Высокий', variant: 'destructive' },
-};
-
+// Соңғы белсенділіктен өткен күн санын есептеу
 function daysSince(dateStr) {
   if (!dateStr) return null;
   return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
 }
 
+// Бір беттегі студенттер саны
 const PAGE_SIZE = 25;
 
 export default function AdminStudents() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [faculties, setFaculties] = useState([]);
@@ -34,6 +32,14 @@ export default function AdminStudents() {
   const [faculty, setFaculty] = useState('');
   const [risk, setRisk] = useState('');
 
+  // Тәуекел деңгейлерінің белгі конфигурациясы
+  const RISK_CONFIG = {
+    low: { label: t('risk.low'), variant: 'success' },
+    moderate: { label: t('risk.moderate'), variant: 'warning' },
+    high: { label: t('risk.high'), variant: 'destructive' },
+  };
+
+  // Сүзгі параметрлері бойынша студенттер тізімін API-дан жүктеу
   const loadStudents = useCallback(async () => {
     setLoading(true);
     try {
@@ -54,68 +60,74 @@ export default function AdminStudents() {
     }
   }, [search, faculty, risk, page]);
 
+  // Сүзгі өзгергенде беттеуді бастапқыға қайтару
   useEffect(() => {
     setPage(1);
   }, [search, faculty, risk]);
 
+  // Іздеу кезінде debounce қолданып жүктеу
   useEffect(() => {
-    const t = setTimeout(loadStudents, search ? 400 : 0);
-    return () => clearTimeout(t);
+    const timer = setTimeout(loadStudents, search ? 400 : 0);
+    return () => clearTimeout(timer);
   }, [loadStudents]);
 
+  // Жалпы бет санын есептеу
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="fade-in space-y-5">
+      {/* Тақырып және жалпы студент саны */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">Студенты</h1>
+        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('admin.students.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">
-          {loading ? 'Загрузка...' : `${total} студентов`}
+          {loading ? t('admin.students.loadingCount') : t('admin.students.count', { count: total })}
         </p>
       </div>
 
-      {/* Filters */}
+      {/* Іздеу, факультет және тәуекел сүзгілері */}
       <Card className="border-zinc-800 bg-zinc-900">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
               <Input
-                placeholder="Имя или email..."
+                placeholder={t('admin.students.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
               />
             </div>
 
-            <Select value={faculty} onValueChange={setFaculty}>
+            {/* Факультет бойынша сүзгі */}
+            <Select value={faculty || 'all'} onValueChange={(v) => setFaculty(v === 'all' ? '' : v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Все факультеты" />
+                <SelectValue placeholder={t('admin.students.allFaculties')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все факультеты</SelectItem>
+                <SelectItem value="all">{t('admin.students.allFaculties')}</SelectItem>
                 {faculties.map((f) => (
                   <SelectItem key={f} value={f}>{f}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Select value={risk} onValueChange={setRisk}>
+            {/* Тәуекел деңгейі бойынша сүзгі */}
+            <Select value={risk || 'all'} onValueChange={(v) => setRisk(v === 'all' ? '' : v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Все риски" />
+                <SelectValue placeholder={t('admin.students.allRisks')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все уровни риска</SelectItem>
-                <SelectItem value="high">Высокий</SelectItem>
-                <SelectItem value="moderate">Умеренный</SelectItem>
-                <SelectItem value="low">Низкий</SelectItem>
+                <SelectItem value="all">{t('admin.students.allRisks')}</SelectItem>
+                <SelectItem value="high">{t('risk.high')}</SelectItem>
+                <SelectItem value="moderate">{t('risk.moderate')}</SelectItem>
+                <SelectItem value="low">{t('risk.low')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Table */}
+      {/* Студенттер кестесі немесе бос күй */}
       {loading ? (
         <div className="space-y-2">
           {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-14" />)}
@@ -125,7 +137,7 @@ export default function AdminStudents() {
           <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
             <Users className="w-5 h-5 text-zinc-500" />
           </div>
-          <p className="text-sm text-zinc-600">Нет студентов по заданным фильтрам</p>
+          <p className="text-sm text-zinc-600">{t('admin.students.noStudents')}</p>
         </div>
       ) : (
         <Card className="border-zinc-800 bg-zinc-900">
@@ -133,19 +145,20 @@ export default function AdminStudents() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-zinc-800">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Студент</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden sm:table-cell">Факультет</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">Чек-инов</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">Стресс / Настроение</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">Сессий</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Риск</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">Последний чек-ин</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">{t('admin.students.columns.student')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden sm:table-cell">{t('admin.students.columns.faculty')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">{t('admin.students.columns.checkins')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">{t('admin.students.columns.stressMood')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">{t('admin.students.columns.sessions')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">{t('admin.students.columns.risk')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">{t('admin.students.columns.lastCheckin')}</th>
                 </tr>
               </thead>
               <tbody>
-                {students.map((s, i) => {
-                  const risk = RISK_CONFIG[s.last_risk];
+                {students.map((s) => {
+                  const riskConfig = RISK_CONFIG[s.last_risk];
                   const days = daysSince(s.last_checkin);
+                  // Студент атынан бастапқы әріптерді шығарып алу
                   const initials = s.name?.split(' ').map((n) => n[0]).join('').slice(0, 2) || '?';
                   return (
                     <tr
@@ -153,6 +166,7 @@ export default function AdminStudents() {
                       onClick={() => navigate(`/admin/students/${s.id}`)}
                       className="border-b border-zinc-800 last:border-b-0 hover:bg-zinc-800/40 transition-colors cursor-pointer"
                     >
+                      {/* Аты және email бағаны */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-semibold text-zinc-300 shrink-0">
@@ -164,13 +178,15 @@ export default function AdminStudents() {
                           </div>
                         </div>
                       </td>
+                      {/* Факультет және курс */}
                       <td className="px-4 py-3 hidden sm:table-cell">
                         <div className="text-sm text-zinc-300">{s.faculty || '—'}</div>
-                        {s.course && <div className="text-xs text-zinc-600">{s.course} курс</div>}
+                        {s.course && <div className="text-xs text-zinc-600">{s.course} {t('common.course')}</div>}
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span className="text-sm text-zinc-300">{s.checkin_count}</span>
                       </td>
+                      {/* Стресс/көңіл-күй орташа мәндері */}
                       <td className="px-4 py-3 hidden lg:table-cell">
                         {s.checkin_count > 0 ? (
                           <div className="text-sm text-zinc-300">
@@ -187,21 +203,23 @@ export default function AdminStudents() {
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span className="text-sm text-zinc-300">{s.session_count}</span>
                       </td>
+                      {/* Тәуекел белгісі */}
                       <td className="px-4 py-3">
-                        {risk ? (
-                          <Badge variant={risk.variant}>{risk.label}</Badge>
+                        {riskConfig ? (
+                          <Badge variant={riskConfig.variant}>{riskConfig.label}</Badge>
                         ) : (
-                          <span className="text-xs text-zinc-600">Нет данных</span>
+                          <span className="text-xs text-zinc-600">{t('risk.unknown')}</span>
                         )}
                       </td>
+                      {/* Соңғы чекин уақыты */}
                       <td className="px-4 py-3 hidden lg:table-cell">
                         {days === null ? (
-                          <span className="text-xs text-zinc-600">Нет чек-инов</span>
+                          <span className="text-xs text-zinc-600">{t('admin.students.noCheckins')}</span>
                         ) : days === 0 ? (
-                          <span className="text-xs text-zinc-400">Сегодня</span>
+                          <span className="text-xs text-zinc-400">{t('admin.students.today')}</span>
                         ) : (
                           <span className={cn('text-xs', days >= 7 ? 'text-zinc-600' : 'text-zinc-400')}>
-                            {days} дн. назад
+                            {t('common.daysAgo_one', { count: days })}
                           </span>
                         )}
                       </td>
@@ -214,11 +232,11 @@ export default function AdminStudents() {
         </Card>
       )}
 
-      {/* Pagination */}
+      {/* Беттеу навигациясы */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-1">
           <p className="text-xs text-zinc-500">
-            Показано {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} из {total}
+            {t('admin.students.pagination', { from: (page - 1) * PAGE_SIZE + 1, to: Math.min(page * PAGE_SIZE, total), total })}
           </p>
           <div className="flex items-center gap-1.5">
             <Button

@@ -33,7 +33,7 @@ async function request(path, options = {}) {
   const url = `${BASE_URL}${path.startsWith('/') ? path : '/' + path}`;
   let res = await fetch(url, fetchOptions);
 
-  if (res.status === 401 && path !== '/auth/login' && path !== '/auth/refresh') {
+  if (res.status === 401 && path !== '/auth/login' && path !== '/auth/refresh' && path !== '/auth/me') {
     try {
       const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
         method: 'POST',

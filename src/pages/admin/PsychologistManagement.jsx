@@ -19,6 +19,7 @@ export default function PsychologistManagement() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
+  // Психолог қосу формасының валидация схемасы
   const psychSchema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     email: z.string().email(t('common.errors.invalidEmail')),
@@ -29,15 +30,18 @@ export default function PsychologistManagement() {
     bio: z.string().optional(),
   }), [t]);
 
+  // React Hook Form инициализациясы Zod валидациясымен
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(psychSchema),
     defaultValues: { password: 'password123' },
   });
 
+  // Психологтар тізімін жүктеу
   useEffect(() => {
     api.get('/admin/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
+  // Жаңа психолог қосу және тізімді жаңарту
   async function addPsychologist(data) {
     try {
       const added = await api.post('/admin/psychologists', data);
@@ -50,6 +54,7 @@ export default function PsychologistManagement() {
     }
   }
 
+  // Психологты растаудан кейін жою
   async function deletePsych(id) {
     if (!window.confirm(t('admin.psychologistMgmt.deleteConfirm'))) return;
     try {
@@ -61,6 +66,7 @@ export default function PsychologistManagement() {
     }
   }
 
+  // Жүктелу индикаторы
   if (loading) return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="w-5 h-5 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
@@ -69,6 +75,7 @@ export default function PsychologistManagement() {
 
   return (
     <div className="fade-in space-y-5">
+      {/* Тақырып және форманы ашу/жабу батырмасы */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('admin.psychologistMgmt.title')}</h1>
@@ -89,12 +96,13 @@ export default function PsychologistManagement() {
         </Button>
       </div>
 
-      {/* Add form */}
+      {/* Психолог қосу формасы (showForm = true болғанда ғана) */}
       {showForm && (
         <Card className="border-zinc-800 bg-zinc-900 fade-in">
           <CardContent className="p-6">
             <h2 className="text-sm font-semibold text-zinc-200 mb-5">{t('admin.psychologistMgmt.formTitle')}</h2>
             <form onSubmit={handleSubmit(addPsychologist)}>
+              {/* Форма өрістерін динамикалық рендерлеу */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {[
                   { name: 'name', label: t('admin.psychologistMgmt.fields.name'), placeholder: t('admin.psychologistMgmt.fields.namePlaceholder'), required: true },
@@ -121,6 +129,7 @@ export default function PsychologistManagement() {
                   </div>
                 ))}
 
+                {/* Биография өрісі толық ені бойынша */}
                 <div className="col-span-2 space-y-1.5">
                   <Label htmlFor="bio">{t('admin.psychologistMgmt.fields.bio')}</Label>
                   <Textarea id="bio" placeholder={t('admin.psychologistMgmt.fields.bioPlaceholder')} {...register('bio')} />
@@ -142,7 +151,7 @@ export default function PsychologistManagement() {
         </Card>
       )}
 
-      {/* List */}
+      {/* Психологтар тізімі немесе бос күй */}
       {psychologists.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
@@ -155,10 +164,12 @@ export default function PsychologistManagement() {
           {psychologists.map((p) => (
             <Card key={p.id} className="border-zinc-800 bg-zinc-900 hover:border-zinc-700 transition-colors">
               <CardContent className="p-4 flex items-center gap-4">
+                {/* Психолог аватары (аттың бастапқы әріптері) */}
                 <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 shrink-0">
                   {p.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
 
+                {/* Психолог аты, email және статистика белгілері */}
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
                   <div className="text-xs text-zinc-500 mt-0.5">
@@ -178,6 +189,7 @@ export default function PsychologistManagement() {
                   </div>
                 </div>
 
+                {/* Психологты жою батырмасы */}
                 <Button
                   variant="destructive"
                   size="sm"

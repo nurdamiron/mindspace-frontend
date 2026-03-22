@@ -6,6 +6,7 @@ import {
   LineElement, Title, Tooltip, Filler
 } from 'chart.js';
 import { ArrowLeft, CalendarDays, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,30 +14,36 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Chart.js сызықтық диаграмма компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler);
 
-const RISK_CONFIG = {
-  low: { label: 'Низкий', variant: 'success' },
-  moderate: { label: 'Умеренный', variant: 'warning' },
-  high: { label: 'Высокий', variant: 'destructive' },
-};
-
-const METRICS = [
-  { key: 'mood', label: 'Настроение', color: '#e4e4e7', dash: [] },
-  { key: 'stress', label: 'Стресс', color: '#a1a1aa', dash: [6, 3] },
-  { key: 'sleep', label: 'Сон', color: '#71717a', dash: [3, 3] },
-  { key: 'energy', label: 'Энергия', color: '#d4d4d8', dash: [8, 4, 2, 4] },
-];
-
 export default function AdminStudentDetail() {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Тәуекел деңгейлерінің белгі конфигурациясы
+  const RISK_CONFIG = {
+    low: { label: t('risk.low'), variant: 'success' },
+    moderate: { label: t('risk.moderate'), variant: 'warning' },
+    high: { label: t('risk.high'), variant: 'destructive' },
+  };
+
+  // Диаграммада көрсетілетін метрикалар және олардың стильдері
+  const METRICS = [
+    { key: 'mood', label: t('metrics.mood'), color: '#e4e4e7', dash: [] },
+    { key: 'stress', label: t('metrics.stress'), color: '#a1a1aa', dash: [6, 3] },
+    { key: 'sleep', label: t('metrics.sleep'), color: '#71717a', dash: [3, 3] },
+    { key: 'energy', label: t('metrics.energy'), color: '#d4d4d8', dash: [8, 4, 2, 4] },
+  ];
+
+  // Студент деректерін ID бойынша жүктеу
   useEffect(() => {
     api.get(`/admin/students/${id}`).then(setData).finally(() => setLoading(false));
   }, [id]);
 
+  // Жүктелу кезінде скелет UI
   if (loading) return (
     <div className="fade-in space-y-5">
       <div className="flex items-center gap-4">
@@ -53,23 +60,27 @@ export default function AdminStudentDetail() {
     </div>
   );
 
+  // Студент табылмаса қате хабары
   if (!data) return (
     <div className="flex flex-col items-center justify-center py-20 gap-3">
-      <p className="font-medium text-zinc-300">Студент не найден</p>
+      <p className="font-medium text-zinc-300">{t('admin.studentDetail.notFound')}</p>
       <Button variant="secondary" asChild>
-        <Link to="/admin/students"><ArrowLeft className="w-4 h-4 mr-1.5" />Назад</Link>
+        <Link to="/admin/students"><ArrowLeft className="w-4 h-4 mr-1.5" />{t('common.back')}</Link>
       </Button>
     </div>
   );
 
+  // API жауабынан деректерді шығарып алу
   const { student, checkIns, appointments, surveys } = data;
   const latestSurvey = surveys[0];
   const completedAppts = appointments.filter(a => a.status === 'completed');
 
+  // Диаграмма X-осі үшін күн белгілері
   const labels = checkIns.map(c =>
-    new Date(c.date).toLocaleDateString('ru', { month: 'short', day: 'numeric' })
+    new Date(c.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   );
 
+  // Метрика диаграммасының деректер жиыны
   const chartData = {
     labels,
     datasets: METRICS.map(m => ({
@@ -83,6 +94,7 @@ export default function AdminStudentDetail() {
     })),
   };
 
+  // Диаграмма стиль параметрлері
   const chartOptions = {
     responsive: true, maintainAspectRatio: false,
     plugins: {
@@ -97,37 +109,40 @@ export default function AdminStudentDetail() {
 
   return (
     <div className="fade-in space-y-5">
+      {/* Артқа батырмасы және студент туралы негізгі ақпарат */}
       <div className="flex items-center gap-4">
         <Button variant="secondary" size="sm" asChild>
           <Link to="/admin/students" className="flex items-center gap-1.5">
-            <ArrowLeft className="w-3.5 h-3.5" />Назад
+            <ArrowLeft className="w-3.5 h-3.5" />{t('common.back')}
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{student.name || `Студент #${student.id}`}</h1>
+          <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{student.name || `#${student.id}`}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {student.email}
             {student.faculty && ` · ${student.faculty}`}
-            {student.course && ` · ${student.course} курс`}
-            {student.gender && ` · ${student.gender === 'male' ? 'М' : 'Ж'}`}
+            {student.course && ` · ${student.course} ${t('common.course')}`}
+            {student.gender && ` · ${student.gender === 'male' ? t('common.male') : t('common.female')}`}
           </p>
         </div>
       </div>
 
+      {/* Шолу, тарих және сауалнамалар қойындылары */}
       <Tabs defaultValue="overview">
         <TabsList>
-          <TabsTrigger value="overview">Обзор</TabsTrigger>
-          <TabsTrigger value="history">История сессий</TabsTrigger>
-          <TabsTrigger value="surveys">Скрининг</TabsTrigger>
+          <TabsTrigger value="overview">{t('admin.studentDetail.tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="history">{t('admin.studentDetail.tabs.history')}</TabsTrigger>
+          <TabsTrigger value="surveys">{t('admin.studentDetail.tabs.surveys')}</TabsTrigger>
         </TabsList>
 
+        {/* Шолу қойындысы: KPI карточкалары және метрика диаграммасы */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { icon: CalendarDays, label: 'Сессий всего', value: appointments.length },
-              { icon: CheckCircle2, label: 'Завершено', value: completedAppts.length },
+              { icon: CalendarDays, label: t('admin.studentDetail.kpi.totalSessions'), value: appointments.length },
+              { icon: CheckCircle2, label: t('admin.studentDetail.kpi.completed'), value: completedAppts.length },
               {
-                icon: AlertTriangle, label: 'Риск (скрининг)',
+                icon: AlertTriangle, label: t('admin.studentDetail.kpi.riskFromScreening'),
                 value: latestSurvey
                   ? <Badge variant={RISK_CONFIG[latestSurvey.risk_level]?.variant || 'default'}>
                       {RISK_CONFIG[latestSurvey.risk_level]?.label || '—'}
@@ -152,49 +167,54 @@ export default function AdminStudentDetail() {
             })}
           </div>
 
+          {/* Чекин динамикасының сызықтық диаграммасы */}
           <Card className="border-zinc-800 bg-zinc-900">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-zinc-300">Динамика за 30 дней</CardTitle>
+              <CardTitle className="text-sm font-medium text-zinc-300">{t('admin.studentDetail.chart')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="chart-container h-56">
                 {checkIns.length > 0
                   ? <Line data={chartData} options={chartOptions} />
-                  : <div className="flex items-center justify-center h-full text-sm text-zinc-600">Нет чек-инов</div>
+                  : <div className="flex items-center justify-center h-full text-sm text-zinc-600">{t('admin.studentDetail.noCheckins')}</div>
                 }
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* Сессиялар тарихы қойындысы */}
         <TabsContent value="history">
           {appointments.length === 0 ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-sm text-zinc-600">Нет сессий</p>
+              <p className="text-sm text-zinc-600">{t('admin.studentDetail.noSessions')}</p>
             </div>
           ) : (
             <div className="space-y-3">
               {appointments.map(a => (
                 <Card key={a.id} className="border-zinc-800 bg-zinc-900">
                   <CardContent className="p-4">
+                    {/* Сессия күні, психолог аты және мәртебесі */}
                     <div className="flex items-center justify-between mb-1.5">
                       <div>
                         <span className="font-medium text-sm text-zinc-100">
-                          {new Date(a.date).toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          {new Date(a.date).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' })}
                         </span>
                         {a.psychologist_name && (
                           <span className="text-xs text-zinc-500 ml-2">· {a.psychologist_name}</span>
                         )}
                       </div>
                       <Badge variant={a.status === 'completed' ? 'success' : a.status === 'cancelled' ? 'secondary' : 'default'}>
-                        {a.status === 'completed' ? 'Проведено' : a.status === 'cancelled' ? 'Отменено' : 'Запланировано'}
+                        {a.status === 'completed' ? t('status.completed') : a.status === 'cancelled' ? t('status.cancelled') : t('status.scheduled')}
                       </Badge>
                     </div>
                     {a.reason && <p className="text-xs text-zinc-600">{a.reason}</p>}
+                    {/* Сессия жазбалары және жағдай өзгерісі */}
                     {a.session_notes && (
                       <div className="rounded-md bg-zinc-800 p-3 text-xs space-y-1 mt-2">
                         <div className="text-zinc-400">
-                          Состояние: <span className="text-zinc-300 font-medium">{a.condition_before}/10</span>
+                          {t('admin.studentDetail.conditionChange')}:{' '}
+                          <span className="text-zinc-300 font-medium">{a.condition_before}/10</span>
                           {' → '}
                           <span className="text-zinc-200 font-medium">{a.condition_after}/10</span>
                         </div>
@@ -209,10 +229,11 @@ export default function AdminStudentDetail() {
           )}
         </TabsContent>
 
+        {/* Скрининг сауалнамалары тарихы */}
         <TabsContent value="surveys">
           {surveys.length === 0 ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-sm text-zinc-600">Скрининги не проходил</p>
+              <p className="text-sm text-zinc-600">{t('admin.studentDetail.noSurveys')}</p>
             </div>
           ) : (
             <div className="space-y-2.5">
@@ -221,9 +242,9 @@ export default function AdminStudentDetail() {
                   <CardContent className="p-4 flex items-center justify-between">
                     <div>
                       <div className="font-medium text-sm text-zinc-100">
-                        {new Date(s.created_at).toLocaleDateString('ru')}
+                        {new Date(s.created_at).toLocaleDateString(i18n.language)}
                       </div>
-                      <div className="text-xs text-zinc-500 mt-0.5">Балл: {s.score}/25</div>
+                      <div className="text-xs text-zinc-500 mt-0.5">{t('admin.studentDetail.surveyScore', { score: s.score })}</div>
                     </div>
                     <Badge variant={RISK_CONFIG[s.risk_level]?.variant || 'default'}>
                       {RISK_CONFIG[s.risk_level]?.label || s.risk_level}

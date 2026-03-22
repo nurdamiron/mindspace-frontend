@@ -20,6 +20,7 @@ export default function SlotManagement() {
   const [saving, setSaving] = useState(false);
   const [deletingSlot, setDeletingSlot] = useState(null);
 
+  // Слоттар мен психологтар тізімін бір мезгілде жүктеу
   useEffect(() => {
     Promise.all([api.get('/admin/slots'), api.get('/admin/psychologists')])
       .then(([s, p]) => {
@@ -30,6 +31,7 @@ export default function SlotManagement() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Жаңа жеке слот жасау
   async function createSlot(e) {
     e.preventDefault();
     setSaving(true);
@@ -39,6 +41,7 @@ export default function SlotManagement() {
         date: form.date,
         slots: [{ start_time: form.start_time, end_time: form.end_time }],
       });
+      // Жаңа слотқа психолог атын қосып тізімді жаңарту
       setSlots((s) => [...s, ...res.map((r) => ({
         ...r,
         psychologist_name: psychologists.find((p) => p.id === +form.psychologist_id)?.name,
@@ -51,6 +54,7 @@ export default function SlotManagement() {
     }
   }
 
+  // Таңдалған күнге толық жұмыс күні слоттарын автоматты жасау
   async function generateFullDay() {
     if (!form.psychologist_id || !form.date) {
       toast.error(t('admin.slotMgmt.selectPsychDate'));
@@ -58,6 +62,7 @@ export default function SlotManagement() {
     }
     setSaving(true);
     try {
+      // 09:00–17:00 аралығында сағаттық слоттар (түскі үзіліссіз)
       const times = [
         ['09:00', '10:00'], ['10:00', '11:00'], ['11:00', '12:00'],
         ['13:00', '14:00'], ['14:00', '15:00'], ['15:00', '16:00'], ['16:00', '17:00'],
@@ -79,6 +84,7 @@ export default function SlotManagement() {
     }
   }
 
+  // Бос слотты жою
   async function deleteSlot(id) {
     setDeletingSlot(id);
     try {
@@ -92,6 +98,7 @@ export default function SlotManagement() {
     }
   }
 
+  // Слоттарды психолог аты + күн кілті бойынша топтастыру
   const grouped = slots.reduce((acc, slot) => {
     const key = `${slot.psychologist_name}__${slot.date}`;
     if (!acc[key]) acc[key] = { name: slot.psychologist_name, date: slot.date, slots: [] };
@@ -99,6 +106,7 @@ export default function SlotManagement() {
     return acc;
   }, {});
 
+  // Жүктелу индикаторы
   if (loading) return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="w-5 h-5 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
@@ -107,12 +115,13 @@ export default function SlotManagement() {
 
   return (
     <div className="fade-in space-y-5">
+      {/* Тақырып */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('admin.slotMgmt.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('admin.slotMgmt.subtitle')}</p>
       </div>
 
-      {/* Create form */}
+      {/* Слот жасау формасы */}
       <Card className="border-zinc-800 bg-zinc-900">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-zinc-300">{t('admin.slotMgmt.formTitle')}</CardTitle>
@@ -120,6 +129,7 @@ export default function SlotManagement() {
         <CardContent>
           <form onSubmit={createSlot} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Психолог таңдау */}
               <div className="space-y-1.5">
                 <Label>{t('admin.slotMgmt.psychologistLabel')}</Label>
                 <Select
@@ -137,6 +147,7 @@ export default function SlotManagement() {
                 </Select>
               </div>
 
+              {/* Күн таңдау */}
               <div className="space-y-1.5">
                 <Label>{t('admin.slotMgmt.dateLabel')}</Label>
                 <DatePicker
@@ -147,6 +158,7 @@ export default function SlotManagement() {
                 />
               </div>
 
+              {/* Басталу уақыты */}
               <div className="space-y-1.5">
                 <Label>{t('admin.slotMgmt.startLabel')}</Label>
                 <input
@@ -157,6 +169,7 @@ export default function SlotManagement() {
                 />
               </div>
 
+              {/* Аяқталу уақыты */}
               <div className="space-y-1.5">
                 <Label>{t('admin.slotMgmt.endLabel')}</Label>
                 <input
@@ -168,6 +181,7 @@ export default function SlotManagement() {
               </div>
             </div>
 
+            {/* Толық күн және жеке слот қосу батырмалары */}
             <div className="flex flex-wrap gap-2.5">
               <Button
                 type="button"
@@ -188,7 +202,7 @@ export default function SlotManagement() {
         </CardContent>
       </Card>
 
-      {/* Slots list */}
+      {/* Топтастырылған слоттар тізімі немесе бос күй */}
       {Object.values(grouped).length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
@@ -204,6 +218,7 @@ export default function SlotManagement() {
           {Object.values(grouped).map((g) => (
             <Card key={`${g.name}__${g.date}`} className="border-zinc-800 bg-zinc-900">
               <CardContent className="p-5">
+                {/* Психолог аты, күні және бос/броньдалған санаулары */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="font-medium text-zinc-100 text-sm">{g.name}</div>
@@ -220,6 +235,7 @@ export default function SlotManagement() {
                     </Badge>
                   </div>
                 </div>
+                {/* Уақыт слоттары: бос (жасыл) немесе броньдалған (қызыл) */}
                 <div className="flex flex-wrap gap-1.5">
                   {g.slots.map((slot) => (
                     <div
@@ -232,6 +248,7 @@ export default function SlotManagement() {
                       )}
                     >
                       <span>{slot.start_time?.slice(0, 5)}–{slot.end_time?.slice(0, 5)}</span>
+                      {/* Бос слотты жою батырмасы */}
                       {slot.is_available && (
                         <button
                           onClick={() => deleteSlot(slot.id)}

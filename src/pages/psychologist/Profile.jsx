@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
+// Құпия сөз өрісі — көрсету/жасыру мүмкіндігімен
 function PasswordField({ id, label, registration, error }) {
   const [show, setShow] = useState(false);
   return (
@@ -26,6 +27,7 @@ function PasswordField({ id, label, registration, error }) {
           className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 pr-10"
           {...registration}
         />
+        {/* Көрсету/жасыру ауыстырғышы */}
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
@@ -40,8 +42,11 @@ function PasswordField({ id, label, registration, error }) {
   );
 }
 
+// Құпия сөзді өзгерту бөлімі
 function PasswordSection() {
   const { t } = useTranslation();
+
+  // Құпия сөз валидация схемасы — сәйкестік тексеруімен
   const pwSchema = useMemo(() => z.object({
     current_password: z.string().min(1, t('common.errors.required')),
     new_password: z.string().min(6, t('common.errors.minPassword')),
@@ -50,11 +55,13 @@ function PasswordSection() {
     message: t('common.errors.passwordMismatch'),
     path: ['confirm_password'],
   }), [t]);
+
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(pwSchema),
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
+  // Құпия сөзді API арқылы жаңартатын функция
   async function onSubmit(data) {
     try {
       await api.patch('/auth/password', {
@@ -107,10 +114,12 @@ function PasswordSection() {
   );
 }
 
+// Психолог профилі беті
 export default function PsychProfile() {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
 
+  // Профиль формасының валидация схемасы
   const schema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     specialization: z.string().optional(),
@@ -124,6 +133,7 @@ export default function PsychProfile() {
     defaultValues: { name: '', specialization: '', languages: '', experience_years: '', bio: '' },
   });
 
+  // Профиль деректерін API-дан жүктеп, форманы толтыру
   useEffect(() => {
     api.get('/psychologist/profile').then((data) => {
       reset({
@@ -136,6 +146,7 @@ export default function PsychProfile() {
     });
   }, [reset]);
 
+  // Профильді жаңартатын функция
   async function onSubmit(data) {
     try {
       const updated = await api.patch('/psychologist/profile', {
@@ -145,6 +156,7 @@ export default function PsychProfile() {
         experience_years: data.experience_years ? Number(data.experience_years) : null,
         bio: data.bio || null,
       });
+      // Контекстегі пайдаланушы атын да жаңарту
       if (setUser) setUser((u) => ({ ...u, name: updated.name }));
       toast.success(t('psychologist.profile.success'));
       reset(data);
@@ -153,15 +165,18 @@ export default function PsychProfile() {
     }
   }
 
+  // Аватар үшін аты-жөн бастапқы әріптерін алу
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (
     <div className="fade-in space-y-6 max-w-[560px]">
+      {/* Бет тақырыбы */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('psychologist.profile.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('psychologist.profile.subtitle')}</p>
       </div>
 
+      {/* Аватар және пайдаланушы ақпараты */}
       <div className="flex items-center gap-4">
         <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center text-xl font-bold text-zinc-300">
           {initials}
@@ -174,6 +189,7 @@ export default function PsychProfile() {
 
       <Separator className="bg-zinc-800" />
 
+      {/* Профиль редакциялау формасы */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-3">
@@ -183,12 +199,14 @@ export default function PsychProfile() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Аты-жөні өрісі */}
             <div className="space-y-1.5">
               <Label htmlFor="name">{t('psychologist.profile.name')} <span className="text-zinc-600">*</span></Label>
               <Input id="name" placeholder={t('psychologist.profile.name')} {...register('name')} />
               {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
             </div>
 
+            {/* Мамандану, тілдер және тәжірибе өрістері */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="specialization">{t('psychologist.profile.specialization')}</Label>
@@ -204,11 +222,13 @@ export default function PsychProfile() {
               </div>
             </div>
 
+            {/* Өзі туралы мәліметтер өрісі */}
             <div className="space-y-1.5">
               <Label htmlFor="bio">{t('psychologist.profile.bio')}</Label>
               <Textarea id="bio" placeholder={t('psychologist.profile.bioPlaceholder')} {...register('bio')} />
             </div>
 
+            {/* Тек өзгеріс болса сақтау батырмасы белсенді */}
             <Button type="submit" disabled={isSubmitting || !isDirty} className="w-full">
               {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />{t('psychologist.profile.saving')}</> : t('psychologist.profile.saveBtn')}
             </Button>
@@ -216,6 +236,7 @@ export default function PsychProfile() {
         </Card>
       </form>
 
+      {/* Құпия сөз өзгерту бөлімі */}
       <PasswordSection />
     </div>
   );

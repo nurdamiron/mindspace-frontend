@@ -3,18 +3,22 @@ import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
+// Берілген жыл мен айдағы күндер санын қайтарады
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }
 
+// Айдың бірінші күні дүйсенбіден бастап нешінші күн екенін анықтайды
 function getFirstDayOfMonth(year, month) {
   const d = new Date(year, month, 1).getDay();
-  return (d + 6) % 7; // Monday-first
+  return (d + 6) % 7;
 }
 
 export function DatePicker({ value, onChange, minDate, placeholder }) {
   const { i18n, t } = useTranslation();
   const [open, setOpen] = useState(false);
+
+  // Бастапқы көріністі мән немесе бүгінгі күн негізінде орнату
   const [view, setView] = useState(() => {
     if (value) {
       const d = new Date(value + 'T00:00:00');
@@ -25,10 +29,12 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
   });
   const ref = useRef(null);
 
+  // Ең аз рұқсат берілген күнді анықтау
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const min = minDate ? new Date(minDate + 'T00:00:00') : today;
 
+  // Сыртқа басқанда күнтізбені жабу
   useEffect(() => {
     function handlePointer(e) {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -37,6 +43,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     return () => document.removeEventListener('pointerdown', handlePointer);
   }, []);
 
+  // Таңдалған мәнді локальді форматта көрсету
   const displayValue = value
     ? new Date(value + 'T00:00:00').toLocaleDateString(i18n.language, {
         day: 'numeric', month: 'long', year: 'numeric',
@@ -46,16 +53,18 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
   const daysInMonth = getDaysInMonth(view.year, view.month);
   const firstDay = getFirstDayOfMonth(view.year, view.month);
 
+  // Ай атауын локальді форматта алу
   const monthLabel = new Date(view.year, view.month, 1).toLocaleDateString(i18n.language, {
     month: 'long', year: 'numeric',
   });
 
-  // Mon-Sun weekday labels
+  // Дүйсенбіден басталатын апта күндерінің қысқартылған атаулары
   const weekdays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(2024, 0, i + 1); // Jan 1 2024 = Monday
+    const d = new Date(2024, 0, i + 1);
     return d.toLocaleDateString(i18n.language, { weekday: 'short' }).slice(0, 2);
   });
 
+  // Алдыңғы айға өту
   function prevMonth() {
     setView((v) => {
       const d = new Date(v.year, v.month - 1, 1);
@@ -63,6 +72,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     });
   }
 
+  // Келесі айға өту
   function nextMonth() {
     setView((v) => {
       const d = new Date(v.year, v.month + 1, 1);
@@ -70,18 +80,21 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     });
   }
 
+  // Күнді таңдап, YYYY-MM-DD форматында onChange-ке жіберу
   function selectDay(day) {
     const pad = (n) => String(n).padStart(2, '0');
     onChange(`${view.year}-${pad(view.month + 1)}-${pad(day)}`);
     setOpen(false);
   }
 
+  // Күн минималды шектен кіші болса өшіріледі
   function isDisabled(day) {
     const d = new Date(view.year, view.month, day);
     d.setHours(0, 0, 0, 0);
     return d < min;
   }
 
+  // Күн таңдалған мәнмен сәйкес келетінін тексеру
   function isSelected(day) {
     if (!value) return false;
     const sel = new Date(value + 'T00:00:00');
@@ -92,6 +105,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     );
   }
 
+  // Бүгінгі күнді анықтау
   function isToday(day) {
     const now = new Date();
     return (
@@ -101,12 +115,14 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
     );
   }
 
+  // Күнтізбе торының ұяшықтарын құру (бос және нақты күндер)
   const cells = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
     <div className="relative" ref={ref}>
+      {/* Күнтізбені ашатын негізгі түйме */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -123,9 +139,10 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
         <span className="flex-1 text-left truncate">{displayValue || placeholder || t('datePicker.select')}</span>
       </button>
 
+      {/* Ашылмалы күнтізбе панелі */}
       {open && (
         <div className="absolute left-0 top-11 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl p-4">
-          {/* Month nav */}
+          {/* Ай навигациясы */}
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
@@ -144,7 +161,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
             </button>
           </div>
 
-          {/* Weekdays */}
+          {/* Апта күндерінің тақырыбы */}
           <div className="grid grid-cols-7 mb-2">
             {weekdays.map((w, i) => (
               <div key={i} className="text-center text-[10px] font-medium text-zinc-600 uppercase py-1">
@@ -153,7 +170,7 @@ export function DatePicker({ value, onChange, minDate, placeholder }) {
             ))}
           </div>
 
-          {/* Days */}
+          {/* Күндер торы */}
           <div className="grid grid-cols-7 gap-0.5">
             {cells.map((day, i) => (
               <div key={i} className="aspect-square">

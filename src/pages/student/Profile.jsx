@@ -14,8 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-
+// Құпия сөз өрісі — көру/жасыру мүмкіндігімен
 function PasswordField({ id, label, registration, error }) {
+  // Құпия сөздің көрінуін басқару күйі
   const [show, setShow] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -27,6 +28,7 @@ function PasswordField({ id, label, registration, error }) {
           className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 pr-10"
           {...registration}
         />
+        {/* Көру/жасыру батырмасы */}
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
@@ -41,8 +43,11 @@ function PasswordField({ id, label, registration, error }) {
   );
 }
 
+// Құпия сөзді өзгерту бөлімі
 function PasswordSection() {
   const { t } = useTranslation();
+
+  // Zod валидация схемасы — жаңа және растау сөздері сәйкес болуы керек
   const pwSchema = useMemo(() => z.object({
     current_password: z.string().min(1, t('common.errors.required')),
     new_password: z.string().min(6, t('common.errors.minPassword')),
@@ -51,11 +56,14 @@ function PasswordSection() {
     message: t('common.errors.passwordMismatch'),
     path: ['confirm_password'],
   }), [t]);
+
+  // Форма күйін және валидациясын инициализациялау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(pwSchema),
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
+  // Құпия сөзді серверге жіберу
   async function onSubmit(data) {
     try {
       await api.patch('/auth/password', {
@@ -79,12 +87,14 @@ function PasswordSection() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Ағымдағы құпия сөз өрісі */}
           <PasswordField
             id="current_password"
             label={t('student.profile.currentPassword')}
             registration={register('current_password')}
             error={errors.current_password}
           />
+          {/* Жаңа және растау құпия сөз өрістері */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <PasswordField
               id="new_password"
@@ -108,10 +118,12 @@ function PasswordSection() {
   );
 }
 
+// Студент профилі беті
 export default function Profile() {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
 
+  // Профиль деректерін валидациялау схемасы
   const schema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     faculty: z.string().optional(),
@@ -120,13 +132,16 @@ export default function Profile() {
     age: z.coerce.number().min(16).max(99).optional().or(z.literal('')),
   }), [t]);
 
+  // Профиль формасын инициализациялау
   const { register, handleSubmit, setValue, watch, reset, formState: { errors, isSubmitting, isDirty } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { name: '', faculty: '', course: '', gender: '', age: '' },
   });
 
+  // Жыныс өрісін бақылау
   const genderValue = watch('gender');
 
+  // Компонент жүктелгенде профиль деректерін API-дан алу
   useEffect(() => {
     api.get('/student/profile').then((data) => {
       reset({
@@ -139,6 +154,7 @@ export default function Profile() {
     });
   }, [reset]);
 
+  // Профиль деректерін серверге сақтау
   async function onSubmit(data) {
     try {
       const updated = await api.patch('/student/profile', {
@@ -148,6 +164,7 @@ export default function Profile() {
         gender: data.gender || null,
         age: data.age ? Number(data.age) : null,
       });
+      // Сәтті жаңартылса контекстегі пайдаланушы атын өзгерту
       if (setUser) setUser((u) => ({ ...u, name: updated.name }));
       toast.success(t('student.profile.success'));
       reset(data);
@@ -156,16 +173,18 @@ export default function Profile() {
     }
   }
 
+  // Пайдаланушы атының бас әріптерінен аватар мәтіні
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (
     <div className="fade-in space-y-6 max-w-[560px]">
+      {/* Бет тақырыбы */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('student.profile.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('student.profile.subtitle')}</p>
       </div>
 
-      {/* Avatar row */}
+      {/* Аватар және пайдаланушы ақпараты */}
       <div className="flex items-center gap-4">
         <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center text-xl font-bold text-zinc-300">
           {initials}
@@ -178,6 +197,7 @@ export default function Profile() {
 
       <Separator className="bg-zinc-800" />
 
+      {/* Профиль деректерін өңдеу формасы */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-3">
@@ -187,12 +207,14 @@ export default function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Аты-жөні өрісі */}
             <div className="space-y-1.5">
               <Label htmlFor="name">{t('student.profile.name')} <span className="text-zinc-600">*</span></Label>
               <Input id="name" placeholder={t('student.profile.name')} {...register('name')} />
               {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
             </div>
 
+            {/* Факультет, курс, жыныс, жас өрістері */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="faculty">{t('student.profile.faculty')}</Label>
@@ -204,6 +226,7 @@ export default function Profile() {
                 <Input id="course" type="number" min={1} max={6} placeholder="1–6" {...register('course')} />
               </div>
 
+              {/* Жыныс таңдау тізімі */}
               <div className="space-y-1.5">
                 <Label>{t('student.profile.gender')}</Label>
                 <Select
@@ -227,6 +250,7 @@ export default function Profile() {
               </div>
             </div>
 
+            {/* Сақтау батырмасы — деректер өзгермесе өшірулі */}
             <Button
               type="submit"
               disabled={isSubmitting || !isDirty}
@@ -245,6 +269,7 @@ export default function Profile() {
         </Card>
       </form>
 
+      {/* Құпия сөзді өзгерту бөлімі */}
       <PasswordSection />
     </div>
   );
