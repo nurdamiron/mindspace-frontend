@@ -17,43 +17,47 @@ import {
   X,
   UserCircle,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-const navConfig = {
-  student: [
-    { to: '/student/dashboard', icon: BarChart2, label: 'Мой статус' },
-    { to: '/student/checkin', icon: CheckSquare, label: 'Чек-ин' },
-    { to: '/student/screening', icon: Brain, label: 'Скрининг' },
-    { to: '/student/chat', icon: MessageSquare, label: 'ИИ-помощник' },
-    { to: '/student/psychologists', icon: Users, label: 'Психологи' },
-    { to: '/student/appointments', icon: CalendarDays, label: 'Мои записи' },
-    { to: '/student/profile', icon: UserCircle, label: 'Мой профиль' },
-  ],
-  psychologist: [
-    { to: '/psychologist/schedule', icon: ClipboardList, label: 'Расписание' },
-    { to: '/psychologist/stats', icon: TrendingUp, label: 'Статистика' },
-    { to: '/psychologist/profile', icon: UserCircle, label: 'Мой профиль' },
-  ],
-  admin: [
-    { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Дашборд' },
-    { to: '/admin/students', icon: Users, label: 'Студенты' },
-    { to: '/admin/psychologists', icon: UserCircle, label: 'Психологи' },
-    { to: '/admin/slots', icon: Settings, label: 'Расписание' },
-  ],
-};
-
-const roleLabels = {
-  student: 'Студент',
-  psychologist: 'Психолог',
-  admin: 'Администратор',
-};
-
 export default function Layout() {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navConfig = {
+    student: [
+      { to: '/student/dashboard', icon: BarChart2, label: t('nav.student.dashboard') },
+      { to: '/student/checkin', icon: CheckSquare, label: t('nav.student.checkIn') },
+      { to: '/student/screening', icon: Brain, label: t('nav.student.screening') },
+      { to: '/student/chat', icon: MessageSquare, label: t('nav.student.aiChat') },
+      { to: '/student/psychologists', icon: Users, label: t('nav.student.psychologists') },
+      { to: '/student/appointments', icon: CalendarDays, label: t('nav.student.appointments') },
+      { to: '/student/profile', icon: UserCircle, label: t('nav.student.profile') },
+    ],
+    psychologist: [
+      { to: '/psychologist/schedule', icon: ClipboardList, label: t('nav.psychologist.schedule') },
+      { to: '/psychologist/students', icon: Users, label: t('nav.psychologist.students') },
+      { to: '/psychologist/slots', icon: CalendarDays, label: t('nav.psychologist.slots') },
+      { to: '/psychologist/stats', icon: TrendingUp, label: t('nav.psychologist.stats') },
+      { to: '/psychologist/profile', icon: UserCircle, label: t('nav.psychologist.profile') },
+    ],
+    admin: [
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: t('nav.admin.dashboard') },
+      { to: '/admin/students', icon: Users, label: t('nav.admin.students') },
+      { to: '/admin/psychologists', icon: UserCircle, label: t('nav.admin.psychologists') },
+      { to: '/admin/slots', icon: Settings, label: t('nav.admin.slots') },
+    ],
+  };
+
+  const roleLabels = {
+    student: t('nav.roles.student'),
+    psychologist: t('nav.roles.psychologist'),
+    admin: t('nav.roles.admin'),
+  };
 
   function handleLogout() {
     logout();
@@ -78,14 +82,16 @@ export default function Layout() {
         </div>
         <div>
           <div className="text-sm font-semibold text-zinc-50 leading-none">MindSpace</div>
-          <div className="text-[10px] text-zinc-500 mt-0.5">Поддержка студентов</div>
+          <div className="text-[10px] text-zinc-500 mt-0.5">
+            {i18n.language === 'kk' ? 'Студенттерге қолдау' : 'Поддержка студентов'}
+          </div>
         </div>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-          Навигация
+          {t('common.navigation')}
         </p>
         <div className="space-y-0.5">
           {navItems.map((item) => {
@@ -121,6 +127,33 @@ export default function Layout() {
         </div>
       </nav>
 
+      {/* Language switcher */}
+      <div className="px-4 py-2.5 border-t border-zinc-800 shrink-0 flex items-center gap-1">
+        <button
+          onClick={() => i18n.changeLanguage('ru')}
+          className={cn(
+            'flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors',
+            i18n.language === 'ru'
+              ? 'bg-zinc-700 text-zinc-100'
+              : 'text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800/50'
+          )}
+        >
+          {t('lang.ru')}
+        </button>
+        <div className="w-px h-4 bg-zinc-700" />
+        <button
+          onClick={() => i18n.changeLanguage('kk')}
+          className={cn(
+            'flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors',
+            i18n.language === 'kk'
+              ? 'bg-zinc-700 text-zinc-100'
+              : 'text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800/50'
+          )}
+        >
+          {t('lang.kk')}
+        </button>
+      </div>
+
       {/* User footer */}
       <div className="px-3 py-3 border-t border-zinc-800 shrink-0">
         <div className="flex items-center gap-3 px-2 py-2 rounded-md bg-zinc-800/50">
@@ -129,14 +162,14 @@ export default function Layout() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-xs font-medium text-zinc-200 truncate">
-              {user?.name || 'Пользователь'}
+              {user?.name || t('common.user')}
             </div>
             <div className="text-[10px] text-zinc-500">{roleLabels[user?.role]}</div>
           </div>
           <button
             onClick={handleLogout}
             className="p-1 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700 transition-colors shrink-0"
-            title="Выйти"
+            title={t('nav.logout')}
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
