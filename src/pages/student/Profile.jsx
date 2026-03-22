@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Loader2, User, Lock } from 'lucide-react';
+import { Loader2, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -13,24 +14,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const pwSchema = z.object({
-  current_password: z.string().min(1, 'Введите текущий пароль'),
-  new_password: z.string().min(6, 'Минимум 6 символов'),
-  confirm_password: z.string(),
-}).refine((d) => d.new_password === d.confirm_password, {
-  message: 'Пароли не совпадают',
-  path: ['confirm_password'],
-});
 
-const schema = z.object({
-  name: z.string().min(2, 'Имя обязательно'),
-  faculty: z.string().optional(),
-  course: z.coerce.number().min(1).max(6).optional().or(z.literal('')),
-  gender: z.string().optional(),
-  age: z.coerce.number().min(16).max(99).optional().or(z.literal('')),
-});
+function PasswordField({ id, label, registration, error }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? 'text' : 'password'}
+          className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 pr-10"
+          {...registration}
+        />
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+          tabIndex={-1}
+        >
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      </div>
+      {error && <p className="text-xs text-red-400">{error.message}</p>}
+    </div>
+  );
+}
 
 function PasswordSection() {
+  const { t } = useTranslation();
+  const pwSchema = useMemo(() => z.object({
+    current_password: z.string().min(1, t('common.errors.required')),
+    new_password: z.string().min(6, t('common.errors.minPassword')),
+    confirm_password: z.string(),
+  }).refine((d) => d.new_password === d.confirm_password, {
+    message: t('common.errors.passwordMismatch'),
+    path: ['confirm_password'],
+  }), [t]);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(pwSchema),
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
@@ -42,7 +62,7 @@ function PasswordSection() {
         current_password: data.current_password,
         new_password: data.new_password,
       });
-      toast.success('Пароль изменён');
+      toast.success(t('student.profile.passwordSuccess'));
       reset();
     } catch (err) {
       toast.error(err.message);
@@ -55,31 +75,32 @@ function PasswordSection() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
             <Lock className="w-3.5 h-3.5 text-zinc-400" />
-            Смена пароля
+            {t('student.profile.passwordSection')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="current_password">Текущий пароль</Label>
-            <Input id="current_password" type="password" {...register('current_password')} />
-            {errors.current_password && <p className="text-xs text-red-400">{errors.current_password.message}</p>}
-          </div>
-
+          <PasswordField
+            id="current_password"
+            label={t('student.profile.currentPassword')}
+            registration={register('current_password')}
+            error={errors.current_password}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="new_password">Новый пароль</Label>
-              <Input id="new_password" type="password" placeholder="Мин. 6 символов" {...register('new_password')} />
-              {errors.new_password && <p className="text-xs text-red-400">{errors.new_password.message}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="confirm_password">Подтвердите пароль</Label>
-              <Input id="confirm_password" type="password" {...register('confirm_password')} />
-              {errors.confirm_password && <p className="text-xs text-red-400">{errors.confirm_password.message}</p>}
-            </div>
+            <PasswordField
+              id="new_password"
+              label={t('student.profile.newPassword')}
+              registration={register('new_password')}
+              error={errors.new_password}
+            />
+            <PasswordField
+              id="confirm_password"
+              label={t('student.profile.confirmPassword')}
+              registration={register('confirm_password')}
+              error={errors.confirm_password}
+            />
           </div>
-
           <Button type="submit" variant="secondary" disabled={isSubmitting}>
-            {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />Меняем...</> : 'Изменить пароль'}
+            {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />{t('student.profile.saving')}</> : t('student.profile.changePassword')}
           </Button>
         </CardContent>
       </Card>
@@ -88,7 +109,16 @@ function PasswordSection() {
 }
 
 export default function Profile() {
+  const { t } = useTranslation();
   const { user, setUser } = useAuth();
+
+  const schema = useMemo(() => z.object({
+    name: z.string().min(2, t('common.errors.required')),
+    faculty: z.string().optional(),
+    course: z.coerce.number().min(1).max(6).optional().or(z.literal('')),
+    gender: z.string().optional(),
+    age: z.coerce.number().min(16).max(99).optional().or(z.literal('')),
+  }), [t]);
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors, isSubmitting, isDirty } } = useForm({
     resolver: zodResolver(schema),
@@ -119,7 +149,7 @@ export default function Profile() {
         age: data.age ? Number(data.age) : null,
       });
       if (setUser) setUser((u) => ({ ...u, name: updated.name }));
-      toast.success('Профиль обновлён');
+      toast.success(t('student.profile.success'));
       reset(data);
     } catch (err) {
       toast.error(err.message);
@@ -131,8 +161,8 @@ export default function Profile() {
   return (
     <div className="fade-in space-y-6 max-w-[560px]">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">Мой профиль</h1>
-        <p className="text-sm text-zinc-500 mt-1">Личная информация и настройки</p>
+        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('student.profile.title')}</h1>
+        <p className="text-sm text-zinc-500 mt-1">{t('student.profile.subtitle')}</p>
       </div>
 
       {/* Avatar row */}
@@ -153,46 +183,46 @@ export default function Profile() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
               <User className="w-3.5 h-3.5 text-zinc-400" />
-              Основная информация
+              {t('student.profile.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Имя <span className="text-zinc-600">*</span></Label>
-              <Input id="name" placeholder="Ваше полное имя" {...register('name')} />
+              <Label htmlFor="name">{t('student.profile.name')} <span className="text-zinc-600">*</span></Label>
+              <Input id="name" placeholder={t('student.profile.name')} {...register('name')} />
               {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="faculty">Факультет</Label>
-                <Input id="faculty" placeholder="Например: ИВТ" {...register('faculty')} />
+                <Label htmlFor="faculty">{t('student.profile.faculty')}</Label>
+                <Input id="faculty" {...register('faculty')} />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="course">Курс</Label>
+                <Label htmlFor="course">{t('student.profile.course')}</Label>
                 <Input id="course" type="number" min={1} max={6} placeholder="1–6" {...register('course')} />
               </div>
 
               <div className="space-y-1.5">
-                <Label>Пол</Label>
+                <Label>{t('student.profile.gender')}</Label>
                 <Select
-                  value={genderValue || ''}
-                  onValueChange={(v) => setValue('gender', v, { shouldDirty: true })}
+                  value={genderValue || 'none'}
+                  onValueChange={(v) => setValue('gender', v === 'none' ? '' : v, { shouldDirty: true })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Не указан" />
+                    <SelectValue placeholder={t('student.profile.selectGender')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Не указан</SelectItem>
-                    <SelectItem value="male">Мужской</SelectItem>
-                    <SelectItem value="female">Женский</SelectItem>
+                    <SelectItem value="none">{t('student.profile.selectGender')}</SelectItem>
+                    <SelectItem value="male">{t('student.profile.genderMale')}</SelectItem>
+                    <SelectItem value="female">{t('student.profile.genderFemale')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="age">Возраст</Label>
+                <Label htmlFor="age">{t('student.profile.age')}</Label>
                 <Input id="age" type="number" min={16} max={99} placeholder="18" {...register('age')} />
               </div>
             </div>
@@ -205,10 +235,10 @@ export default function Profile() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Сохраняем...
+                  {t('student.profile.saving')}
                 </>
               ) : (
-                'Сохранить изменения'
+                t('student.profile.saveBtn')
               )}
             </Button>
           </CardContent>
