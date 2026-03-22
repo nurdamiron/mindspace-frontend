@@ -133,7 +133,7 @@ export default function AdminDashboard() {
       {/* Тақырып және CSV жүктеу батырмасы */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('admin.dashboard.title')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-zinc-50 tracking-tight">{t('admin.dashboard.title')}</h1>
           <p className="text-sm text-zinc-500 mt-1">{t('admin.dashboard.subtitle')}</p>
         </div>
         <Button
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPI карточкалары: жалпы, белсенді студенттер, сессиялар, стресс */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Users, label: t('admin.dashboard.kpi.totalStudents'), value: totalStudents || 0 },
           { icon: Activity, label: t('admin.dashboard.kpi.activeStudents'), value: activeStudents || 0 },
@@ -158,14 +158,14 @@ export default function AdminDashboard() {
           const Icon = s.icon;
           return (
             <Card key={s.label} className="border-zinc-800 bg-zinc-900">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-zinc-500 uppercase tracking-wide font-medium">{s.label}</span>
-                  <div className="w-7 h-7 rounded-md bg-zinc-800 flex items-center justify-center">
-                    <Icon className="w-3.5 h-3.5 text-zinc-400" />
+              <CardContent className="p-3 sm:p-5">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <span className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-wide font-medium leading-tight">{s.label}</span>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-zinc-800 flex items-center justify-center shrink-0 ml-1">
+                    <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-zinc-50">{s.value}</div>
+                <div className="text-xl sm:text-2xl font-bold text-zinc-50">{s.value}</div>
               </CardContent>
             </Card>
           );
@@ -178,13 +178,13 @@ export default function AdminDashboard() {
           <CardTitle className="text-sm font-medium text-zinc-300">{t('admin.dashboard.weeklyMetrics')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
             {METRIC_KEYS.map((m) => {
               const val = parseFloat(metrics[m.key] || 0);
               return (
                 <div key={m.key} className="text-center">
-                  <div className="text-2xl font-bold text-zinc-100 mb-1">{val || '—'}</div>
-                  <div className="text-xs text-zinc-500 uppercase tracking-wide mb-2">{m.label}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-zinc-100 mb-1">{val || '—'}</div>
+                  <div className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-wide mb-2">{m.label}</div>
                   {/* 5 балдық шкала бойынша толтыру ені */}
                   <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
                     <div
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
             <CardTitle className="text-sm font-medium text-zinc-300">{t('admin.dashboard.trendChart')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="chart-container h-52">
+            <div className="chart-container h-44 sm:h-52">
               {(weeklyTrend || []).length > 0 ? (
                 <Line data={trendChart} options={CHART_OPTS} />
               ) : (
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
             <CardTitle className="text-sm font-medium text-zinc-300">{t('admin.dashboard.facultyChart')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="chart-container h-52">
+            <div className="chart-container h-44 sm:h-52">
               {(facultyStats || []).length > 0 ? (
                 <Bar data={facultyChart} options={CHART_OPTS} />
               ) : (
@@ -242,11 +242,11 @@ export default function AdminDashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('admin.dashboard.tableHeaders.faculty')}</TableHead>
-                  <TableHead>{t('admin.dashboard.tableHeaders.avgStress')}</TableHead>
-                  <TableHead>{t('admin.dashboard.tableHeaders.avgMood')}</TableHead>
-                  <TableHead>{t('admin.dashboard.tableHeaders.activeStudents')}</TableHead>
-                  <TableHead>{t('admin.dashboard.tableHeaders.risk')}</TableHead>
+                  <TableHead className="text-xs sm:text-sm">{t('admin.dashboard.tableHeaders.faculty')}</TableHead>
+                  <TableHead className="text-xs sm:text-sm">{t('admin.dashboard.tableHeaders.avgStress')}</TableHead>
+                  <TableHead className="hidden sm:table-cell text-xs sm:text-sm">{t('admin.dashboard.tableHeaders.avgMood')}</TableHead>
+                  <TableHead className="hidden sm:table-cell text-xs sm:text-sm">{t('admin.dashboard.tableHeaders.activeStudents')}</TableHead>
+                  <TableHead className="text-xs sm:text-sm">{t('admin.dashboard.tableHeaders.risk')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -257,15 +257,15 @@ export default function AdminDashboard() {
                   const riskLabel = stress >= 3.5 ? t('risk.high') : stress >= 2.5 ? t('risk.moderate') : t('risk.low');
                   return (
                     <TableRow key={r.faculty}>
-                      <TableCell className="font-medium">{r.faculty}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium text-xs sm:text-sm">{r.faculty}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         <span className={stress >= 3.5 ? 'text-red-400 font-semibold' : 'text-zinc-300'}>
                           {r.avg_stress}
                         </span>
                       </TableCell>
-                      <TableCell>{r.avg_mood}</TableCell>
-                      <TableCell>{r.active_students}</TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{r.avg_mood}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{r.active_students}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         <Badge variant={riskVariant}>{riskLabel}</Badge>
                       </TableCell>
                     </TableRow>
