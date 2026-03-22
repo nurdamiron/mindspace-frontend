@@ -83,7 +83,7 @@ export default function Layout() {
         <div>
           <div className="text-sm font-semibold text-zinc-50 leading-none">MindSpace</div>
           <div className="text-[10px] text-zinc-500 mt-0.5">
-            {i18n.language === 'kk' ? 'Студенттерге қолдау' : 'Поддержка студентов'}
+            {t('layout.tagline')}
           </div>
         </div>
       </div>

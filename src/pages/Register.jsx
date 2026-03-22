@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { Mail, Lock, BrainCircuit, User, ArrowRight, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,21 +13,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 
-const schema = z.object({
-  name: z.string().min(2, 'Имя обязательно'),
-  email: z.string().email('Некорректный email'),
-  password: z.string().min(6, 'Минимум 6 символов'),
-  confirm: z.string(),
-  faculty: z.string().optional(),
-  course: z.coerce.number().min(1).max(6).optional().or(z.literal('')),
-}).refine((d) => d.password === d.confirm, {
-  message: 'Пароли не совпадают',
-  path: ['confirm'],
-});
-
 export default function Register() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const schema = z.object({
+    name: z.string().min(2, t('auth.register.errors.name')),
+    email: z.string().email(t('auth.register.errors.email')),
+    password: z.string().min(6, t('auth.register.errors.password')),
+    confirm: z.string(),
+    faculty: z.string().optional(),
+    course: z.coerce.number().min(1).max(6).optional().or(z.literal('')),
+  }).refine((d) => d.password === d.confirm, {
+    message: t('auth.register.errors.password'),
+    path: ['confirm'],
+  });
 
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
@@ -49,15 +51,17 @@ export default function Register() {
         }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Ошибка регистрации');
+      if (!res.ok) throw new Error(json.error || t('auth.register.errors.failed'));
 
       localStorage.setItem('token', json.token);
-      toast.success('Аккаунт создан');
+      toast.success(t('auth.register.title'));
       navigate('/student/dashboard');
     } catch (err) {
       toast.error(err.message);
     }
   }
+
+  const courseOptions = t('auth.register.courseOptions', { returnObjects: true });
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-10">
@@ -68,33 +72,32 @@ export default function Register() {
           </div>
           <div>
             <div className="font-semibold text-zinc-50 text-base leading-none">MindSpace</div>
-            <div className="text-xs text-zinc-500 mt-0.5">Психологическая поддержка</div>
+            <div className="text-xs text-zinc-500 mt-0.5">{t('landing.hero.badge')}</div>
           </div>
         </div>
 
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Регистрация</CardTitle>
-            <CardDescription>Создайте аккаунт студента</CardDescription>
+            <CardTitle className="text-lg">{t('auth.register.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Name */}
               <div className="space-y-1.5">
-                <Label htmlFor="reg-name">Полное имя <span className="text-zinc-600">*</span></Label>
+                <Label htmlFor="reg-name">{t('auth.register.name')} <span className="text-zinc-600">*</span></Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <Input id="reg-name" placeholder="Имя Фамилия" className="pl-9" {...register('name')} />
+                  <Input id="reg-name" placeholder={t('auth.register.namePlaceholder')} className="pl-9" {...register('name')} />
                 </div>
                 {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
               </div>
 
               {/* Email */}
               <div className="space-y-1.5">
-                <Label htmlFor="reg-email">Email <span className="text-zinc-600">*</span></Label>
+                <Label htmlFor="reg-email">{t('auth.register.email')} <span className="text-zinc-600">*</span></Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <Input id="reg-email" type="email" placeholder="your@university.kz" className="pl-9" {...register('email')} />
+                  <Input id="reg-email" type="email" placeholder={t('auth.register.emailPlaceholder')} className="pl-9" {...register('email')} />
                 </div>
                 {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
               </div>
@@ -102,15 +105,15 @@ export default function Register() {
               {/* Password */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="reg-password">Пароль <span className="text-zinc-600">*</span></Label>
+                  <Label htmlFor="reg-password">{t('auth.register.password')} <span className="text-zinc-600">*</span></Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                    <Input id="reg-password" type="password" placeholder="••••••" className="pl-9" {...register('password')} />
+                    <Input id="reg-password" type="password" placeholder={t('auth.register.passwordPlaceholder')} className="pl-9" {...register('password')} />
                   </div>
                   {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="reg-confirm">Повторите</Label>
+                  <Label htmlFor="reg-confirm">{t('auth.register.password')}</Label>
                   <Input id="reg-confirm" type="password" placeholder="••••••" {...register('confirm')} />
                   {errors.confirm && <p className="text-xs text-red-400">{errors.confirm.message}</p>}
                 </div>
@@ -121,18 +124,20 @@ export default function Register() {
               {/* Faculty + Course */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="reg-faculty">Факультет</Label>
-                  <Input id="reg-faculty" placeholder="ИВТ, ЭЭФ..." {...register('faculty')} />
+                  <Label htmlFor="reg-faculty">{t('auth.register.faculty')}</Label>
+                  <Input id="reg-faculty" placeholder={t('auth.register.facultyPlaceholder')} {...register('faculty')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Курс</Label>
+                  <Label>{t('auth.register.course')}</Label>
                   <Select onValueChange={(v) => setValue('course', v)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="1–6" />
+                      <SelectValue placeholder={t('auth.register.coursePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <SelectItem key={n} value={String(n)}>{n} курс</SelectItem>
+                        <SelectItem key={n} value={String(n)}>
+                          {Array.isArray(courseOptions) ? courseOptions[n - 1] : t('admin.studentDetail.course', { n })}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -141,22 +146,22 @@ export default function Register() {
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" />Создаём аккаунт...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" />{t('auth.register.loading')}</>
                 ) : (
-                  <>Создать аккаунт<ArrowRight className="w-4 h-4" /></>
+                  <>{t('auth.register.submit')}<ArrowRight className="w-4 h-4" /></>
                 )}
               </Button>
             </form>
 
             <div className="mt-5 text-center space-y-2">
               <p className="text-xs text-zinc-500">
-                Уже есть аккаунт?{' '}
+                {t('auth.register.hasAccount')}{' '}
                 <Link to="/login" className="text-zinc-300 hover:text-zinc-100 transition-colors">
-                  Войти
+                  {t('auth.register.login')}
                 </Link>
               </p>
               <Link to="/" className="block text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
-                На главную
+                {t('notFound.button')}
               </Link>
             </div>
           </CardContent>
