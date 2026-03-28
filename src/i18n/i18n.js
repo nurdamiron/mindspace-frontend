@@ -8,17 +8,19 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import ru from './locales/ru/translation.json';
 // kk — қазақ тіліндегі аударма файлы
 import kk from './locales/kk/translation.json';
+// en — ағылшын тіліндегі аударма файлы
+import en from './locales/en/translation.json';
 
 // i18n инициализациясы: тіл анықтау, React плагині және ресурстар тіркеу
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    // Орыс және қазақ тілдерінің аударма ресурстары
-    resources: { ru: { translation: ru }, kk: { translation: kk } },
+    // Орыс, қазақ және ағылшын тілдерінің аударма ресурстары
+    resources: { ru: { translation: ru }, kk: { translation: kk }, en: { translation: en } },
     // Аудармасы жоқ жағдайда орыс тіліне қайту
     fallbackLng: 'ru',
-    supportedLngs: ['ru', 'kk'],
+    supportedLngs: ['ru', 'kk', 'en'],
     interpolation: { escapeValue: false },
     // Тілді localStorage-тен немесе браузер параметрінен анықтау
     detection: {
