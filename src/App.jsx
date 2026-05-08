@@ -1,66 +1,68 @@
-// BrowserRouter, Routes, Route, Navigate — маршруттау компоненттері
+// BrowserRouter, Routes, Route, Navigate : маршруттау компоненттері
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-// Toaster — хабарлама тостерін көрсету компоненті
+// Toaster : хабарлама тостерін көрсету компоненті
 import { Toaster } from 'sonner';
-// AuthProvider, useAuth — аутентификация провайдері және хук
+// AuthProvider, useAuth : аутентификация провайдері және хук
 import { AuthProvider, useAuth } from './context/AuthContext';
-// Layout — барлық рөлдерге ортақ бүйірлік панель орналасуы
+// Layout : барлық рөлдерге ортақ бүйірлік панель орналасуы
 import Layout from './components/Layout';
-// Landing — басты бет компоненті
+// Landing : басты бет компоненті
 import Landing from './pages/Landing';
-// Login — кіру беті
+// Login : кіру беті
 import Login from './pages/Login';
-// Register — тіркелу беті
+// Register : тіркелу беті
 import Register from './pages/Register';
-// NotFound — 404 қате беті
+// NotFound : 404 қате беті
 import NotFound from './pages/NotFound';
 
-// StudentDashboard — студент бақылау тақтасы
+// StudentDashboard : студент бақылау тақтасы
 import StudentDashboard from './pages/student/Dashboard';
-// CheckIn — студенттің күнделікті чекин беті
+// CheckIn : студенттің күнделікті чекин беті
 import CheckIn from './pages/student/CheckIn';
-// Screening — психологиялық скрининг беті
+// Screening : психологиялық скрининг беті
 import Screening from './pages/student/Screening';
-// AIChat — AI чат беті
+// AIChat : AI чат беті
 import AIChat from './pages/student/AIChat';
-// Psychologists — психологтар тізімі және жазылу беті
+// Psychologists : психологтар тізімі және жазылу беті
 import Psychologists from './pages/student/Psychologists';
-// Appointments — студенттің кездесулер тізімі
+// Appointments : студенттің кездесулер тізімі
 import Appointments from './pages/student/Appointments';
-// Profile — студент профилі беті
+// Profile : студент профилі беті
 import Profile from './pages/student/Profile';
 
-// PsychSchedule — психологтің кесте беті
+// PsychSchedule : психологтің кесте беті
 import PsychSchedule from './pages/psychologist/Schedule';
-// StudentCard — психологтің студент картасы
+// StudentCard психологтің студент картасы
 import StudentCard from './pages/psychologist/StudentCard';
-// PsychStats — психолог статистикасы беті
+// PsychStats : психолог статистикасы беті
 import PsychStats from './pages/psychologist/Stats';
-// PsychProfile — психолог профилі беті
+// PsychProfile : психолог профилі беті
 import PsychProfile from './pages/psychologist/Profile';
-// PsychStudents — психологтің студенттер тізімі
+// PsychStudents : психологтің студенттер тізімі
 import PsychStudents from './pages/psychologist/Students';
-// PsychSlots — психологтің бос уақыт слоттары беті
+// PsychSlots : психологтің бос уақыт слоттары беті
 import PsychSlots from './pages/psychologist/Slots';
 
-// AdminDashboard — әкімші бақылау тақтасы
+// AdminDashboard : әкімші бақылау тақтасы
 import AdminDashboard from './pages/admin/Dashboard';
-// PsychologistManagement — психологтарды басқару беті
+// PsychologistManagement : психологтарды басқару беті
 import PsychologistManagement from './pages/admin/PsychologistManagement';
-// SlotManagement — слоттарды басқару беті
+// SlotManagement : слоттарды басқару беті
 import SlotManagement from './pages/admin/SlotManagement';
-// AdminStudents — әкімшінің студенттер тізімі
+// AdminStudents : әкімшінің студенттер тізімі
 import AdminStudents from './pages/admin/Students';
-// AdminStudentDetail — студенттің толық ақпарат беті
+// AdminStudentDetail : студенттің толық ақпарат беті
 import AdminStudentDetail from './pages/admin/StudentDetail';
+// AdminComplaints : шағымдарды басқару беті
+import AdminComplaints from './pages/admin/Complaints';
 
-// ProtectedRoute — рөл негізінде маршруттарды қорғайтын компонент
+// ProtectedRoute : рөл негізінде маршруттарды қорғайтын компонент
 function ProtectedRoute({ children, roles }) {
   const { user, loading } = useAuth();
   // Жүктелу кезінде спиннер көрсету
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950">
-      <div className="w-6 h-6 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-zinc-800 border-t-zinc-500 rounded-full animate-spin" />
     </div>
   );
   // Кірмеген пайдаланушыны логинге бағыттау
@@ -70,13 +72,13 @@ function ProtectedRoute({ children, roles }) {
   return children;
 }
 
-// RootRedirect — пайдаланушы рөліне қарай бастапқы бетке бағыттайды
+// RootRedirect : пайдаланушы рөліне қарай бастапқы бетке бағыттайды
 function RootRedirect() {
   const { user, loading } = useAuth();
   // Жүктелу кезінде спиннер
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950">
-      <div className="w-6 h-6 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-zinc-800 border-t-zinc-500 rounded-full animate-spin" />
     </div>
   );
   // Кірмеген пайдаланушыға Landing беті
@@ -88,29 +90,29 @@ function RootRedirect() {
   return <Navigate to="/login" replace />;
 }
 
-// App — қосымшаның тамырлық компоненті: маршруттар мен провайдерлер
+// App : қосымшаның тамырлық компоненті: маршруттар мен провайдерлер
 export default function App() {
   return (
     <AuthProvider>
-      {/* Toaster — жоғарғы оң жақта хабарлама тостерін орнату */}
+      {/* Toaster : жоғарғы оң жақта хабарлама тостерін орнату */}
       <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: '#18181b',
-            border: '1px solid #27272a',
-            color: '#fafafa',
+            background: '#f0f4f2',
+            border: '1px solid #c4d6ca',
+            color: '#1a2d22',
           },
         }}
       />
       <BrowserRouter>
         <Routes>
-          {/* Тамырлық бет — рөлге қарай бағыттайды */}
+          {/* Тамырлық бет : рөлге қарай бағыттайды */}
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Студент маршруттары — тек student рөлі үшін */}
+          {/* Студент маршруттары : тек student рөлі үшін */}
           <Route path="/student" element={
             <ProtectedRoute roles={['student']}><Layout /></ProtectedRoute>
           }>
@@ -124,7 +126,7 @@ export default function App() {
             <Route path="profile" element={<Profile />} />
           </Route>
 
-          {/* Психолог маршруттары — тек psychologist рөлі үшін */}
+          {/* Психолог маршруттары : тек psychologist рөлі үшін */}
           <Route path="/psychologist" element={
             <ProtectedRoute roles={['psychologist']}><Layout /></ProtectedRoute>
           }>
@@ -137,13 +139,14 @@ export default function App() {
             <Route path="slots" element={<PsychSlots />} />
           </Route>
 
-          {/* Әкімші маршруттары — тек admin рөлі үшін */}
+          {/* Әкімші маршруттары : тек admin рөлі үшін */}
           <Route path="/admin" element={
             <ProtectedRoute roles={['admin']}><Layout /></ProtectedRoute>
           }>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="psychologists" element={<PsychologistManagement />} />
+            <Route path="complaints" element={<AdminComplaints />} />
             <Route path="slots" element={<SlotManagement />} />
             <Route path="students" element={<AdminStudents />} />
             <Route path="students/:id" element={<AdminStudentDetail />} />

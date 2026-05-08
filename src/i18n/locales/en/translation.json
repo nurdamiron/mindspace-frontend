@@ -26,17 +26,17 @@
     "navigation": "Navigation",
     "redirecting": "Redirecting...",
     "errors": {
-      "required": "Field is required",
+      "required": "This field is required",
       "minPassword": "Minimum 6 characters",
       "invalidEmail": "Enter a valid email",
       "passwordMismatch": "Passwords do not match"
     }
   },
   "datePicker": {
-    "select": "Select date"
+    "select": "Select a date"
   },
   "layout": {
-    "tagline": "Student Support"
+    "tagline": "Student support"
   },
   "lang": {
     "ru": "RUS",
@@ -70,6 +70,7 @@
       "dashboard": "Dashboard",
       "students": "Students",
       "psychologists": "Psychologists",
+      "complaints": "Complaints",
       "slots": "Schedule"
     }
   },
@@ -111,41 +112,36 @@
     "features": {
       "title": "Everything you need for psychological well-being",
       "items": [
-        { "title": "Daily monitoring", "desc": "Track your mood, stress, sleep, and energy every day. See the dynamics of your condition." },
-        { "title": "Psychological screening", "desc": "Take a standardised test to assess your stress level and psychological state." },
-        { "title": "Psychologist catalogue", "desc": "Choose a specialist by specialisation, language, and experience. Book a convenient time." },
-        { "title": "AI assistant 24/7", "desc": "Get support at any time. The AI will listen, support you, and give basic advice." },
-        { "title": "Personal analytics", "desc": "AI analyses your data and provides personal insights for improving your well-being." },
-        { "title": "Confidentiality", "desc": "Your data is protected. Only you and your psychologist have access to your information." }
+        { "title": "Daily monitoring", "desc": "Track your mood, stress, sleep, and energy every day. See the dynamics of your well-being." },
+        { "title": "Psychological screening", "desc": "Take a standardized test to assess your stress level and psychological state." },
+        { "title": "Psychologist directory", "desc": "Choose a specialist by specialization, language, and experience. Book a convenient time." },
+        { "title": "AI assistant 24/7", "desc": "Get support at any time of day. The AI will listen, support you, and offer basic advice." },
+        { "title": "Personal analytics", "desc": "The AI analyzes your data and provides personal insights to improve your well-being." },
+        { "title": "Confidentiality", "desc": "Your data is protected. Only you and your psychologist have access to the information." }
       ]
     },
     "steps": {
       "title": "How it works",
       "items": [
         { "title": "Register", "desc": "Create an account in 2 minutes using your university email." },
-        { "title": "Track yourself", "desc": "Complete daily check-ins and take psychological screenings." },
+        { "title": "Track yourself", "desc": "Fill in daily check-ins and complete psychological screenings." },
         { "title": "Get support", "desc": "Chat with the AI assistant or book an appointment with a live psychologist." }
       ]
     },
     "roles": {
       "title": "For all participants in the educational process",
       "items": [
-        { "role": "For students", "desc": "State monitoring, AI support, booking a psychologist" },
+        { "role": "For students", "desc": "State monitoring, AI support, psychologist booking" },
         { "role": "For psychologists", "desc": "Schedule management, student cards, analytics" },
         { "role": "For administrators", "desc": "University-wide summary statistics, system management" }
       ]
-    },
-    "cta": {
-      "title": "Start taking care of your mental health today",
-      "subtitle": "Free for all university students",
-      "button": "Register for free"
     },
     "privacy": {
       "title": "Your data is safe",
       "subtitle": "We understand that mental health is personal. Confidentiality is built into every level of the platform.",
       "items": [
         { "title": "Only you and your psychologist", "desc": "Session details and your check-ins are visible only to you and the specialist you work with." },
-        { "title": "Anonymous analytics", "desc": "Administration sees only anonymised statistics — no names or personal data." },
+        { "title": "Anonymous analytics", "desc": "Administration sees only anonymized statistics — no names or personal data." },
         { "title": "Secure storage", "desc": "All data is encrypted in transit and at rest. We do not share information with third parties." },
         { "title": "You are in control", "desc": "You can stop using the platform at any time." }
       ]
@@ -155,10 +151,15 @@
       "items": [
         { "q": "Is my data confidential?", "a": "Yes. Your check-ins and session details are accessible only to you and your psychologist. Administration sees only anonymous faculty-level statistics." },
         { "q": "Is it free for students?", "a": "Yes, the platform is completely free for all university students." },
-        { "q": "How do I book a psychologist?", "a": "Go to the Psychologists section, choose a specialist, and pick a convenient time from the available slots." },
+        { "q": "How do I book a psychologist?", "a": "Go to the Psychologists section, choose a specialist, and pick a convenient time from available slots." },
         { "q": "Can my dean or teachers see my data?", "a": "No. Teachers and the dean's office have no access to the platform. Only psychologists and system administrators do." },
         { "q": "Can I chat anonymously?", "a": "The AI assistant is available immediately after registration. Booking a psychologist requires a profile, but the specialist maintains professional confidentiality." }
       ]
+    },
+    "cta": {
+      "title": "Start taking care of your mental health today",
+      "subtitle": "Free for all university students",
+      "button": "Register for free"
     },
     "footer": {
       "description": "Psychological support platform for students",
@@ -171,12 +172,12 @@
   "auth": {
     "login": {
       "title": "Welcome",
-      "subtitle": "Sign in to your account",
+      "subtitle": "Log in to your account",
       "email": "Email",
       "password": "Password",
-      "submit": "Sign in",
+      "submit": "Log in",
       "successToast": "Welcome!",
-      "loading": "Signing in...",
+      "loading": "Logging in...",
       "noAccount": "No account?",
       "register": "Register",
       "demo": {
@@ -192,13 +193,30 @@
       }
     },
     "register": {
-      "title": "Create an account",
+      "title": "Create account",
       "name": "Full name",
       "namePlaceholder": "John Smith",
       "email": "Email",
       "emailPlaceholder": "student@university.kz",
       "faculty": "Faculty",
-      "facultyPlaceholder": "Information Technology",
+      "facultyPlaceholder": "Select faculty",
+      "faculties": [
+        "Information Technology",
+        "Economics and Finance",
+        "Law",
+        "Medicine",
+        "Engineering",
+        "Education",
+        "Humanities",
+        "Natural Sciences",
+        "Business and Management",
+        "Social Sciences",
+        "Architecture and Design",
+        "Mathematics and Physics",
+        "Biology and Chemistry",
+        "International Relations",
+        "Other"
+      ],
       "course": "Year",
       "coursePlaceholder": "Select year",
       "courseOptions": ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "Year 6"],
@@ -231,11 +249,11 @@
       "alerts": {
         "highStress": {
           "title": "High stress level",
-          "desc": "Your average stress for the week is above normal. We recommend booking a psychologist."
+          "desc": "Your average stress for the week is above normal. We recommend booking an appointment with a psychologist."
         },
         "lowMood": {
           "title": "Low mood",
-          "desc": "Your mood has been below average for several days in a row. Try talking to the AI assistant."
+          "desc": "Mood has been below average for several days in a row. Try talking to the AI assistant."
         },
         "lowSleep": {
           "title": "Insufficient sleep",
@@ -243,27 +261,39 @@
         },
         "highRisk": {
           "title": "High risk level from screening",
-          "desc": "Screening results indicate a high stress level. We strongly recommend booking a psychologist."
+          "desc": "Screening results indicate a high level of stress. Book an appointment with a psychologist."
         }
       },
-      "weeklyStats": "Average indicators for the week",
+      "weeklyStats": "Weekly average indicators",
       "moodChart": "Mood dynamics (30 days)",
       "aiInsight": "AI analysis of my state",
-      "getInsight": "Get a personal insight",
-      "insightInfo": "AI will analyse your check-ins and give personal recommendations",
+      "getInsight": "Get personal insight",
+      "insightInfo": "The AI will analyze your check-ins and provide personal recommendations",
       "quickActions": "Quick actions",
       "actions": {
         "checkin": "Fill in check-in",
         "screening": "Take screening",
         "aiChat": "Talk to AI",
         "bookPsych": "Book a psychologist"
+      },
+      "recommendations": {
+        "title": "Recommended for you",
+        "subtitle": "Specialists matched to your language and recent signals",
+        "viewAll": "View all",
+        "freeSlots": "Has free slots",
+        "reasons": {
+          "language": "Your language",
+          "specialization": "Matches your needs",
+          "trust": "High trust",
+          "rating": "Good rating"
+        }
       }
     },
     "checkIn": {
       "title": "Daily check-in",
       "subtitle": "Rate your state today",
-      "alreadyDone": "You have already completed a check-in today",
-      "alreadyDoneHint": "The next check-in is available tomorrow. Check the AI assistant or statistics.",
+      "alreadyDone": "You have already filled in today's check-in",
+      "alreadyDoneHint": "Next check-in is available tomorrow. Check the AI assistant or statistics.",
       "notes": "Notes (optional)",
       "notesPlaceholder": "What was special about today?",
       "submit": "Save check-in",
@@ -272,12 +302,12 @@
       "scale": {
         "1": "Very bad",
         "2": "Bad",
-        "3": "OK",
+        "3": "Okay",
         "4": "Good",
         "5": "Excellent"
       },
       "metrics": {
-        "mood": { "label": "Mood", "desc": "How do you feel emotionally?" },
+        "mood": { "label": "Mood", "desc": "How are you feeling emotionally?" },
         "stress": { "label": "Stress", "desc": "How tense or anxious are you?" },
         "sleep": { "label": "Sleep", "desc": "How did you sleep last night?" },
         "energy": { "label": "Energy", "desc": "What is your energy level?" },
@@ -292,29 +322,31 @@
       "submit": "Finish",
       "notAllAnswered": "Answer all questions",
       "submitting": "Processing...",
+      "progress": "Progress",
+      "remainingHint": "{{count}} questions left",
       "result": {
         "title": "Screening results",
         "score": "Your score",
         "riskLevel": "Risk level",
         "low": {
           "label": "Low risk",
-          "desc": "Your state is normal. Keep tracking your psychological health with daily check-ins."
+          "desc": "Your state is normal. Continue monitoring your psychological health with daily check-ins."
         },
         "moderate": {
           "label": "Moderate risk",
-          "desc": "There are signs of psychological tension. We recommend paying attention to the balance between work and rest."
+          "desc": "There are signs of psychological tension. We recommend paying attention to your work-rest balance."
         },
         "high": {
           "label": "High risk",
-          "desc": "Results indicate a significant stress level. We strongly recommend booking a psychologist."
+          "desc": "Results indicate a significant level of stress. We strongly recommend booking an appointment with a psychologist."
         },
         "bookPsych": "Book a psychologist",
         "newScreening": "Take again",
-        "toDashboard": "Home"
+        "toDashboard": "Go home"
       },
       "questions": [
-        "How often do you feel overwhelmed by studies or work?",
-        "How often is it difficult for you to focus or concentrate?",
+        "How often do you feel overwhelmed by your studies or work?",
+        "How often do you find it hard to focus or concentrate?",
         "How often do you feel anxious or worried?",
         "How often do you experience sleep problems?",
         "How often do you feel lonely or isolated?"
@@ -323,39 +355,77 @@
     "aiChat": {
       "title": "AI Assistant",
       "badge": "Powered by AI",
-      "greeting": "Hi! I am here to support you. How are you feeling today?",
-      "placeholder": "Write a message...",
+      "greeting": "Hello! I'm here to support you. How are you feeling today?",
+      "placeholder": "Type a message...",
       "quickMessages": [
         "I feel stressed about my studies",
         "I find it hard to concentrate",
-        "I have been sleeping badly lately",
+        "I haven't been sleeping well lately",
         "I want to talk about my emotions"
       ],
       "thinking": "Thinking...",
-      "disclaimer": "The AI assistant does not replace a professional psychologist. For serious issues, please consult a specialist."
+      "disclaimer": "The AI assistant is not a replacement for a professional psychologist. For serious issues, please consult a specialist.",
+      "newChat": "New chat",
+      "clearDialog": {
+        "title": "Start new chat?",
+        "desc": "All chat history will be permanently deleted.",
+        "confirm": "Clear"
+      },
+      "noConversations": "No chats yet. Press «+ New chat».",
+      "deleteConvDialog": {
+        "title": "Delete this chat?",
+        "desc": "All messages will be permanently deleted.",
+        "confirm": "Delete"
+      },
+      "groups": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "week": "Last 7 days",
+        "older": "Older"
+      },
+      "crisis": {
+        "title": "We noticed heavy feelings in your message.",
+        "subtitle": "An AI helper isn't enough for this. Please book a live specialist right now — it matters.",
+        "cta": "Book a psychologist",
+        "dismiss": "Dismiss"
+      }
     },
     "psychologists": {
-      "title": "Psychologist catalogue",
+      "title": "Psychologist directory",
       "subtitle": "Choose a specialist and book a consultation",
       "noData": "No psychologists available",
       "experience": "years of experience",
+      "specializationLabel": "Specialization",
+      "languagesLabel": "Languages",
+      "experienceLabel": "Experience",
       "book": "Book",
       "selectSlot": "Select a slot to book",
       "selectedPsych": "Psychologist",
       "availableSlots": "Available slots",
       "noSlots": "No available slots",
-      "noSlotsHint": "This psychologist has no free time yet",
+      "noSlotsHint": "This psychologist has no free time available yet",
       "format": "Consultation format",
       "formatOffline": "In person",
       "formatOnline": "Online",
       "reason": "Reason for visit (optional)",
-      "reasonPlaceholder": "Briefly describe the reason for your visit...",
+      "reasonPlaceholder": "Briefly describe your reason for visiting...",
       "confirm": "Confirm booking",
       "confirming": "Booking...",
       "success": "Appointment created successfully",
       "filter": {
         "all": "All psychologists",
         "available": "With available slots"
+      },
+      "trust": {
+        "verified": "Verified specialist",
+        "verifiedHint": "Diploma and license confirmed by admin",
+        "rating": "Rating",
+        "noRating": "Not yet rated",
+        "sessionsCompleted_one": "{{count}} session",
+        "sessionsCompleted_other": "{{count}} sessions",
+        "studentsHelped_one": "{{count}} student",
+        "studentsHelped_other": "{{count}} students",
+        "trustScore": "Trust score"
       }
     },
     "appointments": {
@@ -376,7 +446,7 @@
       "feedbackBtn": "Leave feedback",
       "cancelDialog": {
         "title": "Cancel appointment?",
-        "desc": "This action cannot be undone. The slot will be freed for other students.",
+        "desc": "This action cannot be undone. The slot will be freed up for other students.",
         "confirm": "Yes, cancel",
         "cancel": "No"
       },
@@ -394,11 +464,39 @@
         "completed": "Completed",
         "cancelled": "Cancelled"
       },
-      "cancelSuccess": "Appointment cancelled"
+      "cancelSuccess": "Appointment cancelled",
+      "complainBtn": "Report",
+      "complaintDialog": {
+        "title": "Report this psychologist",
+        "subtitle": "Your report goes to admins. The specialist's work will be reviewed.",
+        "category": "Complaint category",
+        "categoryPlaceholder": "Select a category",
+        "severity": "Severity",
+        "severityHint": "How serious is this situation",
+        "details": "Describe what happened",
+        "detailsPlaceholder": "Describe the situation in detail — when, what happened, what was unacceptable...",
+        "submit": "Submit report",
+        "submitting": "Submitting...",
+        "success": "Report received. Admins will review it.",
+        "categories": {
+          "ethics": "Ethics violation",
+          "no_show": "Specialist did not show up",
+          "harassment": "Harassment / pressure",
+          "poor_quality": "Poor quality session",
+          "boundary_violation": "Boundary violation",
+          "other": "Other"
+        },
+        "severities": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "critical": "Critical"
+        }
+      }
     },
     "profile": {
       "title": "My Profile",
-      "subtitle": "Manage personal information",
+      "subtitle": "Manage your personal data",
       "name": "Name",
       "email": "Email",
       "faculty": "Faculty",
@@ -432,12 +530,12 @@
       "sessionWith": "Session with student",
       "noteDialog": {
         "title": "Session note",
-        "conditionBefore": "Condition before (1-10)",
-        "conditionAfter": "Condition after (1-10)",
+        "conditionBefore": "State before (1-10)",
+        "conditionAfter": "State after (1-10)",
         "tags": "Topics / tags",
         "tagsPlaceholder": "anxiety, studies, relationships...",
         "notes": "Session notes",
-        "notesPlaceholder": "Brief session description...",
+        "notesPlaceholder": "Brief description of the session...",
         "save": "Save note",
         "saving": "Saving...",
         "success": "Note saved"
@@ -469,10 +567,10 @@
       "lastCheckin": "Last check-in",
       "riskLevel": "Risk level",
       "aiSummary": {
-        "title": "AI student analysis",
+        "title": "AI analysis of student",
         "generate": "Generate analysis",
-        "generating": "Analysing...",
-        "info": "AI will analyse the student's data and provide a brief summary"
+        "generating": "Analyzing...",
+        "info": "The AI will analyze the student's data and provide a brief summary"
       },
       "metrics": {
         "mood": "Mood",
@@ -485,7 +583,7 @@
       "title": "Statistics",
       "subtitle": "Analytics of your work",
       "totalStudents": "Total students",
-      "completedSessions": "Sessions completed",
+      "completedSessions": "Completed sessions",
       "avgRating": "Average rating",
       "activeStudents": "Active students",
       "noData": "No data",
@@ -502,7 +600,7 @@
       "subtitle": "Professional information",
       "name": "Name",
       "email": "Email",
-      "specialization": "Specialisation",
+      "specialization": "Specialization",
       "languages": "Languages",
       "experience": "Experience (years)",
       "bio": "Biography",
@@ -510,6 +608,46 @@
       "saveBtn": "Save changes",
       "saving": "Saving...",
       "success": "Profile updated"
+    },
+    "verification": {
+      "title": "Specialist verification",
+      "subtitle": "Verify your diploma and license to be visible to students",
+      "status": "Current status",
+      "trustScore": "Trust score",
+      "verifiedAt": "Verified at",
+      "notVerifiedYet": "Not verified yet",
+      "documentsTitle": "Submitted documents",
+      "noDocuments": "No documents submitted yet",
+      "uploadTitle": "Submit a new document",
+      "uploadHint": "Upload your file to Google Drive or Dropbox and paste a public link here. Admins will review it.",
+      "documentType": "Document type",
+      "documentTypePlaceholder": "Select type",
+      "documentNumber": "Document number",
+      "issuingOrganization": "Issuing organization",
+      "expiresAt": "Expires at",
+      "fileUrl": "Document link (URL)",
+      "fileUrlPlaceholder": "https://drive.google.com/...",
+      "submitBtn": "Submit for review",
+      "submitting": "Submitting...",
+      "submitSuccess": "Document submitted for review",
+      "openLink": "Open",
+      "reviewNotes": "Admin notes",
+      "types": {
+        "diploma": "Diploma",
+        "license": "License",
+        "certificate": "Certificate",
+        "id_card": "ID card",
+        "other": "Other"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "active": "Active",
+        "probation": "Probation",
+        "suspended": "Suspended",
+        "revoked": "Revoked"
+      }
     },
     "students": {
       "title": "My Students",
@@ -526,21 +664,32 @@
       "dateLabel": "Date",
       "startLabel": "Start",
       "endLabel": "End",
-      "selectDate": "Select date",
+      "selectDate": "Select a date",
       "fullDayBtn": "Add full day",
       "addSlotBtn": "Add slot",
       "slotAdded": "Slot added",
-      "allSlotsAdded": "Day slots added",
+      "allSlotsAdded": "All slots for the day added",
       "slotDeleted": "Slot deleted",
+      "allSlotsDeleted": "All slots for the day deleted",
+      "deleteAllBtn": "Delete day",
       "available": "Available: {{count}}",
       "booked": "Booked: {{count}}",
       "noSlots": "No available slots",
-      "noSlotsHint": "Add time slots for student bookings"
+      "noSlotsHint": "Add time slots for student bookings",
+      "deleteDialog": {
+        "title": "Delete slot?",
+        "confirm": "Delete"
+      },
+      "deleteAllDialog": {
+        "title": "Delete all slots for this day?",
+        "hint": "Only free (unbooked) slots will be deleted.",
+        "confirm": "Delete all"
+      }
     }
   },
   "admin": {
     "dashboard": {
-      "title": "Dashboard",
+      "title": "Control panel",
       "subtitle": "Aggregated university statistics",
       "downloadReport": "Download report (CSV)",
       "kpi": {
@@ -549,9 +698,9 @@
         "totalSessions": "Total sessions",
         "highStress": "High stress"
       },
-      "weeklyMetrics": "Average indicators for the week",
-      "trendChart": "Appointment dynamics (30 days)",
-      "facultyChart": "Distribution by faculty",
+      "weeklyMetrics": "Weekly average indicators",
+      "trendChart": "Consultation trends (30 days)",
+      "facultyChart": "Faculty distribution",
       "riskTable": "Stress level by faculty",
       "tableHeaders": {
         "faculty": "Faculty",
@@ -610,10 +759,10 @@
         "completed": "Completed",
         "riskFromScreening": "Risk (screening)"
       },
-      "chart": "Dynamics over 30 days",
+      "chart": "30-day dynamics",
       "noCheckins": "No check-ins",
       "noSessions": "No sessions",
-      "noSurveys": "No screenings taken",
+      "noSurveys": "No screenings completed",
       "sessionStatus": {
         "completed": "Completed",
         "cancelled": "Cancelled",
@@ -633,7 +782,7 @@
         "namePlaceholder": "Dr. First Last",
         "email": "Email",
         "emailPlaceholder": "psych@university.kz",
-        "specialization": "Specialisation",
+        "specialization": "Specialization",
         "specializationPlaceholder": "Stress, anxiety...",
         "languages": "Languages",
         "languagesPlaceholder": "Kazakh, Russian",
@@ -656,14 +805,92 @@
         "name": "Name is required",
         "email": "Invalid email",
         "password": "Password must be at least 6 characters"
+      },
+      "verify": {
+        "openBtn": "Verify",
+        "trustScore": "Trust",
+        "documentsTitle": "Submitted documents",
+        "noDocuments": "No documents submitted",
+        "openDoc": "Open file",
+        "approve": "Approve",
+        "reject": "Reject",
+        "rejectNotePrompt": "Provide a reason (visible to psychologist):",
+        "docUpdated": "Document status updated",
+        "reviewNotes": "Admin notes",
+        "statusTitle": "Specialist status",
+        "statusLabel": "Status",
+        "trustScoreLabel": "Trust score (0–100)",
+        "reasonLabel": "Reason / note",
+        "reasonPlaceholder": "Why are you making this decision?",
+        "statusUpdated": "Status updated",
+        "statuses": {
+          "active": "Active",
+          "pending": "Pending",
+          "probation": "Probation",
+          "suspended": "Suspended",
+          "rejected": "Rejected",
+          "revoked": "Revoked"
+        },
+        "docTypes": {
+          "diploma": "Diploma",
+          "license": "License",
+          "certificate": "Certificate",
+          "id_card": "ID card",
+          "other": "Other"
+        },
+        "docStatuses": {
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        }
+      }
+    },
+    "complaints": {
+      "title": "Complaints queue",
+      "subtitle": "Manage student complaints",
+      "noComplaints": "No complaints",
+      "updateSuccess": "Complaint updated",
+      "filters": {
+        "all": "All",
+        "open": "New",
+        "in_review": "In review",
+        "resolved": "Resolved",
+        "rejected": "Rejected"
+      },
+      "categories": {
+        "ethics": "Ethics violation",
+        "no_show": "Specialist did not show up",
+        "harassment": "Harassment / pressure",
+        "poor_quality": "Poor quality session",
+        "boundary_violation": "Boundary violation",
+        "other": "Other"
+      },
+      "severities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "statuses": {
+        "open": "New",
+        "in_review": "In review",
+        "resolved": "Resolved",
+        "rejected": "Rejected"
+      },
+      "dialog": {
+        "title": "Resolve complaint",
+        "newStatus": "New status",
+        "resolution": "Resolution notes",
+        "resolutionPlaceholder": "What was resolved, what was discussed with the psychologist...",
+        "note": "Note: critical complaints automatically suspended the psychologist. Restore status manually after resolution if needed."
       }
     },
     "slotMgmt": {
       "title": "Schedule management",
-      "subtitle": "Creating consultation slots",
+      "subtitle": "Create slots for consultations",
       "formTitle": "Create slot",
       "psychologistLabel": "Psychologist",
-      "psychologistPlaceholder": "Select psychologist",
+      "psychologistPlaceholder": "Select a psychologist",
       "dateLabel": "Date",
       "startLabel": "Start",
       "endLabel": "End",
@@ -674,10 +901,14 @@
       "available": "{{count}} available",
       "booked": "{{count}} booked",
       "deleteTitle": "Delete slot",
-      "selectPsychDate": "Select psychologist and date",
+      "selectPsychDate": "Select a psychologist and date",
       "slotAdded": "Slot added",
-      "allSlotsAdded": "All day slots added",
-      "slotDeleted": "Slot deleted"
+      "allSlotsAdded": "All slots for the day added",
+      "slotDeleted": "Slot deleted",
+      "deleteDialog": {
+        "title": "Delete slot?",
+        "confirm": "Delete"
+      }
     }
   }
 }

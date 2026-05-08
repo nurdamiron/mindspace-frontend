@@ -1,38 +1,63 @@
-// useState, useEffect, useMemo — күй, жанама әсерлер және мемоизация үшін
+// useState, useEffect, useMemo : күй, жанама әсерлер және мемоизация үшін
 import { useState, useEffect, useMemo } from 'react';
-// useForm — форманы басқару үшін
+// useForm : форманы басқару үшін
 import { useForm } from 'react-hook-form';
-// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
+// zodResolver : Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
-// z — форма валидация схемасын жасау үшін
+// z : форма валидация схемасын жасау үшін
 import { z } from 'zod';
-// toast — хабарлама тостерін көрсету үшін
+// toast : хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
-// Lucide иконалары — қосу, жою, пайдаланушылар, жүктелу, жабу
-import { Plus, Trash2, Users, Loader2, X } from 'lucide-react';
-// useTranslation — аударма хуктары
+// Lucide иконалары : қосу, жою, пайдаланушылар, жүктелу, жабу, верификация
+import { Plus, Trash2, Users, Loader2, X, ShieldCheck, ShieldAlert, FileText, ExternalLink, Check, Ban, Flag } from 'lucide-react';
+// useTranslation : аударма хуктары
 import { useTranslation } from 'react-i18next';
-// api — серверге HTTP сұраныстар жіберу үшін
+// api : серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
-// shadcn/ui компоненттері — батырма, енгізу, белгіше, мәтін аймағы, белгі, карта
+// shadcn/ui компоненттері : батырма, енгізу, белгіше, мәтін аймағы, белгі, карта
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
-// PsychologistManagement — психологтарды басқару беті
+// VERIFICATION_STATUS_STYLES : статус → badge стилі
+const VERIFICATION_STATUS_STYLES = {
+  active:    { variant: 'success',     icon: ShieldCheck },
+  pending:   { variant: 'secondary',   icon: null },
+  probation: { variant: 'default',     icon: ShieldAlert },
+  suspended: { variant: 'destructive', icon: Ban },
+  rejected:  { variant: 'destructive', icon: Ban },
+  revoked:   { variant: 'destructive', icon: Ban },
+};
+
+const ALL_STATUSES = ['active', 'pending', 'probation', 'suspended', 'rejected', 'revoked'];
+
+// PsychologistManagement : психологтарды басқару беті
 export default function PsychologistManagement() {
   const { t } = useTranslation();
-  // psychologists — психологтар тізімі
+  // psychologists : психологтар тізімі
   const [psychologists, setPsychologists] = useState([]);
-  // loading — деректер жүктелу күйі
+  // loading : деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // showForm — психолог қосу формасының көрінуі
+  // showForm : психолог қосу формасының көрінуі
   const [showForm, setShowForm] = useState(false);
+  // verifying : верификация диалогында ашылған психолог
+  const [verifying, setVerifying] = useState(null);
+  // documents : verifying психологтың құжаттар тізімі
+  const [documents, setDocuments] = useState([]);
+  // docsLoading : құжаттар жүктелу күйі
+  const [docsLoading, setDocsLoading] = useState(false);
+  // statusForm : жаңа статус, trust_score, reason өрістері
+  const [statusForm, setStatusForm] = useState({ status: 'active', trust_score: 0, reason: '' });
+  // savingStatus : статусты сақтау күйі
+  const [savingStatus, setSavingStatus] = useState(false);
 
-  // psychSchema — психолог қосу формасының валидация схемасы
+  // psychSchema : психолог қосу формасының валидация схемасы
   const psychSchema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     email: z.string().email(t('common.errors.invalidEmail')),
@@ -54,7 +79,7 @@ export default function PsychologistManagement() {
     api.get('/admin/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
-  // addPsychologist — жаңа психолог қосу және тізімді жаңарту
+  // addPsychologist : жаңа психолог қосу және тізімді жаңарту
   async function addPsychologist(data) {
     try {
       const added = await api.post('/admin/psychologists', data);
@@ -67,7 +92,69 @@ export default function PsychologistManagement() {
     }
   }
 
-  // deletePsych — психологты растаудан кейін жою
+  // openVerification : бір психологтың верификация панелін ашу + құжаттарын жүктеу
+  async function openVerification(p) {
+    setVerifying(p);
+    setStatusForm({
+      status: p.verification_status || 'pending',
+      trust_score: p.trust_score || 0,
+      reason: '',
+    });
+    setDocuments([]);
+    setDocsLoading(true);
+    try {
+      const docs = await api.get(`/admin/psychologists/${p.id}/documents`);
+      setDocuments(docs);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setDocsLoading(false);
+    }
+  }
+
+  // reviewDocument : құжатты approve немесе reject ету
+  async function reviewDocument(docId, status) {
+    const note = status === 'rejected' ? window.prompt(t('admin.psychologistMgmt.verify.rejectNotePrompt')) : '';
+    if (status === 'rejected' && note === null) return; // болдырмау
+    try {
+      const updated = await api.patch(`/admin/documents/${docId}/review`, {
+        status,
+        review_notes: note || null,
+      });
+      setDocuments((d) =>
+        d.map((doc) => (doc.id === docId ? { ...doc, ...updated } : doc))
+      );
+      toast.success(t('admin.psychologistMgmt.verify.docUpdated'));
+    } catch (err) {
+      toast.error(err.message);
+    }
+  }
+
+  // saveStatus : психологтың верификация статусын жаңарту
+  async function saveStatus() {
+    setSavingStatus(true);
+    try {
+      const updated = await api.patch(
+        `/admin/psychologists/${verifying.id}/status`,
+        {
+          status: statusForm.status,
+          trust_score: Number(statusForm.trust_score) || 0,
+          reason: statusForm.reason || null,
+        }
+      );
+      setPsychologists((list) =>
+        list.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
+      );
+      toast.success(t('admin.psychologistMgmt.verify.statusUpdated'));
+      setVerifying(null);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSavingStatus(false);
+    }
+  }
+
+  // deletePsych : психологты растаудан кейін жою
   async function deletePsych(id) {
     if (!window.confirm(t('admin.psychologistMgmt.deleteConfirm'))) return;
     try {
@@ -91,7 +178,7 @@ export default function PsychologistManagement() {
       {/* Тақырып және форманы ашу/жабу батырмасы */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('admin.psychologistMgmt.title')}</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">{t('admin.psychologistMgmt.title')}</h1>
           <p className="text-sm text-zinc-500 mt-1">{t('admin.psychologistMgmt.count', { count: psychologists.length })}</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)} variant={showForm ? 'secondary' : 'default'}>
@@ -184,7 +271,27 @@ export default function PsychologistManagement() {
 
                 {/* Психолог аты, email және статистика белгілері */}
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
+                    {/* Верификация статус белгісі */}
+                    {(() => {
+                      const cfg = VERIFICATION_STATUS_STYLES[p.verification_status] || VERIFICATION_STATUS_STYLES.pending;
+                      const Icon = cfg.icon;
+                      return (
+                        <Badge variant={cfg.variant} className="gap-1 text-[10px]">
+                          {Icon && <Icon className="w-2.5 h-2.5" />}
+                          {t(`admin.psychologistMgmt.verify.statuses.${p.verification_status || 'pending'}`)}
+                        </Badge>
+                      );
+                    })()}
+                    {/* Ашық шағымдар саны (бар болса) */}
+                    {Number(p.open_complaints) > 0 && (
+                      <Badge variant="destructive" className="gap-1 text-[10px]">
+                        <Flag className="w-2.5 h-2.5" />
+                        {p.open_complaints}
+                      </Badge>
+                    )}
+                  </div>
                   <div className="text-xs text-zinc-500 mt-0.5">
                     {p.email}
                     {p.specialization && ` · ${p.specialization}`}
@@ -199,23 +306,198 @@ export default function PsychologistManagement() {
                     {p.total_students > 0 && (
                       <Badge variant="outline" className="text-xs">{t('admin.psychologistMgmt.studentsBadge', { count: p.total_students })}</Badge>
                     )}
+                    <Badge variant="outline" className="text-xs">
+                      {t('admin.psychologistMgmt.verify.trustScore')}: {p.trust_score || 0}
+                    </Badge>
                   </div>
                 </div>
 
-                {/* Психологты жою батырмасы */}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deletePsych(p.id)}
-                  className="shrink-0"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+                <div className="flex flex-col gap-2 shrink-0">
+                  {/* Верификация диалогын ашу */}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => openVerification(p)}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {t('admin.psychologistMgmt.verify.openBtn')}
+                  </Button>
+                  {/* Психологты жою батырмасы */}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deletePsych(p.id)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Верификация диалогы : құжат тексеру + статус өзгерту */}
+      <Dialog open={!!verifying} onOpenChange={(open) => !open && setVerifying(null)}>
+        <DialogContent className="max-w-[560px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              {verifying?.name}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-5 py-1">
+            {/* Құжаттар тізімі + approve/reject */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                {t('admin.psychologistMgmt.verify.documentsTitle')}
+              </h3>
+              {docsLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+                </div>
+              ) : documents.length === 0 ? (
+                <p className="text-xs text-zinc-600 py-2">{t('admin.psychologistMgmt.verify.noDocuments')}</p>
+              ) : (
+                <ul className="space-y-2">
+                  {documents.map((doc) => (
+                    <li
+                      key={doc.id}
+                      className="rounded-md border border-zinc-800 bg-zinc-800/40 p-3 space-y-2"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <FileText className="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-zinc-200">
+                              {t(`admin.psychologistMgmt.verify.docTypes.${doc.document_type}`)}
+                              {doc.document_number && (
+                                <span className="text-zinc-500 font-normal"> · {doc.document_number}</span>
+                              )}
+                            </div>
+                            {doc.issuing_organization && (
+                              <div className="text-xs text-zinc-500 truncate">{doc.issuing_organization}</div>
+                            )}
+                            <a
+                              href={doc.file_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1 mt-1"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              {t('admin.psychologistMgmt.verify.openDoc')}
+                            </a>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={
+                            doc.status === 'approved' ? 'success' :
+                            doc.status === 'rejected' ? 'destructive' : 'secondary'
+                          }
+                          className="shrink-0"
+                        >
+                          {t(`admin.psychologistMgmt.verify.docStatuses.${doc.status}`)}
+                        </Badge>
+                      </div>
+                      {doc.review_notes && (
+                        <div className="text-xs text-amber-400/80">
+                          <span className="text-zinc-500">{t('admin.psychologistMgmt.verify.reviewNotes')}: </span>
+                          {doc.review_notes}
+                        </div>
+                      )}
+                      {doc.status === 'pending' && (
+                        <div className="flex gap-2 pt-1">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-7 text-xs"
+                            onClick={() => reviewDocument(doc.id, 'approved')}
+                          >
+                            <Check className="w-3 h-3" />
+                            {t('admin.psychologistMgmt.verify.approve')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-7 text-xs"
+                            onClick={() => reviewDocument(doc.id, 'rejected')}
+                          >
+                            <Ban className="w-3 h-3" />
+                            {t('admin.psychologistMgmt.verify.reject')}
+                          </Button>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Статус өзгерту панелі */}
+            <div className="space-y-3 pt-3 border-t border-zinc-800">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                {t('admin.psychologistMgmt.verify.statusTitle')}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>{t('admin.psychologistMgmt.verify.statusLabel')}</Label>
+                  <Select
+                    value={statusForm.status}
+                    onValueChange={(v) => setStatusForm((f) => ({ ...f, status: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {t(`admin.psychologistMgmt.verify.statuses.${s}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t('admin.psychologistMgmt.verify.trustScoreLabel')}</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={statusForm.trust_score}
+                    onChange={(e) => setStatusForm((f) => ({ ...f, trust_score: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t('admin.psychologistMgmt.verify.reasonLabel')}</Label>
+                <Textarea
+                  value={statusForm.reason}
+                  onChange={(e) => setStatusForm((f) => ({ ...f, reason: e.target.value }))}
+                  placeholder={t('admin.psychologistMgmt.verify.reasonPlaceholder')}
+                  rows={2}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="secondary" onClick={() => setVerifying(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={saveStatus} disabled={savingStatus}>
+              {savingStatus ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {t('common.saving')}
+                </>
+              ) : (
+                t('common.save')
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,16 +1,17 @@
-// useState, useEffect — компонент күйі мен жанама әсерлер үшін
+// useState, useEffect : компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
-// Link — ішкі сілтемелер үшін
+// Link : ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
-// toast — хабарлама тостерін көрсету үшін
+// toast : хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
-// Lucide иконалары — растау, навигация, күнтізбе, жүктелу
-import { CheckCircle2, ChevronRight, CalendarDays, Loader2 } from 'lucide-react';
-// useTranslation — аударма хуктары
+// Lucide иконалары : растау, навигация, күнтізбе, жүктелу
+import { CheckCircle2, ChevronRight, CalendarDays, Loader2, ShieldCheck, Star, Users } from 'lucide-react';
+// useTranslation : аударма хуктары
 import { useTranslation } from 'react-i18next';
-// api — серверге HTTP сұраныстар жіберу үшін
+// api : серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
-// shadcn/ui компоненттері — батырма, белгі, карта, белгіше, мәтін аймағы, бөлгіш, тізім
+import { formatDate } from '@/lib/dateUtils';
+// shadcn/ui компоненттері : батырма, белгі, карта, белгіше, мәтін аймағы, бөлгіш, тізім
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,32 +19,32 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// cn — шартты CSS класстарды біріктіру утилитасы
+// cn : шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
 
-// Psychologists — психологтар тізімі және жазылу беті
+// Psychologists : психологтар тізімі және жазылу беті
 export default function Psychologists() {
   const { t, i18n } = useTranslation();
 
-  // psychologists — психологтар тізімі
+  // psychologists : психологтар тізімі
   const [psychologists, setPsychologists] = useState([]);
-  // selected — таңдалған психолог
+  // selected : таңдалған психолог
   const [selected, setSelected] = useState(null);
-  // slots — таңдалған психологтың бос слоттары
+  // slots : таңдалған психологтың бос слоттары
   const [slots, setSlots] = useState([]);
-  // selectedSlot — таңдалған слот
+  // selectedSlot : таңдалған слот
   const [selectedSlot, setSelectedSlot] = useState(null);
-  // reason — жазылу себебі
+  // reason : жазылу себебі
   const [reason, setReason] = useState('');
-  // format — кездесу форматы (онлайн/офлайн)
+  // format : кездесу форматы (онлайн/офлайн)
   const [format, setFormat] = useState('offline');
-  // loading — деректер жүктелу күйі
+  // loading : деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // booking — жазылу жүктелу күйі
+  // booking : жазылу жүктелу күйі
   const [booking, setBooking] = useState(false);
-  // success — жазылу сәтті болды күйі
+  // success : жазылу сәтті болды күйі
   const [success, setSuccess] = useState(false);
-  // filterDate — слотты күн бойынша сүзгілеу
+  // filterDate : слотты күн бойынша сүзгілеу
   const [filterDate, setFilterDate] = useState('');
 
   // Беттің жүктелуінде психологтар тізімін API-дан алу
@@ -51,7 +52,7 @@ export default function Psychologists() {
     api.get('/student/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
-  // selectPsychologist — психологты таңдап, оның бос уақыт слоттарын жүктеу
+  // selectPsychologist : психологты таңдап, оның бос уақыт слоттарын жүктеу
   async function selectPsychologist(psych) {
     setSelected(psych);
     setSelectedSlot(null);
@@ -64,7 +65,7 @@ export default function Psychologists() {
     }
   }
 
-  // book — таңдалған слотқа жазылу сұранысын жіберу
+  // book : таңдалған слотқа жазылу сұранысын жіберу
   async function book() {
     if (!selectedSlot) return;
     setBooking(true);
@@ -118,7 +119,7 @@ export default function Psychologists() {
     );
   }
 
-  // groupedSlots — слоттарды күн бойынша топтастыру
+  // groupedSlots : слоттарды күн бойынша топтастыру
   const groupedSlots = slots.reduce((acc, slot) => {
     const d = slot.date;
     if (!acc[d]) acc[d] = [];
@@ -126,7 +127,7 @@ export default function Psychologists() {
     return acc;
   }, {});
 
-  // filteredDates — фильтр бойынша күндерді сүзу немесе алғашқы 5 күнді алу
+  // filteredDates : фильтр бойынша күндерді сүзу немесе алғашқы 5 күнді алу
   const filteredDates = filterDate
     ? Object.keys(groupedSlots).filter((d) => d === filterDate)
     : Object.keys(groupedSlots).slice(0, 5);
@@ -135,11 +136,11 @@ export default function Psychologists() {
     <div className="fade-in space-y-5">
       {/* Бет тақырыбы */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('student.psychologists.title')}</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">{t('student.psychologists.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('student.psychologists.subtitle')}</p>
       </div>
 
-      {/* Психолог таңдалса — екі баған, таңдалмаса — бір баған */}
+      {/* Психолог таңдалса : екі баған, таңдалмаса : бір баған */}
       <div className={cn('grid gap-5', selected ? 'grid-cols-1 lg:grid-cols-[1fr_1.4fr]' : 'grid-cols-1 max-w-2xl')}>
         {/* Психологтар тізімі */}
         <div className="space-y-2.5">
@@ -159,23 +160,66 @@ export default function Psychologists() {
               )}
             >
               <div className="flex items-start gap-3">
-                {/* Психолог аватары — аты-жөні бас әріптерінен */}
+                {/* Психолог аватары : аты-жөні бас әріптерінен */}
                 <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 shrink-0">
                   {p.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">{p.specialization}</div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
+                    {/* Тексерілген маман белгісі : verification_status='active' жағдайында ғана көрсетіледі */}
+                    {p.verification_status === 'active' && (
+                      <span
+                        title={t('student.psychologists.trust.verifiedHint')}
+                        className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20"
+                      >
+                        <ShieldCheck className="w-3 h-3" />
+                        {t('student.psychologists.trust.verified')}
+                      </span>
+                    )}
+                  </div>
+                  {p.specialization && (
+                    <div className="text-xs text-zinc-500 mt-0.5">
+                      <span className="text-zinc-600">{t('student.psychologists.specializationLabel')}: </span>
+                      {p.specialization}
+                    </div>
+                  )}
+                  {/* Сенімділік сигналдары : рейтинг, сеанстар саны */}
+                  <div className="flex gap-3 flex-wrap mt-1.5 text-xs text-zinc-500">
+                    {Number(p.rating_count) > 0 ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        <span className="font-medium text-zinc-300">{Number(p.avg_rating).toFixed(1)}</span>
+                        <span className="text-zinc-600">({p.rating_count})</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-zinc-600">
+                        <Star className="w-3 h-3" />
+                        {t('student.psychologists.trust.noRating')}
+                      </span>
+                    )}
+                    {Number(p.completed_sessions) > 0 && (
+                      <span className="inline-flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {t('student.psychologists.trust.sessionsCompleted', { count: Number(p.completed_sessions) })}
+                      </span>
+                    )}
+                  </div>
                   {/* Тәжірибе жылы мен тілдер белгілері */}
-                  <div className="flex gap-1.5 flex-wrap mt-2">
+                  <div className="flex gap-1.5 flex-wrap mt-2 items-center">
                     {p.experience_years && (
                       <Badge variant="secondary" className="text-xs">
                         {p.experience_years} {t('student.psychologists.experience')}
                       </Badge>
                     )}
-                    {p.languages && p.languages.split(',').map((l) => (
-                      <Badge key={l} variant="outline" className="text-xs">{l.trim()}</Badge>
-                    ))}
+                    {p.languages && (
+                      <>
+                        <span className="text-[10px] text-zinc-600">{t('student.psychologists.languagesLabel')}:</span>
+                        {p.languages.split(',').map((l) => (
+                          <Badge key={l} variant="outline" className="text-xs">{l.trim()}</Badge>
+                        ))}
+                      </>
+                    )}
                   </div>
                   {p.bio && (
                     <p className="text-xs text-zinc-600 mt-2 leading-relaxed line-clamp-2">{p.bio}</p>
@@ -190,7 +234,7 @@ export default function Psychologists() {
           ))}
         </div>
 
-        {/* Жазылу панелі — психолог таңдалғанда ғана көрінеді */}
+        {/* Жазылу панелі : психолог таңдалғанда ғана көрінеді */}
         {selected && (
           <div className="space-y-4 fade-in">
             <Card className="border-zinc-800 bg-zinc-900">
@@ -212,7 +256,7 @@ export default function Psychologists() {
                         <SelectItem value="all">{t('student.psychologists.filter.all')}</SelectItem>
                         {Object.keys(groupedSlots).map((d) => (
                           <SelectItem key={d} value={d}>
-                            {new Date(d).toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
+                            {formatDate(d, i18n.language, { weekday: 'long', month: 'long', day: 'numeric' })}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -228,9 +272,9 @@ export default function Psychologists() {
                 ) : filteredDates.map((date) => (
                   <div key={date}>
                     <p className="text-xs font-medium text-zinc-500 mb-2.5">
-                      {new Date(date).toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}
+                      {formatDate(date, i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
-                    {/* Уақыт слоттары — таңдалған слот ерекшеленеді */}
+                    {/* Уақыт слоттары : таңдалған слот ерекшеленеді */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                       {groupedSlots[date].map((slot) => (
                         <button
@@ -252,7 +296,7 @@ export default function Psychologists() {
               </CardContent>
             </Card>
 
-            {/* Жазылу формасы — слот таңдалғанда ғана көрінеді */}
+            {/* Жазылу формасы : слот таңдалғанда ғана көрінеді */}
             {selectedSlot && (
               <Card className="border-zinc-800 bg-zinc-900 fade-in">
                 <CardHeader className="pb-3">
@@ -297,7 +341,7 @@ export default function Psychologists() {
                   <div className="rounded-md bg-zinc-800 p-3.5 space-y-1.5 text-sm">
                     {[
                       [t('student.psychologists.selectedPsych'), selected.name],
-                      [t('student.appointments.date'), new Date(selectedSlot.date).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long' })],
+                      [t('student.appointments.date'), formatDate(selectedSlot.date, i18n.language, { day: 'numeric', month: 'long' })],
                       [t('student.appointments.time'), `${selectedSlot.start_time.slice(0, 5)}–${selectedSlot.end_time.slice(0, 5)}`],
                     ].map(([k, v]) => (
                       <div key={k} className="flex justify-between">

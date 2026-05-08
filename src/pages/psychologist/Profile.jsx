@@ -1,32 +1,309 @@
-// useEffect, useMemo, useState — жанама әсерлер, мемоизация және күй үшін
+// useEffect, useMemo, useState : жанама әсерлер, мемоизация және күй үшін
 import { useEffect, useMemo, useState } from 'react';
-// useForm — форманы басқару үшін
+// useForm : форманы басқару үшін
 import { useForm } from 'react-hook-form';
-// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
+// zodResolver : Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
-// z — форма валидация схемасын жасау үшін
+// z : форма валидация схемасын жасау үшін
 import { z } from 'zod';
-// toast — хабарлама тостерін көрсету үшін
+// toast : хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
-// Lucide иконалары — жүктелу, пайдаланушы, құлып, көз
-import { Loader2, User, Lock, Eye, EyeOff } from 'lucide-react';
-// useTranslation — аударма хуктары
+// Lucide иконалары : жүктелу, пайдаланушы, құлып, көз, верификация, ескерту, файл, плюс
+import { Loader2, User, Lock, Eye, EyeOff, ShieldCheck, ShieldAlert, FileText, ExternalLink, Upload } from 'lucide-react';
+// useTranslation : аударма хуктары
 import { useTranslation } from 'react-i18next';
-// api — серверге HTTP сұраныстар жіберу үшін
+// api : серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
-// useAuth — пайдаланушы деректері мен setUser функциясы үшін
+// useAuth : пайдаланушы деректері мен setUser функциясы үшін
 import { useAuth } from '../../context/AuthContext';
-// shadcn/ui компоненттері — батырма, енгізу, белгіше, мәтін аймағы, карта, бөлгіш
+// shadcn/ui компоненттері : батырма, енгізу, белгіше, мәтін аймағы, карта, бөлгіш
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
-// PasswordField — құпия сөз өрісі: көрсету/жасыру мүмкіндігімен
+// DOCUMENT_TYPES : backend енумымен сәйкес құжат түрлері
+const DOCUMENT_TYPES = ['diploma', 'license', 'certificate', 'id_card', 'other'];
+
+// STATUS_BADGE : статусқа сәйкес badge стилі
+const STATUS_BADGE = {
+  active: { variant: 'success', icon: ShieldCheck },
+  approved: { variant: 'success', icon: ShieldCheck },
+  pending: { variant: 'secondary', icon: null },
+  probation: { variant: 'default', icon: ShieldAlert },
+  suspended: { variant: 'destructive', icon: ShieldAlert },
+  rejected: { variant: 'destructive', icon: ShieldAlert },
+  revoked: { variant: 'destructive', icon: ShieldAlert },
+};
+
+// VerificationSection : психолог верификация бөлімі (статус + құжат тізімі + жіберу формасы)
+function VerificationSection() {
+  const { t, i18n } = useTranslation();
+  // status : сервердегі ағымдағы верификация күйі
+  const [status, setStatus] = useState(null);
+  // documents : жіберілген құжаттар тізімі
+  const [documents, setDocuments] = useState([]);
+  // loading : бастапқы жүктелу күйі
+  const [loading, setLoading] = useState(true);
+  // submitting : жаңа құжат жіберу күйі
+  const [submitting, setSubmitting] = useState(false);
+  // form : жаңа құжат формасының өрістері
+  const [form, setForm] = useState({
+    document_type: '',
+    document_number: '',
+    issuing_organization: '',
+    expires_at: '',
+    file_url: '',
+  });
+
+  // Бет жүктелуінде статус пен құжаттарды параллель алу
+  useEffect(() => {
+    Promise.all([
+      api.get('/psychologist/verification/status'),
+      api.get('/psychologist/verification/documents'),
+    ])
+      .then(([s, d]) => {
+        setStatus(s.psychologist || null);
+        setDocuments(d || []);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // submit : жаңа құжатты POST /api/psychologist/verification/documents-ке жіберу
+  async function submit(e) {
+    e.preventDefault();
+    if (!form.document_type || !form.file_url) {
+      toast.error(t('common.errors.required'));
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const created = await api.post('/psychologist/verification/documents', {
+        document_type: form.document_type,
+        document_number: form.document_number || null,
+        issuing_organization: form.issuing_organization || null,
+        expires_at: form.expires_at || null,
+        file_url: form.file_url,
+      });
+      setDocuments((d) => [created, ...d]);
+      setForm({
+        document_type: '',
+        document_number: '',
+        issuing_organization: '',
+        expires_at: '',
+        file_url: '',
+      });
+      toast.success(t('psychologist.verification.submitSuccess'));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card className="border-zinc-800 bg-zinc-900">
+        <CardContent className="py-8 flex items-center justify-center">
+          <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const currentStatus = status?.verification_status || 'pending';
+  const badge = STATUS_BADGE[currentStatus] || STATUS_BADGE.pending;
+  const StatusIcon = badge.icon;
+
+  return (
+    <Card className="border-zinc-800 bg-zinc-900">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+          <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
+          {t('psychologist.verification.title')}
+        </CardTitle>
+        <p className="text-xs text-zinc-500 mt-1">{t('psychologist.verification.subtitle')}</p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Ағымдағы статус және сенім балы */}
+        <div className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-800/40 p-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500">{t('psychologist.verification.status')}:</span>
+            <Badge variant={badge.variant} className="gap-1">
+              {StatusIcon && <StatusIcon className="w-3 h-3" />}
+              {t(`psychologist.verification.statuses.${currentStatus}`)}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500">{t('psychologist.verification.trustScore')}:</span>
+            <span className="text-sm font-semibold text-zinc-200">{status?.trust_score ?? 0}/100</span>
+          </div>
+          {status?.verified_at && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">{t('psychologist.verification.verifiedAt')}:</span>
+              <span className="text-xs text-zinc-300">
+                {new Date(status.verified_at).toLocaleDateString(i18n.language)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Жіберілген құжаттар тізімі */}
+        <div className="space-y-2">
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+            {t('psychologist.verification.documentsTitle')}
+          </h3>
+          {documents.length === 0 ? (
+            <p className="text-xs text-zinc-600 py-2">{t('psychologist.verification.noDocuments')}</p>
+          ) : (
+            <ul className="space-y-2">
+              {documents.map((doc) => {
+                const docBadge = STATUS_BADGE[doc.status] || STATUS_BADGE.pending;
+                return (
+                  <li
+                    key={doc.id}
+                    className="flex items-start justify-between gap-3 rounded-md border border-zinc-800 bg-zinc-800/30 p-3"
+                  >
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <FileText className="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-zinc-200">
+                          {t(`psychologist.verification.types.${doc.document_type}`)}
+                          {doc.document_number && (
+                            <span className="text-zinc-500 font-normal"> · {doc.document_number}</span>
+                          )}
+                        </div>
+                        {doc.issuing_organization && (
+                          <div className="text-xs text-zinc-500 truncate">{doc.issuing_organization}</div>
+                        )}
+                        {doc.review_notes && (
+                          <div className="text-xs text-amber-400/80 mt-1">
+                            <span className="text-zinc-500">{t('psychologist.verification.reviewNotes')}: </span>
+                            {doc.review_notes}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        {t('psychologist.verification.openLink')}
+                      </a>
+                      <Badge variant={docBadge.variant}>
+                        {t(`psychologist.verification.statuses.${doc.status}`)}
+                      </Badge>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <Separator className="bg-zinc-800" />
+
+        {/* Жаңа құжат жіберу формасы */}
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+              {t('psychologist.verification.uploadTitle')}
+            </h3>
+            <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+              {t('psychologist.verification.uploadHint')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>{t('psychologist.verification.documentType')} <span className="text-zinc-600">*</span></Label>
+              <Select
+                value={form.document_type}
+                onValueChange={(v) => setForm((f) => ({ ...f, document_type: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('psychologist.verification.documentTypePlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {DOCUMENT_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {t(`psychologist.verification.types.${type}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>{t('psychologist.verification.documentNumber')}</Label>
+              <Input
+                value={form.document_number}
+                onChange={(e) => setForm((f) => ({ ...f, document_number: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>{t('psychologist.verification.issuingOrganization')}</Label>
+              <Input
+                value={form.issuing_organization}
+                onChange={(e) => setForm((f) => ({ ...f, issuing_organization: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>{t('psychologist.verification.expiresAt')}</Label>
+              <Input
+                type="date"
+                value={form.expires_at}
+                onChange={(e) => setForm((f) => ({ ...f, expires_at: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>{t('psychologist.verification.fileUrl')} <span className="text-zinc-600">*</span></Label>
+            <Input
+              type="url"
+              placeholder={t('psychologist.verification.fileUrlPlaceholder')}
+              value={form.file_url}
+              onChange={(e) => setForm((f) => ({ ...f, file_url: e.target.value }))}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={submitting || !form.document_type || !form.file_url}
+            className="w-full sm:w-auto"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t('psychologist.verification.submitting')}
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4" />
+                {t('psychologist.verification.submitBtn')}
+              </>
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+// PasswordField : құпия сөз өрісі: көрсету/жасыру мүмкіндігімен
 function PasswordField({ id, label, registration, error }) {
-  // show — құпия сөздің көрінуін басқару күйі
+  // show : құпия сөздің көрінуін басқару күйі
   const [show, setShow] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -53,11 +330,11 @@ function PasswordField({ id, label, registration, error }) {
   );
 }
 
-// PasswordSection — құпия сөзді өзгерту бөлімі
+// PasswordSection : құпия сөзді өзгерту бөлімі
 function PasswordSection() {
   const { t } = useTranslation();
 
-  // pwSchema — құпия сөз валидация схемасы: сәйкестік тексеруімен
+  // pwSchema : құпия сөз валидация схемасы: сәйкестік тексеруімен
   const pwSchema = useMemo(() => z.object({
     current_password: z.string().min(1, t('common.errors.required')),
     new_password: z.string().min(6, t('common.errors.minPassword')),
@@ -73,7 +350,7 @@ function PasswordSection() {
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
-  // onSubmit — құпия сөзді API арқылы жаңартатын функция
+  // onSubmit : құпия сөзді API арқылы жаңартатын функция
   async function onSubmit(data) {
     try {
       await api.patch('/auth/password', {
@@ -128,12 +405,12 @@ function PasswordSection() {
   );
 }
 
-// PsychProfile — психолог профилі беті
+// PsychProfile : психолог профилі беті
 export default function PsychProfile() {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
 
-  // schema — профиль формасының валидация схемасы
+  // schema : профиль формасының валидация схемасы
   const schema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     specialization: z.string().optional(),
@@ -161,7 +438,7 @@ export default function PsychProfile() {
     });
   }, [reset]);
 
-  // onSubmit — профильді жаңартатын функция
+  // onSubmit : профильді жаңартатын функция
   async function onSubmit(data) {
     try {
       const updated = await api.patch('/psychologist/profile', {
@@ -180,14 +457,14 @@ export default function PsychProfile() {
     }
   }
 
-  // initials — аватар үшін аты-жөн бастапқы әріптерін алу
+  // initials : аватар үшін аты-жөн бастапқы әріптерін алу
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (
-    <div className="fade-in space-y-6 max-w-[560px]">
+    <div className="fade-in space-y-6">
       {/* Бет тақырыбы */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('psychologist.profile.title')}</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">{t('psychologist.profile.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('psychologist.profile.subtitle')}</p>
       </div>
 
@@ -204,55 +481,57 @@ export default function PsychProfile() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* Профиль редакциялау формасы */}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Card className="border-zinc-800 bg-zinc-900">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-              <User className="w-3.5 h-3.5 text-zinc-400" />
-              {t('psychologist.profile.subtitle')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Аты-жөні өрісі */}
-            <div className="space-y-1.5">
-              <Label htmlFor="name">{t('psychologist.profile.name')} <span className="text-zinc-600">*</span></Label>
-              <Input id="name" placeholder={t('psychologist.profile.name')} {...register('name')} />
-              {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
-            </div>
-
-            {/* Мамандану, тілдер және тәжірибе өрістері */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Десктопта 2 баған: профиль формасы | құпия сөз */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-8 space-y-6 lg:space-y-0">
+        {/* Профиль редакциялау формасы */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Card className="border-zinc-800 bg-zinc-900">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-zinc-400" />
+                {t('psychologist.profile.subtitle')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="specialization">{t('psychologist.profile.specialization')}</Label>
-                <Input id="specialization" {...register('specialization')} />
+                <Label htmlFor="name">{t('psychologist.profile.name')} <span className="text-zinc-600">*</span></Label>
+                <Input id="name" placeholder={t('psychologist.profile.name')} {...register('name')} />
+                {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="specialization">{t('psychologist.profile.specialization')}</Label>
+                  <Input id="specialization" {...register('specialization')} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="languages">{t('psychologist.profile.languages')}</Label>
+                  <Input id="languages" {...register('languages')} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="experience_years">{t('psychologist.profile.experience')}</Label>
+                  <Input id="experience_years" type="number" min={0} placeholder="5" {...register('experience_years')} />
+                </div>
+              </div>
+
               <div className="space-y-1.5">
-                <Label htmlFor="languages">{t('psychologist.profile.languages')}</Label>
-                <Input id="languages" {...register('languages')} />
+                <Label htmlFor="bio">{t('psychologist.profile.bio')}</Label>
+                <Textarea id="bio" placeholder={t('psychologist.profile.bioPlaceholder')} {...register('bio')} />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="experience_years">{t('psychologist.profile.experience')}</Label>
-                <Input id="experience_years" type="number" min={0} placeholder="5" {...register('experience_years')} />
-              </div>
-            </div>
 
-            {/* Өзі туралы мәліметтер өрісі */}
-            <div className="space-y-1.5">
-              <Label htmlFor="bio">{t('psychologist.profile.bio')}</Label>
-              <Textarea id="bio" placeholder={t('psychologist.profile.bioPlaceholder')} {...register('bio')} />
-            </div>
+              <Button type="submit" disabled={isSubmitting || !isDirty} className="w-full">
+                {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />{t('psychologist.profile.saving')}</> : t('psychologist.profile.saveBtn')}
+              </Button>
+            </CardContent>
+          </Card>
+        </form>
 
-            {/* Тек өзгеріс болса сақтау батырмасы белсенді */}
-            <Button type="submit" disabled={isSubmitting || !isDirty} className="w-full">
-              {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />{t('psychologist.profile.saving')}</> : t('psychologist.profile.saveBtn')}
-            </Button>
-          </CardContent>
-        </Card>
-      </form>
+        {/* Құпия сөз өзгерту бөлімі */}
+        <PasswordSection />
+      </div>
 
-      {/* Құпия сөз өзгерту бөлімі */}
-      <PasswordSection />
+      {/* Маманды растау бөлімі (толық ені) */}
+      <VerificationSection />
     </div>
   );
 }

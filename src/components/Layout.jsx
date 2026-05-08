@@ -1,8 +1,8 @@
-// useState — мобильді мәзір күйін басқару үшін
+// useState : мобильді мәзір күйін басқару үшін
 import { useState } from 'react';
-// Outlet, NavLink, useNavigate — маршруттау және навигация үшін
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-// Lucide иконалары — навигация элементтері үшін иконалар
+// Outlet, NavLink, useNavigate, useLocation : маршруттау және навигация үшін
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+// Lucide иконалары : навигация элементтері үшін иконалар
 import {
   BarChart2,
   CheckSquare,
@@ -19,26 +19,29 @@ import {
   Menu,
   X,
   UserCircle,
+  Flag,
 } from 'lucide-react';
-// useTranslation — аударма хуктары
+// useTranslation : аударма хуктары
 import { useTranslation } from 'react-i18next';
-// useAuth — пайдаланушы және logout функциясы үшін
+// useAuth : пайдаланушы және logout функциясы үшін
 import { useAuth } from '../context/AuthContext';
-// Separator — бөлгіш сызық компоненті
+// Separator : бөлгіш сызық компоненті
 import { Separator } from '@/components/ui/separator';
-// cn — шартты CSS класстарды біріктіру утилитасы
+// cn : шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
 
-// Layout — барлық рөлдерге ортақ бүйірлік панель орналасуы
+// Layout : барлық рөлдерге ортақ бүйірлік панель орналасуы
 export default function Layout() {
   // Аударма және аутентификация контекстін алу
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  // mobileOpen — мобильді мәзірдің ашық/жабық күйі
+  // mobileOpen : мобильді мәзірдің ашық/жабық күйі
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const isChatPage = location.pathname === '/student/chat';
 
-  // navConfig — әр рөлге арналған навигация элементтері
+  // navConfig : әр рөлге арналған навигация элементтері
   const navConfig = {
     student: [
       { to: '/student/dashboard', icon: BarChart2, label: t('nav.student.dashboard') },
@@ -60,45 +63,46 @@ export default function Layout() {
       { to: '/admin/dashboard', icon: LayoutDashboard, label: t('nav.admin.dashboard') },
       { to: '/admin/students', icon: Users, label: t('nav.admin.students') },
       { to: '/admin/psychologists', icon: UserCircle, label: t('nav.admin.psychologists') },
+      { to: '/admin/complaints', icon: Flag, label: t('nav.admin.complaints') },
       { to: '/admin/slots', icon: Settings, label: t('nav.admin.slots') },
     ],
   };
 
-  // roleLabels — рөл атауларының аудармалары
+  // roleLabels : рөл атауларының аудармалары
   const roleLabels = {
     student: t('nav.roles.student'),
     psychologist: t('nav.roles.psychologist'),
     admin: t('nav.roles.admin'),
   };
 
-  // handleLogout — жүйеден шығу және логин бетіне бағыттау
+  // handleLogout : жүйеден шығу және логин бетіне бағыттау
   function handleLogout() {
     logout();
     navigate('/login');
   }
 
-  // closeMobile — мобильді мәзірді жабу
+  // closeMobile : мобильді мәзірді жабу
   function closeMobile() {
     setMobileOpen(false);
   }
 
-  // navItems — ағымдағы рөлге сәйкес навигация элементтерін алу
+  // navItems : ағымдағы рөлге сәйкес навигация элементтерін алу
   const navItems = navConfig[user?.role] || [];
-  // initials — пайдаланушы атының бас әріптерін алу
+  // initials : пайдаланушы атының бас әріптерін алу
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
     : '?';
 
-  // SidebarContent — бүйірлік панельдің ішкі мазмұны: лого, навигация, тіл, пайдаланушы
+  // SidebarContent : бүйірлік панельдің ішкі мазмұны: лого, навигация, тіл, пайдаланушы
   const SidebarContent = () => (
     <>
       {/* Логотип блогы */}
       <div className="px-5 h-14 flex items-center gap-3 border-b border-zinc-800 shrink-0">
-        <div className="w-7 h-7 rounded-md bg-zinc-50 flex items-center justify-center shrink-0">
-          <BrainCircuit className="w-4 h-4 text-zinc-900" />
+        <div className="w-7 h-7 rounded-md bg-[#3d8a68] flex items-center justify-center shrink-0">
+          <BrainCircuit className="w-4 h-4 text-white" />
         </div>
         <div>
-          <div className="text-sm font-semibold text-zinc-50 leading-none">MindSpace</div>
+          <div className="text-sm font-semibold text-zinc-100 leading-none">MindSpace</div>
           <div className="text-[10px] text-zinc-500 mt-0.5">
             {t('layout.tagline')}
           </div>
@@ -169,6 +173,18 @@ export default function Layout() {
         >
           {t('lang.kk')}
         </button>
+        <div className="w-px h-4 bg-zinc-700" />
+        <button
+          onClick={() => i18n.changeLanguage('en')}
+          className={cn(
+            'flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors',
+            i18n.language === 'en'
+              ? 'bg-zinc-700 text-zinc-100'
+              : 'text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800/50'
+          )}
+        >
+          {t('lang.en')}
+        </button>
       </div>
 
       {/* Пайдаланушы ақпараты және шығу түймесі */}
@@ -208,14 +224,14 @@ export default function Layout() {
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-zinc-50 flex items-center justify-center">
-            <BrainCircuit className="w-3.5 h-3.5 text-zinc-900" />
+          <div className="w-6 h-6 rounded bg-[#3d8a68] flex items-center justify-center">
+            <BrainCircuit className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-sm font-semibold text-zinc-50">MindSpace</span>
+          <span className="text-sm font-semibold text-zinc-100">MindSpace</span>
         </div>
       </div>
 
-      {/* Мобильді фондық қабат — жабу үшін басу */}
+      {/* Мобильді фондық қабат : жабу үшін басу */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black/60"
@@ -244,9 +260,15 @@ export default function Layout() {
 
       {/* Негізгі мазмұн аймағы */}
       <main className="flex-1 lg:ml-[248px] min-h-screen pt-14 lg:pt-0">
-        <div className="max-w-[1200px] p-5 lg:p-8 fade-in">
-          <Outlet />
-        </div>
+        {isChatPage ? (
+          <div className="h-[calc(100vh-56px)] lg:h-screen p-5 lg:p-8 flex flex-col">
+            <Outlet />
+          </div>
+        ) : (
+          <div className="max-w-[1200px] mx-auto p-5 lg:p-8 fade-in">
+            <Outlet />
+          </div>
+        )}
       </main>
     </div>
   );

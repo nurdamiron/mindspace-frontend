@@ -1,29 +1,32 @@
-// useState, useEffect — компонент күйі мен жанама әсерлер үшін
+// useState, useEffect : компонент күйі мен жанама әсерлер үшін
 import { useState, useEffect } from 'react';
-// Link — ішкі сілтемелер үшін
+// Link : ішкі сілтемелер үшін
 import { Link } from 'react-router-dom';
-// ReactMarkdown — Markdown мәтінін HTML форматында көрсету үшін
+// ReactMarkdown : Markdown мәтінін HTML форматында көрсету үшін
 import ReactMarkdown from 'react-markdown';
-// Chart.js компоненттері — сызықтық диаграмма үшін
+// Chart.js компоненттері : сызықтық диаграмма үшін
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
   Title, Tooltip, Legend, Filler
 } from 'chart.js';
-// Line — сызықтық диаграмма компоненті
+// Line : сызықтық диаграмма компоненті
 import { Line } from 'react-chartjs-2';
-// Lucide иконалары — метрикалар, іс-әрекеттер және интерфейс үшін
+// Lucide иконалары : метрикалар, іс-әрекеттер және интерфейс үшін
 import {
   Smile, Zap, Moon, Battery, Target,
   CheckSquare, Brain, MessageSquare, Users,
   ArrowRight, CalendarDays, Sparkles, AlertTriangle, Loader2, X,
+  Star, ShieldCheck, ChevronRight,
 } from 'lucide-react';
-// useTranslation — аударма хуктары
+// formatDate : локализацияланған күн форматтағышы
+import { formatDate } from '@/lib/dateUtils';
+// useTranslation : аударма хуктары
 import { useTranslation } from 'react-i18next';
-// api — серверге HTTP сұраныстар жіберу үшін
+// api : серверге HTTP сұраныстар жіберу үшін
 import { api } from '../../api/client';
-// useAuth — ағымдағы пайдаланушы деректерін алу үшін
+// useAuth : ағымдағы пайдаланушы деректерін алу үшін
 import { useAuth } from '../../context/AuthContext';
-// shadcn/ui компоненттері — карта, батырма, бөлгіш, скелет
+// shadcn/ui компоненттері : карта, батырма, бөлгіш, скелет
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -32,16 +35,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 // Chart.js компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-// METRIC_ICONS — метрика атауын иконаға сәйкестендіретін объект
+// METRIC_ICONS : метрика атауын иконаға сәйкестендіретін объект
 const METRIC_ICONS = { mood: Smile, stress: Zap, sleep: Moon, energy: Battery, productivity: Target };
-// METRIC_COLORS — метрика атауын диаграмма түсіне сәйкестендіретін объект
+// METRIC_COLORS : метрика атауын диаграмма түсіне сәйкестендіретін объект
 const METRIC_COLORS = { mood: '#60a5fa', stress: '#f87171', sleep: '#a78bfa', energy: '#fbbf24', productivity: '#34d399' };
-// CHART_COLORS — диаграмма жолдарының реттелген түстер массиві
+// CHART_COLORS : диаграмма жолдарының реттелген түстер массиві
 const CHART_COLORS = ['#60a5fa', '#f87171', '#a78bfa', '#fbbf24', '#34d399'];
-// CHART_DASH — диаграмма жолдарының штрих үлгілері
+// CHART_DASH : диаграмма жолдарының штрих үлгілері
 const CHART_DASH = [[], [], [], [], []];
 
-// computeAlerts — стресс, көңіл-күй және ұйқы деңгейіне байланысты ескертулерді есептейді
+// computeAlerts : стресс, көңіл-күй және ұйқы деңгейіне байланысты ескертулерді есептейді
 function computeAlerts(checkIns, weeklyAverages) {
   const alerts = [];
   if (!checkIns || checkIns.length === 0) return alerts;
@@ -70,31 +73,37 @@ function computeAlerts(checkIns, weeklyAverages) {
   return alerts;
 }
 
-// StudentDashboard — студент бақылау тақтасының негізгі компоненті
+// StudentDashboard : студент бақылау тақтасының негізгі компоненті
 export default function StudentDashboard() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  // stats — серверден алынған статистика деректері
+  // stats : серверден алынған статистика деректері
   const [stats, setStats] = useState(null);
-  // loading — деректер жүктелу күйі
+  // loading : деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // activeMetrics — диаграммада көрсетілетін белсенді метрикалар
+  // activeMetrics : диаграммада көрсетілетін белсенді метрикалар
   const [activeMetrics, setActiveMetrics] = useState(['mood', 'stress', 'sleep']);
-  // insight — AI-инсайт мәтіні
+  // insight : AI-инсайт мәтіні
   const [insight, setInsight] = useState(null);
-  // insightLoading — AI инсайт жүктелу күйі
+  // insightLoading : AI инсайт жүктелу күйі
   const [insightLoading, setInsightLoading] = useState(false);
-  // insightError — AI инсайт қате хабарламасы
+  // insightError : AI инсайт қате хабарламасы
   const [insightError, setInsightError] = useState(null);
+  // recommendations : matchingEngine қайтаратын top-3 ұсынылған психологтар
+  const [recommendations, setRecommendations] = useState([]);
 
   const METRIC_KEYS = ['mood', 'stress', 'sleep', 'energy', 'productivity'];
 
   // Бет жүктелгенде студент статистикасын серверден алады
   useEffect(() => {
     api.get('/student/stats').then(setStats).finally(() => setLoading(false));
-  }, []);
+    // Параллель түрде ұсыныстарды жүктеу (UI тілін аргумент ретінде беру)
+    api.get(`/student/recommendations?lang=${i18n.language}`)
+      .then((data) => setRecommendations(data?.recommendations || []))
+      .catch(() => {});
+  }, [i18n.language]);
 
-  // loadInsight — AI-инсайт жүктеу функциясы
+  // loadInsight : AI-инсайт жүктеу функциясы
   async function loadInsight() {
     setInsightLoading(true);
     setInsightError(null);
@@ -122,14 +131,14 @@ export default function StudentDashboard() {
     </div>
   );
 
-  // checkIns — check-in тізімін дайындайды
+  // checkIns : check-in тізімін дайындайды
   const checkIns = stats?.checkIns || [];
-  // labels — диаграмма X осіндегі күн белгілері
+  // labels : диаграмма X осіндегі күн белгілері
   const labels = checkIns.map((c) =>
-    new Date(c.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
+    formatDate(c.date, i18n.language, { month: 'short', day: 'numeric' })
   );
 
-  // chartData — сызба үшін деректер жиынын белсенді метрикалар бойынша құрады
+  // chartData : сызба үшін деректер жиынын белсенді метрикалар бойынша құрады
   const chartData = {
     labels,
     datasets: activeMetrics.map((key, i) => {
@@ -149,36 +158,36 @@ export default function StudentDashboard() {
     }),
   };
 
-  // chartOptions — сызбаның визуалды параметрлері
+  // chartOptions : сызбаның визуалды параметрлері
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#27272a',
-        borderColor: '#3f3f46',
+        backgroundColor: '#f0f4f2',
+        borderColor: '#c4d6ca',
         borderWidth: 1,
-        titleColor: '#fafafa',
-        bodyColor: '#a1a1aa',
+        titleColor: '#1a2d22',
+        bodyColor: '#4a6657',
         padding: 10,
         cornerRadius: 6,
       },
     },
     scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', font: { size: 11 } } },
-      y: { min: 1, max: 5, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', stepSize: 1, font: { size: 11 } } },
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#4a6657', font: { size: 11 } } },
+      y: { min: 1, max: 5, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#4a6657', stepSize: 1, font: { size: 11 } } },
     },
   };
 
-  // avgs — апталық орташа мәндер
+  // avgs : апталық орташа мәндер
   const avgs = stats?.weeklyAverages || {};
-  // appts — кездесу санақтары
+  // appts : кездесу санақтары
   const appts = stats?.appointments || {};
-  // alerts — есептелген ескертулер тізімі
+  // alerts : есептелген ескертулер тізімі
   const alerts = computeAlerts(checkIns, avgs);
 
-  // QUICK_ACTIONS — жылдам сілтемелер тізімі
+  // QUICK_ACTIONS : жылдам сілтемелер тізімі
   const QUICK_ACTIONS = [
     { label: t('student.dashboard.actions.checkin'), href: '/student/checkin', icon: CheckSquare, primary: true },
     { label: t('student.dashboard.actions.screening'), href: '/student/screening', icon: Brain },
@@ -190,7 +199,7 @@ export default function StudentDashboard() {
     <div className="fade-in space-y-6">
       {/* Бет тақырыбы мен сәлемдесу */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">
+        <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">
           {user?.name?.split(' ')[0] || t('nav.roles.student')}
         </h1>
         <p className="text-sm text-zinc-500 mt-1">{t('student.dashboard.subtitle')}</p>
@@ -354,6 +363,78 @@ export default function StudentDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Сізге ұсынылады : matchingEngine талдауы бойынша top-3 маман */}
+      {recommendations.length > 0 && (
+        <Card className="border-zinc-800 bg-zinc-900">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+              <CardTitle className="text-sm font-medium text-zinc-300">
+                {t('student.dashboard.recommendations.title')}
+              </CardTitle>
+            </div>
+            <Link
+              to="/student/psychologists"
+              className="text-xs text-zinc-500 hover:text-zinc-300 inline-flex items-center gap-0.5 transition-colors"
+            >
+              {t('student.dashboard.recommendations.viewAll')}
+              <ChevronRight className="w-3 h-3" />
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-zinc-500 mb-3">{t('student.dashboard.recommendations.subtitle')}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+              {recommendations.map((p) => {
+                const reasonKeys = (p.reasons || []).map((r) => r.key);
+                return (
+                  <Link
+                    key={p.id}
+                    to="/student/psychologists"
+                    className="rounded-lg border border-zinc-800 bg-zinc-800/40 p-3 hover:border-zinc-600 hover:bg-zinc-800 transition-colors group"
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-semibold text-zinc-300 shrink-0">
+                        {p.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <div className="font-medium text-zinc-100 text-sm truncate">{p.name}</div>
+                          <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                        </div>
+                        {p.specialization && (
+                          <div className="text-[11px] text-zinc-500 truncate mt-0.5">{p.specialization}</div>
+                        )}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-[11px] text-zinc-500">
+                          {Number(p.rating_count) > 0 && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                              {Number(p.avg_rating).toFixed(1)}
+                            </span>
+                          )}
+                          {p.has_free_slots && (
+                            <span className="text-emerald-400/80">{t('student.dashboard.recommendations.freeSlots')}</span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {reasonKeys.slice(0, 2).map((rk) => (
+                            <span
+                              key={rk}
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-700/50 text-zinc-400"
+                            >
+                              {t(`student.dashboard.recommendations.reasons.${rk}`)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Төменгі қатар: жылдам әрекеттер және сеанс статистикасы */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
