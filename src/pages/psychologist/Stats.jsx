@@ -151,7 +151,9 @@ export default function PsychStats() {
                 {tagStats.slice(0, 8).map((t_item) => (
                   <div key={t_item.tags} className="flex items-center gap-3">
                     <div className="flex-1">
-                      <div className="text-xs font-medium text-zinc-300 mb-1.5">{t_item.tags}</div>
+                      <div className="text-xs font-medium text-zinc-300 mb-1.5">
+                        {t_item.tags.split(',').map(tag => tag.trim()).filter(Boolean).map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}
+                      </div>
                       <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
                         {/* Ең жоғары мәнге қатысты пайызды есептеп, ені белгілеу */}
                         <div

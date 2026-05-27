@@ -1,7 +1,7 @@
 // useState : мобильді мәзір күйін басқару үшін
 import { useState } from 'react';
 // Outlet, NavLink, useNavigate, useLocation : маршруттау және навигация үшін
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 // Lucide иконалары : навигация элементтері үшін иконалар
 import {
   BarChart2,
@@ -20,6 +20,7 @@ import {
   X,
   UserCircle,
   Flag,
+  AlertTriangle,
 } from 'lucide-react';
 // useTranslation : аударма хуктары
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,36 @@ import { useAuth } from '../context/AuthContext';
 import { Separator } from '@/components/ui/separator';
 // cn : шартты CSS класстарды біріктіру утилитасы
 import { cn } from '@/lib/utils';
+
+const BANNER_STYLES = {
+  pending:   'bg-amber-950/60 border-amber-800/50 text-amber-300',
+  probation: 'bg-blue-950/60 border-blue-800/50 text-blue-300',
+  suspended: 'bg-red-950/60 border-red-800/50 text-red-300',
+  rejected:  'bg-red-950/60 border-red-800/50 text-red-300',
+  revoked:   'bg-red-950/60 border-red-800/50 text-red-300',
+};
+
+function VerificationBanner({ status, t }) {
+  const style = BANNER_STYLES[status] || BANNER_STYLES.pending;
+  const message = t(`psychologist.verification.banner.${status}`, { defaultValue: '' });
+  if (!message) return null;
+  return (
+    <div className={cn('border-b px-5 py-2.5 flex items-center justify-between gap-4', style)}>
+      <div className="flex items-center gap-2 text-sm">
+        <AlertTriangle className="w-4 h-4 shrink-0" />
+        <span>{message}</span>
+      </div>
+      {(status === 'pending' || status === 'probation') && (
+        <Link
+          to="/psychologist/profile"
+          className="text-xs font-medium underline underline-offset-2 opacity-80 hover:opacity-100 shrink-0"
+        >
+          {t('psychologist.verification.banner.goToProfile')}
+        </Link>
+      )}
+    </div>
+  );
+}
 
 // Layout : барлық рөлдерге ортақ бүйірлік панель орналасуы
 export default function Layout() {
@@ -260,6 +291,10 @@ export default function Layout() {
 
       {/* Негізгі мазмұн аймағы */}
       <main className="flex-1 lg:ml-[248px] min-h-screen pt-14 lg:pt-0">
+        {/* Психолог верификация баннері */}
+        {user?.role === 'psychologist' && user?.verification_status && user.verification_status !== 'active' && (
+          <VerificationBanner status={user.verification_status} t={t} />
+        )}
         {isChatPage ? (
           <div className="h-[calc(100vh-56px)] lg:h-screen p-5 lg:p-8 flex flex-col">
             <Outlet />

@@ -1,87 +1,90 @@
-// useNavigate, Link — маршруттау және сілтемелер үшін
+import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-// useForm — форманы басқару үшін
 import { useForm } from 'react-hook-form';
-// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
 import { zodResolver } from '@hookform/resolvers/zod';
-// z — форма валидация схемасын жасау үшін
 import { z } from 'zod';
-// toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
-// Lucide иконалары — форма өрістері үшін иконалар
-import { Mail, Lock, BrainCircuit, User, ArrowRight, Loader2 } from 'lucide-react';
-// useTranslation — аударма хуктары
+import { Mail, Lock, BrainCircuit, User, ArrowRight, Loader2, GraduationCap, Stethoscope } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-// useAuth — аутентификация контекстінен login функциясын алу үшін
 import { useAuth } from '../context/AuthContext';
-// shadcn/ui компоненттері — UI элементтері
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
-// Register — жаңа студент тіркелу беті
 export default function Register() {
   const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [role, setRole] = useState('student');
 
-  // Тіркелу формасының валидация схемасы — міндетті өрістер мен құпиясөз сәйкестігі
-  const schema = z.object({
-    name: z.string().min(2, t('auth.register.errors.name')),
-    email: z.string().email(t('auth.register.errors.email')),
-    password: z.string().min(6, t('auth.register.errors.password')),
-    confirm: z.string(),
-    faculty: z.string().optional(),
-    course: z.coerce.number().min(1).max(6).optional().or(z.literal('')),
-  }).refine((d) => d.password === d.confirm, {
-    message: t('auth.register.errors.password'),
-    path: ['confirm'],
-  });
+  const schema = useMemo(() => {
+    const base = {
+      name: z.string().min(2, t('auth.register.errors.name')),
+      email: z.string().email(t('auth.register.errors.email')),
+      password: z.string().min(6, t('auth.register.errors.password')),
+      confirm: z.string(),
+    };
+    const shape = role === 'psychologist'
+      ? { ...base, specialization: z.string().optional() }
+      : { ...base, faculty: z.string().optional(), course: z.coerce.number().min(1).max(6).optional().or(z.literal('')) };
+    return z.object(shape).refine((d) => d.password === d.confirm, {
+      message: t('auth.register.errors.password'),
+      path: ['confirm'],
+    });
+  }, [role, t]);
 
-  // Форма хукін Zod схемасымен инициализациялау
-  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
   });
 
-  const courseValue = watch('course');
+  function switchRole(r) {
+    setRole(r);
+    reset();
+  }
 
-  // onSubmit — тіркелу сұранысын API-ге жіберу және студент дашбордына бағыттау
   async function onSubmit(data) {
     try {
+      const body = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role,
+        ...(role === 'psychologist'
+          ? { specialization: data.specialization || undefined }
+          : { faculty: data.faculty || undefined, course: data.course ? Number(data.course) : undefined }),
+      };
+
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          faculty: data.faculty || undefined,
-          course: data.course ? Number(data.course) : undefined,
-        }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || t('auth.register.errors.failed'));
 
-      // Токенді сақтап, сәтті хабарлама көрсету
       localStorage.setItem('token', json.token);
       toast.success(t('auth.register.title'));
-      navigate('/student/dashboard');
+
+      if (role === 'psychologist') {
+        navigate('/psychologist/profile');
+      } else {
+        navigate('/student/dashboard');
+      }
     } catch (err) {
       toast.error(err.message);
     }
   }
 
-  // Курс опцияларын аудармадан алу
   const courseOptions = t('auth.register.courseOptions', { returnObjects: true });
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-[440px]">
-        {/* Логотип және бренд атауы */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-9 h-9 rounded-lg bg-zinc-50 flex items-center justify-center">
             <BrainCircuit className="w-5 h-5 text-zinc-900" />
@@ -92,14 +95,45 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Тіркелу картасы */}
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg">{t('auth.register.title')}</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Роль переключатель */}
+            <div className="mb-5">
+              <p className="text-xs text-zinc-500 mb-2">{t('auth.register.roleLabel')}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => switchRole('student')}
+                  className={cn(
+                    'flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-medium transition-colors',
+                    role === 'student'
+                      ? 'border-zinc-400 bg-zinc-800 text-zinc-100'
+                      : 'border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                  )}
+                >
+                  <GraduationCap className="w-4 h-4" />
+                  {t('auth.register.roleStudent')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchRole('psychologist')}
+                  className={cn(
+                    'flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-medium transition-colors',
+                    role === 'psychologist'
+                      ? 'border-zinc-400 bg-zinc-800 text-zinc-100'
+                      : 'border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                  )}
+                >
+                  <Stethoscope className="w-4 h-4" />
+                  {t('auth.register.rolePsychologist')}
+                </button>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Аты-жөні өрісі */}
               <div className="space-y-1.5">
                 <Label htmlFor="reg-name">{t('auth.register.name')} <span className="text-zinc-600">*</span></Label>
                 <div className="relative">
@@ -109,7 +143,6 @@ export default function Register() {
                 {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
               </div>
 
-              {/* Email өрісі */}
               <div className="space-y-1.5">
                 <Label htmlFor="reg-email">{t('auth.register.email')} <span className="text-zinc-600">*</span></Label>
                 <div className="relative">
@@ -119,7 +152,6 @@ export default function Register() {
                 {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
               </div>
 
-              {/* Құпиясөз және растау өрістері */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-password">{t('auth.register.password')} <span className="text-zinc-600">*</span></Label>
@@ -129,7 +161,6 @@ export default function Register() {
                   </div>
                   {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
                 </div>
-                {/* Құпиясөзді растау өрісі */}
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-confirm">{t('auth.register.password')}</Label>
                   <Input id="reg-confirm" type="password" placeholder="••••••" {...register('confirm')} />
@@ -139,31 +170,35 @@ export default function Register() {
 
               <Separator className="bg-zinc-800" />
 
-              {/* Факультет және курс өрістері — міндетті емес */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="reg-faculty">{t('auth.register.faculty')}</Label>
-                  <Input id="reg-faculty" placeholder={t('auth.register.facultyPlaceholder')} {...register('faculty')} />
+              {role === 'student' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="reg-faculty">{t('auth.register.faculty')}</Label>
+                    <Input id="reg-faculty" placeholder={t('auth.register.facultyPlaceholder')} {...register('faculty')} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('auth.register.course')}</Label>
+                    <Select onValueChange={(v) => setValue('course', v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('auth.register.coursePlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6].map((n) => (
+                          <SelectItem key={n} value={String(n)}>
+                            {Array.isArray(courseOptions) ? courseOptions[n - 1] : String(n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                {/* Курс таңдау тізімі */}
+              ) : (
                 <div className="space-y-1.5">
-                  <Label>{t('auth.register.course')}</Label>
-                  <Select onValueChange={(v) => setValue('course', v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('auth.register.coursePlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <SelectItem key={n} value={String(n)}>
-                          {Array.isArray(courseOptions) ? courseOptions[n - 1] : t('admin.studentDetail.course', { n })}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="reg-spec">{t('auth.register.specialization')}</Label>
+                  <Input id="reg-spec" placeholder={t('auth.register.specializationPlaceholder')} {...register('specialization')} />
                 </div>
-              </div>
+              )}
 
-              {/* Жіберу түймесі — жүктелу жағдайын көрсетеді */}
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <><Loader2 className="w-4 h-4 animate-spin" />{t('auth.register.loading')}</>
@@ -173,8 +208,13 @@ export default function Register() {
               </Button>
             </form>
 
-            {/* Кіру және басты бетке сілтемелер */}
-            <div className="mt-5 text-center space-y-2">
+            {role === 'psychologist' && (
+              <p className="mt-4 text-xs text-zinc-500 text-center">
+                {t('auth.register.psychologistHint')}
+              </p>
+            )}
+
+            <div className="mt-4 text-center space-y-2">
               <p className="text-xs text-zinc-500">
                 {t('auth.register.hasAccount')}{' '}
                 <Link to="/login" className="text-zinc-300 hover:text-zinc-100 transition-colors">

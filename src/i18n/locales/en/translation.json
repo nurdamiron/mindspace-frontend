@@ -105,55 +105,127 @@
       "login": "Log in"
     },
     "stats": [
-      { "val": "24/7", "label": "AI support" },
-      { "val": "100%", "label": "Confidential" },
-      { "val": "3 min", "label": "Screening" }
+      {
+        "val": "24/7",
+        "label": "AI support"
+      },
+      {
+        "val": "100%",
+        "label": "Confidential"
+      },
+      {
+        "val": "3 min",
+        "label": "Screening"
+      }
     ],
     "features": {
       "title": "Everything you need for psychological well-being",
       "items": [
-        { "title": "Daily monitoring", "desc": "Track your mood, stress, sleep, and energy every day. See the dynamics of your well-being." },
-        { "title": "Psychological screening", "desc": "Take a standardized test to assess your stress level and psychological state." },
-        { "title": "Psychologist directory", "desc": "Choose a specialist by specialization, language, and experience. Book a convenient time." },
-        { "title": "AI assistant 24/7", "desc": "Get support at any time of day. The AI will listen, support you, and offer basic advice." },
-        { "title": "Personal analytics", "desc": "The AI analyzes your data and provides personal insights to improve your well-being." },
-        { "title": "Confidentiality", "desc": "Your data is protected. Only you and your psychologist have access to the information." }
+        {
+          "title": "Daily monitoring",
+          "desc": "Track your mood, stress, sleep, and energy every day. See the dynamics of your well-being."
+        },
+        {
+          "title": "Psychological screening",
+          "desc": "Take a standardized test to assess your stress level and psychological state."
+        },
+        {
+          "title": "Psychologist directory",
+          "desc": "Choose a specialist by specialization, language, and experience. Book a convenient time."
+        },
+        {
+          "title": "AI assistant 24/7",
+          "desc": "Get support at any time of day. The AI will listen, support you, and offer basic advice."
+        },
+        {
+          "title": "Personal analytics",
+          "desc": "The AI analyzes your data and provides personal insights to improve your well-being."
+        },
+        {
+          "title": "Confidentiality",
+          "desc": "Your data is protected. Only you and your psychologist have access to the information."
+        }
       ]
     },
     "steps": {
       "title": "How it works",
       "items": [
-        { "title": "Register", "desc": "Create an account in 2 minutes using your university email." },
-        { "title": "Track yourself", "desc": "Fill in daily check-ins and complete psychological screenings." },
-        { "title": "Get support", "desc": "Chat with the AI assistant or book an appointment with a live psychologist." }
+        {
+          "title": "Register",
+          "desc": "Create an account in 2 minutes using your university email."
+        },
+        {
+          "title": "Track yourself",
+          "desc": "Fill in daily check-ins and complete psychological screenings."
+        },
+        {
+          "title": "Get support",
+          "desc": "Chat with the AI assistant or book an appointment with a live psychologist."
+        }
       ]
     },
     "roles": {
       "title": "For all participants in the educational process",
       "items": [
-        { "role": "For students", "desc": "State monitoring, AI support, psychologist booking" },
-        { "role": "For psychologists", "desc": "Schedule management, student cards, analytics" },
-        { "role": "For administrators", "desc": "University-wide summary statistics, system management" }
+        {
+          "role": "For students",
+          "desc": "State monitoring, AI support, psychologist booking"
+        },
+        {
+          "role": "For psychologists",
+          "desc": "Schedule management, student cards, analytics"
+        },
+        {
+          "role": "For administrators",
+          "desc": "University-wide summary statistics, system management"
+        }
       ]
     },
     "privacy": {
       "title": "Your data is safe",
       "subtitle": "We understand that mental health is personal. Confidentiality is built into every level of the platform.",
       "items": [
-        { "title": "Only you and your psychologist", "desc": "Session details and your check-ins are visible only to you and the specialist you work with." },
-        { "title": "Anonymous analytics", "desc": "Administration sees only anonymized statistics — no names or personal data." },
-        { "title": "Secure storage", "desc": "All data is encrypted in transit and at rest. We do not share information with third parties." },
-        { "title": "You are in control", "desc": "You can stop using the platform at any time." }
+        {
+          "title": "Only you and your psychologist",
+          "desc": "Session details and your check-ins are visible only to you and the specialist you work with."
+        },
+        {
+          "title": "Anonymous analytics",
+          "desc": "Administration sees only anonymized statistics — no names or personal data."
+        },
+        {
+          "title": "Secure storage",
+          "desc": "All data is encrypted in transit and at rest. We do not share information with third parties."
+        },
+        {
+          "title": "You are in control",
+          "desc": "You can stop using the platform at any time."
+        }
       ]
     },
     "faq": {
       "title": "Frequently Asked Questions",
       "items": [
-        { "q": "Is my data confidential?", "a": "Yes. Your check-ins and session details are accessible only to you and your psychologist. Administration sees only anonymous faculty-level statistics." },
-        { "q": "Is it free for students?", "a": "Yes, the platform is completely free for all university students." },
-        { "q": "How do I book a psychologist?", "a": "Go to the Psychologists section, choose a specialist, and pick a convenient time from available slots." },
-        { "q": "Can my dean or teachers see my data?", "a": "No. Teachers and the dean's office have no access to the platform. Only psychologists and system administrators do." },
-        { "q": "Can I chat anonymously?", "a": "The AI assistant is available immediately after registration. Booking a psychologist requires a profile, but the specialist maintains professional confidentiality." }
+        {
+          "q": "Is my data confidential?",
+          "a": "Yes. Your check-ins and session details are accessible only to you and your psychologist. Administration sees only anonymous faculty-level statistics."
+        },
+        {
+          "q": "Is it free for students?",
+          "a": "Yes, the platform is completely free for all university students."
+        },
+        {
+          "q": "How do I book a psychologist?",
+          "a": "Go to the Psychologists section, choose a specialist, and pick a convenient time from available slots."
+        },
+        {
+          "q": "Can my dean or teachers see my data?",
+          "a": "No. Teachers and the dean's office have no access to the platform. Only psychologists and system administrators do."
+        },
+        {
+          "q": "Can I chat anonymously?",
+          "a": "The AI assistant is available immediately after registration. Booking a psychologist requires a profile, but the specialist maintains professional confidentiality."
+        }
       ]
     },
     "cta": {
@@ -219,7 +291,14 @@
       ],
       "course": "Year",
       "coursePlaceholder": "Select year",
-      "courseOptions": ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "Year 6"],
+      "courseOptions": [
+        "Year 1",
+        "Year 2",
+        "Year 3",
+        "Year 4",
+        "Year 5",
+        "Year 6"
+      ],
       "password": "Password",
       "passwordPlaceholder": "Minimum 6 characters",
       "submit": "Register",
@@ -231,7 +310,13 @@
         "email": "Enter a valid email",
         "password": "Password must be at least 6 characters",
         "failed": "Registration failed"
-      }
+      },
+      "roleLabel": "I am registering as",
+      "roleStudent": "Student",
+      "rolePsychologist": "Psychologist",
+      "specialization": "Specialization",
+      "specializationPlaceholder": "Clinical psychology",
+      "psychologistHint": "After registration, upload your documents in the profile — an administrator will review your application."
     }
   },
   "notFound": {
@@ -307,18 +392,39 @@
         "5": "Excellent"
       },
       "metrics": {
-        "mood": { "label": "Mood", "desc": "How are you feeling emotionally?" },
-        "stress": { "label": "Stress", "desc": "How tense or anxious are you?" },
-        "sleep": { "label": "Sleep", "desc": "How did you sleep last night?" },
-        "energy": { "label": "Energy", "desc": "What is your energy level?" },
-        "productivity": { "label": "Productivity", "desc": "How productive are you today?" }
+        "mood": {
+          "label": "Mood",
+          "desc": "How are you feeling emotionally?"
+        },
+        "stress": {
+          "label": "Stress",
+          "desc": "How tense or anxious are you?"
+        },
+        "sleep": {
+          "label": "Sleep",
+          "desc": "How did you sleep last night?"
+        },
+        "energy": {
+          "label": "Energy",
+          "desc": "What is your energy level?"
+        },
+        "productivity": {
+          "label": "Productivity",
+          "desc": "How productive are you today?"
+        }
       }
     },
     "screening": {
       "title": "Psychological screening",
       "subtitle": "Assessment of your psychological state",
       "question": "Question {{current}} of {{total}}",
-      "options": ["Never", "Sometimes", "Often", "Very often", "Always"],
+      "options": [
+        "Never",
+        "Sometimes",
+        "Often",
+        "Very often",
+        "Always"
+      ],
       "submit": "Finish",
       "notAllAnswered": "Answer all questions",
       "submitting": "Processing...",
@@ -462,7 +568,8 @@
       "status": {
         "scheduled": "Scheduled",
         "completed": "Completed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "no_show": "No-show"
       },
       "cancelSuccess": "Appointment cancelled",
       "complainBtn": "Report",
@@ -543,7 +650,8 @@
       "status": {
         "scheduled": "Scheduled",
         "completed": "Completed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "no_show": "Student no-show"
       },
       "format": {
         "offline": "In person",
@@ -647,6 +755,14 @@
         "probation": "Probation",
         "suspended": "Suspended",
         "revoked": "Revoked"
+      },
+      "banner": {
+        "pending": "Your application is under review. Upload documents in your profile.",
+        "probation": "You are on probation. Students cannot book sessions with you yet.",
+        "suspended": "Your account is suspended. Contact the administrator.",
+        "rejected": "Verification rejected. Contact the administrator.",
+        "revoked": "Verification revoked. Contact the administrator.",
+        "goToProfile": "Go to profile"
       }
     },
     "students": {
@@ -658,7 +774,7 @@
       "lastSession": "Last session"
     },
     "slots": {
-      "title": "My Schedule",
+      "title": "My Slots",
       "subtitle": "Manage your available time slots",
       "formTitle": "Add slot",
       "dateLabel": "Date",
@@ -713,7 +829,13 @@
         "sessions": "Sessions",
         "students": "Students"
       },
-      "csvHeaders": ["Faculty", "Avg. stress", "Avg. mood", "Active students", "Risk"],
+      "csvHeaders": [
+        "Faculty",
+        "Avg. stress",
+        "Avg. mood",
+        "Active students",
+        "Risk"
+      ],
       "riskLabels": {
         "high": "High",
         "moderate": "Moderate",

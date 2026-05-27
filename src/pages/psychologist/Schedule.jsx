@@ -150,6 +150,19 @@ export default function Schedule() {
     }
   }
 
+  // markNoShow — студент келмеді деп белгілейтін функция
+  async function markNoShow(id) {
+    try {
+      await api.patch(`/psychologist/appointments/${id}/no-show`);
+      setSessions((s) =>
+        s.map((ses) => ses.appointment_id === id ? { ...ses, status: 'no_show' } : ses)
+      );
+      toast.success(t('psychologist.schedule.status.no_show'));
+    } catch (err) {
+      toast.error(err.message);
+    }
+  }
+
   // saveNote — сеанс жазбасын серверге сақтайтын функция
   async function saveNote() {
     setSaving(true);
@@ -169,6 +182,7 @@ export default function Schedule() {
     scheduled: { label: t('psychologist.schedule.status.scheduled'), variant: 'default' },
     completed: { label: t('psychologist.schedule.status.completed'), variant: 'success' },
     cancelled: { label: t('psychologist.schedule.status.cancelled'), variant: 'secondary' },
+    no_show: { label: t('psychologist.schedule.status.no_show'), variant: 'destructive' },
   };
 
   // PERIODS — кезең сүзгісінің мәндері
@@ -274,6 +288,10 @@ export default function Schedule() {
                         <Button size="sm" onClick={() => completeSession(s.appointment_id)} className="flex items-center gap-1.5">
                           <CheckCircle className="w-3.5 h-3.5" />
                           {t('psychologist.schedule.status.completed')}
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => markNoShow(s.appointment_id)} className="flex items-center gap-1.5">
+                          <CalendarDays className="w-3.5 h-3.5" />
+                          {t('psychologist.schedule.status.no_show')}
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => setNoteModal(s)} className="flex items-center gap-1.5">
                           <ClipboardList className="w-3.5 h-3.5" />
