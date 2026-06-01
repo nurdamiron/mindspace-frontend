@@ -897,6 +897,29 @@
       "conditionChange": "Состояние",
       "surveyScore": "Балл: {{score}}/25"
     },
+    "psychologistDetail": {
+      "back": "К списку психологов",
+      "notFound": "Психолог не найден",
+      "completedSessions": "Завершённых сессий",
+      "totalStudents": "Студентов",
+      "openComplaints": "Открытых жалоб",
+      "registered": "Регистрация",
+      "verifiedAt": "Верифицирован",
+      "profile": "Профиль",
+      "specialization": "Специализация",
+      "languages": "Языки",
+      "experience": "Опыт (лет)",
+      "bio": "О себе",
+      "history": "История верификации",
+      "noHistory": "Событий нет",
+      "events": {
+        "created_by_admin": "Создан администратором",
+        "document_submitted": "Документ загружен",
+        "document_reviewed": "Документ проверен",
+        "status_updated": "Статус изменён",
+        "status_changed": "Статус изменён"
+      }
+    },
     "psychologistMgmt": {
       "title": "Управление психологами",
       "count": "{{count}} специалистов в системе",

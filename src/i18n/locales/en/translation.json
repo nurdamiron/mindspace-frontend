@@ -893,6 +893,29 @@
       "conditionChange": "Condition",
       "surveyScore": "Score: {{score}}/25"
     },
+    "psychologistDetail": {
+      "back": "Back to psychologists",
+      "notFound": "Psychologist not found",
+      "completedSessions": "Completed sessions",
+      "totalStudents": "Students",
+      "openComplaints": "Open complaints",
+      "registered": "Registered",
+      "verifiedAt": "Verified",
+      "profile": "Profile",
+      "specialization": "Specialization",
+      "languages": "Languages",
+      "experience": "Experience (years)",
+      "bio": "About",
+      "history": "Verification history",
+      "noHistory": "No events",
+      "events": {
+        "created_by_admin": "Created by admin",
+        "document_submitted": "Document submitted",
+        "document_reviewed": "Document reviewed",
+        "status_updated": "Status changed",
+        "status_changed": "Status changed"
+      }
+    },
     "psychologistMgmt": {
       "title": "Psychologist management",
       "count": "{{count}} specialists in the system",

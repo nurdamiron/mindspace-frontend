@@ -53,8 +53,8 @@ export default function PsychStats() {
     datasets: [{
       label: t('common.sessions'),
       data: (weeklyLoad || []).map((w) => w.count),
-      backgroundColor: '#52525b',
-      borderColor: '#71717a',
+      backgroundColor: '#94a3b8',
+      borderColor: '#6b7a90',
       borderWidth: 1,
       borderRadius: 4,
     }],
@@ -67,17 +67,17 @@ export default function PsychStats() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#27272a',
-        borderColor: '#3f3f46',
+        backgroundColor: '#e2e8f0',
+        borderColor: '#cbd5e1',
         borderWidth: 1,
-        titleColor: '#fafafa',
-        bodyColor: '#a1a1aa',
+        titleColor: '#0f172a',
+        bodyColor: '#64748b',
         cornerRadius: 6,
       },
     },
     scales: {
-      x: { grid: { display: false }, ticks: { color: '#52525b', font: { size: 11 } } },
-      y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', stepSize: 1, font: { size: 11 } } },
+      x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', stepSize: 1, font: { size: 11 } } },
     },
   };
 

@@ -1,22 +1,22 @@
-// useEffect, useState, useMemo — жанама әсерлер, күй және мемоизация үшін
+// Эффект, күй, мемоизация
 import { useEffect, useState, useMemo } from 'react';
-// useForm — форманы басқару үшін
+// Форманы басқару
 import { useForm } from 'react-hook-form';
-// zodResolver — Zod схемасын react-hook-form-ға байланыстыру үшін
+// Zod-ты формаға жалғау
 import { zodResolver } from '@hookform/resolvers/zod';
-// z — форма валидация схемасын жасау үшін
+// Валидация схемасы
 import { z } from 'zod';
-// toast — хабарлама тостерін көрсету үшін
+// Тост хабарламалары
 import { toast } from 'sonner';
-// Lucide иконалары — жүктелу, пайдаланушы, құпиясөз иконалары
+// Lucide иконалары
 import { Loader2, User, Lock, Eye, EyeOff } from 'lucide-react';
-// useTranslation — аударма хуктары
+// Аударма хук
 import { useTranslation } from 'react-i18next';
-// api — серверге HTTP сұраныстар жіберу үшін
+// HTTP API клиенті
 import { api } from '../../api/client';
-// useAuth — пайдаланушы деректері мен setUser функциясы үшін
+// Аутентификация контексі
 import { useAuth } from '../../context/AuthContext';
-// shadcn/ui компоненттері — батырма, енгізу, белгіше, карта, бөлгіш, тізім
+// shadcn/ui компоненттері
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,9 +24,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// PasswordField — құпия сөз өрісі: көру/жасыру мүмкіндігімен
+// Құпия сөз өрісі (көру/жасыру)
 function PasswordField({ id, label, registration, error }) {
-  // show — құпия сөздің көрінуін басқару күйі
+  // Көріну күйі
   const [show, setShow] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -38,7 +38,7 @@ function PasswordField({ id, label, registration, error }) {
           className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 pr-10"
           {...registration}
         />
-        {/* Көру/жасыру батырмасы */}
+        {/* Көру/жасыру */}
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
@@ -53,11 +53,11 @@ function PasswordField({ id, label, registration, error }) {
   );
 }
 
-// PasswordSection — құпия сөзді өзгерту бөлімі
+// Құпия сөзді өзгерту бөлімі
 function PasswordSection() {
   const { t } = useTranslation();
 
-  // pwSchema — Zod валидация схемасы: жаңа және растау сөздері сәйкес болуы керек
+  // Валидация: жаңа және растау сөздері сәйкес болуы керек
   const pwSchema = useMemo(() => z.object({
     current_password: z.string().min(1, t('common.errors.required')),
     new_password: z.string().min(6, t('common.errors.minPassword')),
@@ -67,13 +67,13 @@ function PasswordSection() {
     path: ['confirm_password'],
   }), [t]);
 
-  // Форма күйін және валидациясын инициализациялау
+  // Форманы баптау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(pwSchema),
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
-  // onSubmit — құпия сөзді серверге жіберу
+  // Құпия сөзді серверге жіберу
   async function onSubmit(data) {
     try {
       await api.patch('/auth/password', {
@@ -97,14 +97,14 @@ function PasswordSection() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Ағымдағы құпия сөз өрісі */}
+          {/* Ағымдағы құпия сөз */}
           <PasswordField
             id="current_password"
             label={t('student.profile.currentPassword')}
             registration={register('current_password')}
             error={errors.current_password}
           />
-          {/* Жаңа және растау құпия сөз өрістері */}
+          {/* Жаңа және растау өрістері */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <PasswordField
               id="new_password"
@@ -128,12 +128,12 @@ function PasswordSection() {
   );
 }
 
-// Profile — студент профилі беті
+// Студент профилі беті
 export default function Profile() {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
 
-  // schema — профиль деректерін валидациялау схемасы
+  // Профиль валидация схемасы
   const schema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     faculty: z.string().optional(),
@@ -142,16 +142,16 @@ export default function Profile() {
     age: z.coerce.number().min(16).max(99).optional().or(z.literal('')),
   }), [t]);
 
-  // Профиль формасын инициализациялау
+  // Форманы баптау
   const { register, handleSubmit, setValue, watch, reset, formState: { errors, isSubmitting, isDirty } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { name: '', faculty: '', course: '', gender: '', age: '' },
   });
 
-  // genderValue — жыныс өрісін бақылау
+  // Жыныс өрісін бақылау
   const genderValue = watch('gender');
 
-  // Компонент жүктелгенде профиль деректерін API-дан алу
+  // Профиль деректерін жүктеу
   useEffect(() => {
     api.get('/student/profile').then((data) => {
       reset({
@@ -164,7 +164,7 @@ export default function Profile() {
     });
   }, [reset]);
 
-  // onSubmit — профиль деректерін серверге сақтау
+  // Профиль деректерін сақтау
   async function onSubmit(data) {
     try {
       const updated = await api.patch('/student/profile', {
@@ -174,7 +174,7 @@ export default function Profile() {
         gender: data.gender || null,
         age: data.age ? Number(data.age) : null,
       });
-      // Сәтті жаңартылса контекстегі пайдаланушы атын өзгерту
+      // Контекстегі атты жаңарту
       if (setUser) setUser((u) => ({ ...u, name: updated.name }));
       toast.success(t('student.profile.success'));
       reset(data);
@@ -183,18 +183,18 @@ export default function Profile() {
     }
   }
 
-  // initials — пайдаланушы атының бас әріптерінен аватар мәтіні
+  // Аватар инициалдары
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (
     <div className="fade-in space-y-6 max-w-[560px]">
-      {/* Бет тақырыбы */}
+      {/* Тақырып */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('student.profile.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('student.profile.subtitle')}</p>
       </div>
 
-      {/* Аватар және пайдаланушы ақпараты */}
+      {/* Аватар мен ақпарат */}
       <div className="flex items-center gap-4">
         <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center text-xl font-bold text-zinc-300">
           {initials}
@@ -207,7 +207,7 @@ export default function Profile() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* Профиль деректерін өңдеу формасы */}
+      {/* Профильді өңдеу формасы */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-3">
@@ -217,14 +217,14 @@ export default function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Аты-жөні өрісі */}
+            {/* Аты-жөні */}
             <div className="space-y-1.5">
               <Label htmlFor="name">{t('student.profile.name')} <span className="text-zinc-600">*</span></Label>
               <Input id="name" placeholder={t('student.profile.name')} {...register('name')} />
               {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
             </div>
 
-            {/* Факультет, курс, жыныс, жас өрістері */}
+            {/* Факультет, курс, жыныс, жас */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="faculty">{t('student.profile.faculty')}</Label>
@@ -236,7 +236,7 @@ export default function Profile() {
                 <Input id="course" type="number" min={1} max={6} placeholder="1–6" {...register('course')} />
               </div>
 
-              {/* Жыныс таңдау тізімі */}
+              {/* Жыныс таңдау */}
               <div className="space-y-1.5">
                 <Label>{t('student.profile.gender')}</Label>
                 <Select
@@ -260,7 +260,7 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Сақтау батырмасы — деректер өзгермесе өшірулі */}
+            {/* Сақтау батырмасы (өзгеріссіз — өшірулі) */}
             <Button
               type="submit"
               disabled={isSubmitting || !isDirty}
@@ -279,7 +279,7 @@ export default function Profile() {
         </Card>
       </form>
 
-      {/* Құпия сөзді өзгерту бөлімі */}
+      {/* Құпия сөз бөлімі */}
       <PasswordSection />
     </div>
   );

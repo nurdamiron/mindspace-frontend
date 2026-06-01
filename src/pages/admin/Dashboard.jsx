@@ -28,12 +28,12 @@ const CHART_OPTS = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { labels: { color: '#71717a', font: { size: 11 } } },
-    tooltip: { backgroundColor: '#27272a', borderColor: '#3f3f46', borderWidth: 1, titleColor: '#fafafa', bodyColor: '#a1a1aa', cornerRadius: 6 },
+    legend: { labels: { color: '#6b7a90', font: { size: 11 } } },
+    tooltip: { backgroundColor: '#e2e8f0', borderColor: '#cbd5e1', borderWidth: 1, titleColor: '#0f172a', bodyColor: '#64748b', cornerRadius: 6 },
   },
   scales: {
-    x: { grid: { display: false }, ticks: { color: '#52525b', font: { size: 11 } } },
-    y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', font: { size: 11 } } },
+    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+    y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
   },
 };
 
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
     datasets: [{
       label: t('admin.dashboard.chartLabels.sessions'),
       data: (weeklyTrend || []).map((w) => w.count),
-      borderColor: '#71717a',
+      borderColor: '#6b7a90',
       backgroundColor: 'rgba(113,113,122,0.1)',
       fill: true, tension: 0.4, pointRadius: 3, borderWidth: 1.5,
     }],
@@ -93,8 +93,8 @@ export default function AdminDashboard() {
   const facultyChart = {
     labels: (facultyStats || []).map((f) => f.faculty),
     datasets: [
-      { label: t('admin.dashboard.chartLabels.students'), data: (facultyStats || []).map((f) => f.students), backgroundColor: '#52525b', borderRadius: 4 },
-      { label: t('admin.dashboard.chartLabels.sessions'), data: (facultyStats || []).map((f) => f.sessions), backgroundColor: '#3f3f46', borderRadius: 4 },
+      { label: t('admin.dashboard.chartLabels.students'), data: (facultyStats || []).map((f) => f.students), backgroundColor: '#94a3b8', borderRadius: 4 },
+      { label: t('admin.dashboard.chartLabels.sessions'), data: (facultyStats || []).map((f) => f.sessions), backgroundColor: '#cbd5e1', borderRadius: 4 },
     ],
   };
 

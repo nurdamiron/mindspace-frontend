@@ -1,62 +1,64 @@
-// BrowserRouter, Routes, Route, Navigate : маршруттау компоненттері
+// Маршруттау компоненттері
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-// Toaster : хабарлама тостерін көрсету компоненті
+// Хабарлама тостері
 import { Toaster } from 'sonner';
-// AuthProvider, useAuth : аутентификация провайдері және хук
+// Аутентификация провайдері мен хук
 import { AuthProvider, useAuth } from './context/AuthContext';
-// Layout : барлық рөлдерге ортақ бүйірлік панель орналасуы
+// Ортақ бүйірлік панель орналасуы
 import Layout from './components/Layout';
-// Landing : басты бет компоненті
+// Басты бет
 import Landing from './pages/Landing';
-// Login : кіру беті
+// Кіру беті
 import Login from './pages/Login';
-// Register : тіркелу беті
+// Тіркелу беті
 import Register from './pages/Register';
-// NotFound : 404 қате беті
+// 404 қате беті
 import NotFound from './pages/NotFound';
 
-// StudentDashboard : студент бақылау тақтасы
+// Студент бақылау тақтасы
 import StudentDashboard from './pages/student/Dashboard';
-// CheckIn : студенттің күнделікті чекин беті
+// Күнделікті чекин беті
 import CheckIn from './pages/student/CheckIn';
-// Screening : психологиялық скрининг беті
+// Психологиялық скрининг беті
 import Screening from './pages/student/Screening';
-// AIChat : AI чат беті
+// AI чат беті
 import AIChat from './pages/student/AIChat';
-// Psychologists : психологтар тізімі және жазылу беті
+// Психологтар тізімі мен жазылу беті
 import Psychologists from './pages/student/Psychologists';
-// Appointments : студенттің кездесулер тізімі
+// Студенттің кездесулер тізімі
 import Appointments from './pages/student/Appointments';
-// Profile : студент профилі беті
+// Студент профилі
 import Profile from './pages/student/Profile';
 
-// PsychSchedule : психологтің кесте беті
+// Психолог кесте беті
 import PsychSchedule from './pages/psychologist/Schedule';
-// StudentCard психологтің студент картасы
+// Студент картасы
 import StudentCard from './pages/psychologist/StudentCard';
-// PsychStats : психолог статистикасы беті
+// Психолог статистикасы
 import PsychStats from './pages/psychologist/Stats';
-// PsychProfile : психолог профилі беті
+// Психолог профилі
 import PsychProfile from './pages/psychologist/Profile';
-// PsychStudents : психологтің студенттер тізімі
+// Психологтың студенттер тізімі
 import PsychStudents from './pages/psychologist/Students';
-// PsychSlots : психологтің бос уақыт слоттары беті
+// Бос уақыт слоттары беті
 import PsychSlots from './pages/psychologist/Slots';
 
-// AdminDashboard : әкімші бақылау тақтасы
+// Әкімші бақылау тақтасы
 import AdminDashboard from './pages/admin/Dashboard';
-// PsychologistManagement : психологтарды басқару беті
+// Психологтарды басқару беті
 import PsychologistManagement from './pages/admin/PsychologistManagement';
-// SlotManagement : слоттарды басқару беті
+// Психологтың толық ақпараты
+import AdminPsychologistDetail from './pages/admin/PsychologistDetail';
+// Слоттарды басқару беті
 import SlotManagement from './pages/admin/SlotManagement';
-// AdminStudents : әкімшінің студенттер тізімі
+// Әкімшінің студенттер тізімі
 import AdminStudents from './pages/admin/Students';
-// AdminStudentDetail : студенттің толық ақпарат беті
+// Студенттің толық ақпараты
 import AdminStudentDetail from './pages/admin/StudentDetail';
-// AdminComplaints : шағымдарды басқару беті
+// Шағымдарды басқару беті
 import AdminComplaints from './pages/admin/Complaints';
 
-// ProtectedRoute : рөл негізінде маршруттарды қорғайтын компонент
+// Рөл бойынша маршрут қорғанысы
 function ProtectedRoute({ children, roles }) {
   const { user, loading } = useAuth();
   // Жүктелу кезінде спиннер көрсету
@@ -72,47 +74,55 @@ function ProtectedRoute({ children, roles }) {
   return children;
 }
 
-// RootRedirect : пайдаланушы рөліне қарай бастапқы бетке бағыттайды
+// Тек верификацияланған (active/probation) психологқа рұқсат, қалғаны профильге
+function VerifiedPsychOnly({ children }) {
+  const { user } = useAuth();
+  const allowed = ['active', 'probation'].includes(user?.verification_status);
+  if (!allowed) return <Navigate to="/psychologist/profile" replace />;
+  return children;
+}
+
+// Рөлге қарай бастапқы бетке бағыттау
 function RootRedirect() {
   const { user, loading } = useAuth();
-  // Жүктелу кезінде спиннер
+  // Жүктелу спиннері
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950">
       <div className="w-6 h-6 border-2 border-zinc-800 border-t-zinc-500 rounded-full animate-spin" />
     </div>
   );
-  // Кірмеген пайдаланушыға Landing беті
+  // Кірмесе Landing беті
   if (!user) return <Landing />;
-  // Рөлге қарай бастапқы бетке бағыттау
+  // Рөлге қарай бағыттау
   if (user.role === 'student') return <Navigate to="/student/dashboard" replace />;
   if (user.role === 'psychologist') return <Navigate to="/psychologist/schedule" replace />;
   if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
   return <Navigate to="/login" replace />;
 }
 
-// App : қосымшаның тамырлық компоненті: маршруттар мен провайдерлер
+// Қосымшаның тамырлық компоненті: маршруттар мен провайдерлер
 export default function App() {
   return (
     <AuthProvider>
-      {/* Toaster : жоғарғы оң жақта хабарлама тостерін орнату */}
+      {/* Хабарлама тостері (жоғарғы оң жақта) */}
       <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: '#f0f4f2',
-            border: '1px solid #c4d6ca',
-            color: '#1a2d22',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            color: '#0f172a',
           },
         }}
       />
       <BrowserRouter>
         <Routes>
-          {/* Тамырлық бет : рөлге қарай бағыттайды */}
+          {/* Тамырлық бет: рөлге қарай бағыттау */}
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Студент маршруттары : тек student рөлі үшін */}
+          {/* Студент маршруттары */}
           <Route path="/student" element={
             <ProtectedRoute roles={['student']}><Layout /></ProtectedRoute>
           }>
@@ -126,33 +136,34 @@ export default function App() {
             <Route path="profile" element={<Profile />} />
           </Route>
 
-          {/* Психолог маршруттары : тек psychologist рөлі үшін */}
+          {/* Психолог маршруттары */}
           <Route path="/psychologist" element={
             <ProtectedRoute roles={['psychologist']}><Layout /></ProtectedRoute>
           }>
             <Route index element={<Navigate to="schedule" replace />} />
-            <Route path="schedule" element={<PsychSchedule />} />
-            <Route path="students/:id" element={<StudentCard />} />
-            <Route path="stats" element={<PsychStats />} />
+            <Route path="schedule" element={<VerifiedPsychOnly><PsychSchedule /></VerifiedPsychOnly>} />
+            <Route path="students/:id" element={<VerifiedPsychOnly><StudentCard /></VerifiedPsychOnly>} />
+            <Route path="stats" element={<VerifiedPsychOnly><PsychStats /></VerifiedPsychOnly>} />
             <Route path="profile" element={<PsychProfile />} />
-            <Route path="students" element={<PsychStudents />} />
-            <Route path="slots" element={<PsychSlots />} />
+            <Route path="students" element={<VerifiedPsychOnly><PsychStudents /></VerifiedPsychOnly>} />
+            <Route path="slots" element={<VerifiedPsychOnly><PsychSlots /></VerifiedPsychOnly>} />
           </Route>
 
-          {/* Әкімші маршруттары : тек admin рөлі үшін */}
+          {/* Әкімші маршруттары */}
           <Route path="/admin" element={
             <ProtectedRoute roles={['admin']}><Layout /></ProtectedRoute>
           }>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="psychologists" element={<PsychologistManagement />} />
+            <Route path="psychologists/:id" element={<AdminPsychologistDetail />} />
             <Route path="complaints" element={<AdminComplaints />} />
             <Route path="slots" element={<SlotManagement />} />
             <Route path="students" element={<AdminStudents />} />
             <Route path="students/:id" element={<AdminStudentDetail />} />
           </Route>
 
-          {/* Барлық белгісіз маршруттар үшін 404 беті */}
+          {/* Белгісіз маршруттар: 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

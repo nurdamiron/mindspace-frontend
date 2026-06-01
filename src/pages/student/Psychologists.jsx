@@ -1,17 +1,17 @@
-// useState, useEffect : компонент күйі мен жанама әсерлер үшін
+// Күй мен жанама әсерлер
 import { useState, useEffect } from 'react';
-// Link : ішкі сілтемелер үшін
+// Ішкі сілтемелер
 import { Link } from 'react-router-dom';
-// toast : хабарлама тостерін көрсету үшін
+// Хабарлама тостері
 import { toast } from 'sonner';
-// Lucide иконалары : растау, навигация, күнтізбе, жүктелу
+// Lucide иконалары
 import { CheckCircle2, ChevronRight, CalendarDays, Loader2, ShieldCheck, Star, Users } from 'lucide-react';
-// useTranslation : аударма хуктары
+// Аударма хугі
 import { useTranslation } from 'react-i18next';
-// api : серверге HTTP сұраныстар жіберу үшін
+// Серверге HTTP сұраныстар
 import { api } from '../../api/client';
 import { formatDate } from '@/lib/dateUtils';
-// shadcn/ui компоненттері : батырма, белгі, карта, белгіше, мәтін аймағы, бөлгіш, тізім
+// shadcn/ui компоненттері
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,40 +19,40 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// cn : шартты CSS класстарды біріктіру утилитасы
+// Шартты CSS класс утилитасы
 import { cn } from '@/lib/utils';
 
-// Psychologists : психологтар тізімі және жазылу беті
+// Психологтар тізімі мен жазылу беті
 export default function Psychologists() {
   const { t, i18n } = useTranslation();
 
-  // psychologists : психологтар тізімі
+  // Психологтар тізімі
   const [psychologists, setPsychologists] = useState([]);
-  // selected : таңдалған психолог
+  // Таңдалған психолог
   const [selected, setSelected] = useState(null);
-  // slots : таңдалған психологтың бос слоттары
+  // Психологтың бос слоттары
   const [slots, setSlots] = useState([]);
-  // selectedSlot : таңдалған слот
+  // Таңдалған слот
   const [selectedSlot, setSelectedSlot] = useState(null);
-  // reason : жазылу себебі
+  // Жазылу себебі
   const [reason, setReason] = useState('');
-  // format : кездесу форматы (онлайн/офлайн)
+  // Кездесу форматы (онлайн/офлайн)
   const [format, setFormat] = useState('offline');
-  // loading : деректер жүктелу күйі
+  // Жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // booking : жазылу жүктелу күйі
+  // Жазылу күйі
   const [booking, setBooking] = useState(false);
-  // success : жазылу сәтті болды күйі
+  // Жазылу сәтті күйі
   const [success, setSuccess] = useState(false);
-  // filterDate : слотты күн бойынша сүзгілеу
+  // Слотты күн бойынша сүзгілеу
   const [filterDate, setFilterDate] = useState('');
 
-  // Беттің жүктелуінде психологтар тізімін API-дан алу
+  // Психологтар тізімін жүктеу
   useEffect(() => {
     api.get('/student/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
-  // selectPsychologist : психологты таңдап, оның бос уақыт слоттарын жүктеу
+  // Психологты таңдап, бос слоттарын жүктеу
   async function selectPsychologist(psych) {
     setSelected(psych);
     setSelectedSlot(null);
@@ -65,7 +65,7 @@ export default function Psychologists() {
     }
   }
 
-  // book : таңдалған слотқа жазылу сұранысын жіберу
+  // Таңдалған слотқа жазылу
   async function book() {
     if (!selectedSlot) return;
     setBooking(true);
@@ -85,14 +85,14 @@ export default function Psychologists() {
     }
   }
 
-  // Деректер жүктелу кезіндегі спиннер
+  // Жүктелу спиннері
   if (loading) return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="w-5 h-5 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
     </div>
   );
 
-  // Жазылу сәтті болғаннан кейін растау экраны
+  // Жазылудан кейінгі растау экраны
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-5">
@@ -103,7 +103,7 @@ export default function Psychologists() {
           <p className="text-lg font-semibold text-zinc-100">{t('student.psychologists.success')}</p>
           <p className="text-sm text-zinc-500 mt-1">{selected?.name}</p>
         </div>
-        {/* Қабылдауларға немесе бас бетке өту батырмалары */}
+        {/* Қабылдауларға не бас бетке өту */}
         <div className="flex gap-3">
           <Button asChild>
             <Link to="/student/appointments" className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export default function Psychologists() {
     );
   }
 
-  // groupedSlots : слоттарды күн бойынша топтастыру
+  // Слоттарды күн бойынша топтау
   const groupedSlots = slots.reduce((acc, slot) => {
     const d = slot.date;
     if (!acc[d]) acc[d] = [];
@@ -127,28 +127,28 @@ export default function Psychologists() {
     return acc;
   }, {});
 
-  // filteredDates : фильтр бойынша күндерді сүзу немесе алғашқы 5 күнді алу
+  // Сүзілген күндер немесе алғашқы 5 күн
   const filteredDates = filterDate
     ? Object.keys(groupedSlots).filter((d) => d === filterDate)
     : Object.keys(groupedSlots).slice(0, 5);
 
   return (
     <div className="fade-in space-y-5">
-      {/* Бет тақырыбы */}
+      {/* Тақырып */}
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">{t('student.psychologists.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('student.psychologists.subtitle')}</p>
       </div>
 
-      {/* Психолог таңдалса : екі баған, таңдалмаса : бір баған */}
+      {/* Таңдалса екі баған, әйтпесе бір баған */}
       <div className={cn('grid gap-5', selected ? 'grid-cols-1 lg:grid-cols-[1fr_1.4fr]' : 'grid-cols-1 max-w-2xl')}>
-        {/* Психологтар тізімі */}
+        {/* Тізім */}
         <div className="space-y-2.5">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-1">
             {t('student.psychologists.title')}
           </h2>
           {psychologists.map((p) => (
-            // Психологты таңдауға арналған карточка батырмасы
+            // Психологты таңдау карточкасы
             <button
               key={p.id}
               onClick={() => selectPsychologist(p)}
@@ -160,14 +160,14 @@ export default function Psychologists() {
               )}
             >
               <div className="flex items-start gap-3">
-                {/* Психолог аватары : аты-жөні бас әріптерінен */}
+                {/* Аватар: аты-жөн бас әріптері */}
                 <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 shrink-0">
                   {p.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
-                    {/* Тексерілген маман белгісі : verification_status='active' жағдайында ғана көрсетіледі */}
+                    {/* Тексерілген маман белгісі (тек active кезінде) */}
                     {p.verification_status === 'active' && (
                       <span
                         title={t('student.psychologists.trust.verifiedHint')}
@@ -184,7 +184,7 @@ export default function Psychologists() {
                       {p.specialization}
                     </div>
                   )}
-                  {/* Сенімділік сигналдары : рейтинг, сеанстар саны */}
+                  {/* Сенім сигналдары: рейтинг, сеанстар саны */}
                   <div className="flex gap-3 flex-wrap mt-1.5 text-xs text-zinc-500">
                     {Number(p.rating_count) > 0 ? (
                       <span className="inline-flex items-center gap-1">
@@ -205,7 +205,7 @@ export default function Psychologists() {
                       </span>
                     )}
                   </div>
-                  {/* Тәжірибе жылы мен тілдер белгілері */}
+                  {/* Тәжірибе мен тілдер белгілері */}
                   <div className="flex gap-1.5 flex-wrap mt-2 items-center">
                     {p.experience_years && (
                       <Badge variant="secondary" className="text-xs">
@@ -234,7 +234,7 @@ export default function Psychologists() {
           ))}
         </div>
 
-        {/* Жазылу панелі : психолог таңдалғанда ғана көрінеді */}
+        {/* Жазылу панелі (психолог таңдалғанда) */}
         {selected && (
           <div className="space-y-4 fade-in">
             <Card className="border-zinc-800 bg-zinc-900">
@@ -244,7 +244,7 @@ export default function Psychologists() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Күн бойынша фильтр */}
+                {/* Күн сүзгісі */}
                 {Object.keys(groupedSlots).length > 0 && (
                   <div className="space-y-1.5">
                     <Label>{t('student.psychologists.selectSlot')}</Label>
@@ -264,7 +264,7 @@ export default function Psychologists() {
                   </div>
                 )}
 
-                {/* Бос слот жоқ болса хабар, болса күн бойынша топталған слоттар */}
+                {/* Слот жоқ болса хабар, болса топталған слоттар */}
                 {filteredDates.length === 0 ? (
                   <div className="text-center py-8 text-sm text-zinc-600">
                     {t('student.psychologists.noSlots')}
@@ -274,7 +274,7 @@ export default function Psychologists() {
                     <p className="text-xs font-medium text-zinc-500 mb-2.5">
                       {formatDate(date, i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
-                    {/* Уақыт слоттары : таңдалған слот ерекшеленеді */}
+                    {/* Уақыт слоттары (таңдалғаны ерекшеленеді) */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                       {groupedSlots[date].map((slot) => (
                         <button
@@ -296,14 +296,14 @@ export default function Psychologists() {
               </CardContent>
             </Card>
 
-            {/* Жазылу формасы : слот таңдалғанда ғана көрінеді */}
+            {/* Жазылу формасы (слот таңдалғанда) */}
             {selectedSlot && (
               <Card className="border-zinc-800 bg-zinc-900 fade-in">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-zinc-300">{t('student.psychologists.selectSlot')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Онлайн/офлайн форматын таңдау */}
+                  {/* Формат таңдау */}
                   <div className="space-y-1.5">
                     <Label>{t('student.psychologists.format')}</Label>
                     <div className="grid grid-cols-2 gap-2">
@@ -325,7 +325,7 @@ export default function Psychologists() {
                     </div>
                   </div>
 
-                  {/* Жазылу себебін енгізу */}
+                  {/* Себеп енгізу */}
                   <div className="space-y-1.5">
                     <Label>
                       {t('student.psychologists.reason')}
@@ -337,7 +337,7 @@ export default function Psychologists() {
                     />
                   </div>
 
-                  {/* Жазылу мәліметтерінің қорытынды шолуы */}
+                  {/* Жазылу қорытындысы */}
                   <div className="rounded-md bg-zinc-800 p-3.5 space-y-1.5 text-sm">
                     {[
                       [t('student.psychologists.selectedPsych'), selected.name],
@@ -351,7 +351,7 @@ export default function Psychologists() {
                     ))}
                   </div>
 
-                  {/* Жазылуды растау батырмасы */}
+                  {/* Растау батырмасы */}
                   <Button className="w-full" onClick={book} disabled={booking}>
                     {booking ? (
                       <>

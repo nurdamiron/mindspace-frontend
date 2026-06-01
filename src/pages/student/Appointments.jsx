@@ -1,16 +1,16 @@
-// useState, useEffect : компонент күйі мен жанама әсерлер үшін
+// Компонент күйі мен әсерлер
 import { useState, useEffect } from 'react';
-// Link : ішкі сілтемелер үшін
+// Ішкі сілтемелер
 import { Link } from 'react-router-dom';
-// Lucide иконалары : рейтинг, пайдаланушылар, күнтізбе, жабу, уақыт, формат, шағым
+// Иконалар
 import { Star, Users, CalendarDays, X, Clock, Wifi, MapPin, Flag } from 'lucide-react';
-// toast : хабарлама тостерін көрсету үшін
+// Тостер хабарламалары
 import { toast } from 'sonner';
-// useTranslation : аударма хуктары
+// Аударма хук
 import { useTranslation } from 'react-i18next';
-// api : серверге HTTP сұраныстар жіберу үшін
+// HTTP сұраныстар
 import { api } from '../../api/client';
-// shadcn/ui компоненттері : диалог, батырма, белгі, белгіше, мәтін аймағы, скелет
+// shadcn/ui компоненттері
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,11 +19,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// COMPLAINT_CATEGORIES, COMPLAINT_SEVERITIES : backend енумдерімен сәйкес
+// Backend енумдерімен сәйкес шағым категориялары мен деңгейлері
 const COMPLAINT_CATEGORIES = ['ethics', 'no_show', 'harassment', 'poor_quality', 'boundary_violation', 'other'];
 const COMPLAINT_SEVERITIES = ['low', 'medium', 'high', 'critical'];
 
-// StarRating : жұлдызды рейтинг компоненті: оқу немесе өзгерту режимінде жұмыс істейді
+// Жұлдызды рейтинг: оқу не өзгерту режимі
 function StarRating({ score, onChange, readOnly }) {
   return (
     <div className="flex gap-1">
@@ -35,7 +35,7 @@ function StarRating({ score, onChange, readOnly }) {
           className={readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-110 transition-transform'}
           disabled={readOnly}
         >
-          {/* Таңдалған жұлдыздарды толтырады */}
+          {/* Таңдалған жұлдыздарды толтыру */}
           <Star
             className={`w-5 h-5 transition-colors ${
               s <= score ? 'fill-zinc-300 text-zinc-300' : 'text-zinc-700'
@@ -47,7 +47,7 @@ function StarRating({ score, onChange, readOnly }) {
   );
 }
 
-// STATUS_STYLES : кездесу статусына сәйкес стиль конфигурациясы
+// Статус бойынша стиль конфигурациясы
 const STATUS_STYLES = {
   scheduled: { variant: 'default', dot: 'bg-zinc-400' },
   completed: { variant: 'success', dot: 'bg-emerald-400' },
@@ -55,40 +55,40 @@ const STATUS_STYLES = {
   no_show:   { variant: 'destructive', dot: 'bg-red-400' },
 };
 
-// Appointments : студенттің кездесулер беті
+// Студенттің кездесулер беті
 export default function Appointments() {
   const { t, i18n } = useTranslation();
-  // appointments : кездесулер тізімі
+  // Кездесулер тізімі
   const [appointments, setAppointments] = useState([]);
-  // loading : деректер жүктелу күйі
+  // Жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // feedbackModal : кері байланыс диалогындағы кездесу
+  // Кері байланыс диалогындағы кездесу
   const [feedbackModal, setFeedbackModal] = useState(null);
-  // feedbackScore : кері байланыс ұпайы
+  // Кері байланыс ұпайы
   const [feedbackScore, setFeedbackScore] = useState(5);
-  // feedbackText : кері байланыс мәтіні
+  // Кері байланыс мәтіні
   const [feedbackText, setFeedbackText] = useState('');
-  // submitting : кері байланыс жіберу күйі
+  // Кері байланыс жіберу күйі
   const [submitting, setSubmitting] = useState(false);
-  // cancelling : болдырмау процесіндегі кездесу идентификаторы
+  // Болдырмалудағы кездесу ID-і
   const [cancelling, setCancelling] = useState(null);
-  // confirmCancel : болдырмауды растау диалогындағы кездесу
+  // Болдырмауды растау диалогы
   const [confirmCancel, setConfirmCancel] = useState(null);
-  // complaintModal : шағым беру диалогындағы кездесу
+  // Шағым диалогындағы кездесу
   const [complaintModal, setComplaintModal] = useState(null);
-  // complaintCategory, complaintSeverity, complaintDetails : шағым формасының өрістері
+  // Шағым формасының өрістері
   const [complaintCategory, setComplaintCategory] = useState('');
   const [complaintSeverity, setComplaintSeverity] = useState('medium');
   const [complaintDetails, setComplaintDetails] = useState('');
-  // submittingComplaint : шағым жіберілу күйі
+  // Шағым жіберілу күйі
   const [submittingComplaint, setSubmittingComplaint] = useState(false);
 
-  // Бет жүктелгенде кездесулерді серверден алады
+  // Бет жүктелгенде кездесулерді алу
   useEffect(() => {
     api.get('/student/appointments').then(setAppointments).finally(() => setLoading(false));
   }, []);
 
-  // cancelAppointment : кездесуді болдырмау: статусты жергілікті жаңартады
+  // Кездесуді болдырмау: статусты жергілікті жаңарту
   async function cancelAppointment(id) {
     setCancelling(id);
     try {
@@ -105,7 +105,7 @@ export default function Appointments() {
     }
   }
 
-  // submitFeedback : кері байланыс жіберу: ұпай мен мәтінді серверге сақтайды
+  // Кері байланыс жіберу: ұпай мен мәтінді сақтау
   async function submitFeedback() {
     setSubmitting(true);
     try {
@@ -113,7 +113,7 @@ export default function Appointments() {
         feedback_score: feedbackScore,
         feedback_text: feedbackText,
       });
-      // Жергілікті тізімде ұпайды жаңартады
+      // Жергілікті тізімде ұпайды жаңарту
       setAppointments((a) =>
         a.map((ap) =>
           ap.id === feedbackModal.id ? { ...ap, feedback_score: feedbackScore } : ap
@@ -128,7 +128,7 @@ export default function Appointments() {
     }
   }
 
-  // openComplaint : шағым диалогін аша отырып, форма өрістерін бастапқы күйіне қайтарады
+  // Шағым диалогын ашып, форманы тазарту
   function openComplaint(a) {
     setComplaintModal(a);
     setComplaintCategory('');
@@ -136,7 +136,7 @@ export default function Appointments() {
     setComplaintDetails('');
   }
 
-  // submitComplaint : шағымды POST /api/student/complaints арқылы жібереді
+  // Шағымды POST /api/student/complaints арқылы жіберу
   async function submitComplaint() {
     if (!complaintCategory || complaintDetails.trim().length < 10) {
       toast.error(t('common.errors.required'));
@@ -159,7 +159,7 @@ export default function Appointments() {
     }
   }
 
-  // Жүктелу кезінде скелет экраны
+  // Жүктелу скелеті
   if (loading) return (
     <div className="fade-in space-y-5">
       <div className="space-y-2">
@@ -170,11 +170,11 @@ export default function Appointments() {
     </div>
   );
 
-  // Кездесулерді алдағы және өткен деп бөледі
+  // Кездесулерді алдағы/өткен деп бөлу
   const upcoming = appointments.filter(a => a.status === 'scheduled');
   const past = appointments.filter(a => a.status !== 'scheduled');
 
-  // pastByMonth : өткен кездесулерді ай бойынша топтастырады
+  // Өткен кездесулерді ай бойынша топтау
   const pastByMonth = past.reduce((acc, a) => {
     const date = new Date(a.date);
     const key = date.toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' });
@@ -183,7 +183,7 @@ export default function Appointments() {
     return acc;
   }, {});
 
-  // AppointmentCard жеке кездесу картасы компоненті
+  // Жеке кездесу картасы
   function AppointmentCard({ a }) {
     const config = STATUS_STYLES[a.status] || STATUS_STYLES.scheduled;
     const date = new Date(a.date);
@@ -193,14 +193,14 @@ export default function Appointments() {
 
     return (
       <div className="flex gap-0 rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden hover:border-zinc-700 transition-colors">
-        {/* Күн бағаны : апта күні, сан, ай атауы */}
+        {/* Күн бағаны: апта күні, сан, ай */}
         <div className="w-16 shrink-0 flex flex-col items-center justify-center bg-zinc-800/50 py-4 gap-0.5">
           <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">{weekday}</span>
           <span className="text-2xl font-bold text-zinc-100 leading-none">{day}</span>
           <span className="text-[11px] text-zinc-400 uppercase tracking-wide">{month}</span>
         </div>
 
-        {/* Кездесу мазмұны: психолог аты, статус, уақыт, формат */}
+        {/* Мазмұн: психолог, статус, уақыт, формат */}
         <div className="flex-1 min-w-0 p-4 flex flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -212,7 +212,7 @@ export default function Appointments() {
             <Badge variant={config.variant} className="shrink-0">{t(`student.appointments.status.${a.status}`) || a.status}</Badge>
           </div>
 
-          {/* Уақыт және формат (онлайн/офлайн) ақпараты */}
+          {/* Уақыт пен формат (онлайн/офлайн) */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="flex items-center gap-1 text-xs text-zinc-500">
               <Clock className="w-3 h-3" />
@@ -228,7 +228,7 @@ export default function Appointments() {
             )}
           </div>
 
-          {/* Болдырмау немесе кері байланыс қалдыру батырмалары */}
+          {/* Болдырмау/кері байланыс батырмалары */}
           <div className="flex items-center justify-between gap-2 mt-1">
             <div>
               {a.feedback_score && <StarRating score={a.feedback_score} readOnly />}
@@ -246,7 +246,7 @@ export default function Appointments() {
                   {t('student.appointments.cancelBtn')}
                 </Button>
               )}
-              {/* Аяқталған кездесуге кері байланыс берілмесе батырма шығады */}
+              {/* Аяқталғанға әлі кері байланыс жоқ болса */}
               {a.status === 'completed' && !a.feedback_score && (
                 <Button
                   variant="secondary"
@@ -261,7 +261,7 @@ export default function Appointments() {
                   {t('student.appointments.feedbackBtn')}
                 </Button>
               )}
-              {/* Шағым беру : тек өткен (completed/no_show) кездесулерге қол жетімді */}
+              {/* Шағым: тек completed/no_show кездесулерге */}
               {(a.status === 'completed' || a.status === 'no_show') && (
                 <Button
                   variant="ghost"
@@ -282,13 +282,13 @@ export default function Appointments() {
 
   return (
     <div className="fade-in space-y-6">
-      {/* Бет тақырыбы */}
+      {/* Тақырып */}
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">{t('student.appointments.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('student.appointments.subtitle')}</p>
       </div>
 
-      {/* Кездесу жоқ болса бос күй экраны */}
+      {/* Кездесу жоқ болса бос күй */}
       {appointments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-14 h-14 rounded-2xl bg-zinc-800/80 flex items-center justify-center">
@@ -307,7 +307,7 @@ export default function Appointments() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Алдағы кездесулер бөлімі */}
+          {/* Алдағы кездесулер */}
           {upcoming.length > 0 && (
             <section className="space-y-2.5">
               <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 px-0.5">
@@ -317,7 +317,7 @@ export default function Appointments() {
             </section>
           )}
 
-          {/* Өткен кездесулер : айлар бойынша топтастырылған */}
+          {/* Өткен кездесулер: айлар бойынша */}
           {past.length > 0 && (
             <section className="space-y-5">
               <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 px-0.5">
@@ -334,7 +334,7 @@ export default function Appointments() {
         </div>
       )}
 
-      {/* Болдырмауды растау диалогы */}
+      {/* Болдырмау растау диалогы */}
       <Dialog open={!!confirmCancel} onOpenChange={(open) => !open && setConfirmCancel(null)}>
         <DialogContent className="max-w-[380px]">
           <DialogHeader>
@@ -358,7 +358,7 @@ export default function Appointments() {
         </DialogContent>
       </Dialog>
 
-      {/* Кері байланыс диалогы : жұлдыз рейтингі мен пікір өрісі */}
+      {/* Кері байланыс диалогы: рейтинг пен пікір */}
       <Dialog open={!!feedbackModal} onOpenChange={(open) => !open && setFeedbackModal(null)}>
         <DialogContent className="max-w-[400px]">
           <DialogHeader>
@@ -368,12 +368,12 @@ export default function Appointments() {
           <div className="space-y-5 py-2">
             <p className="text-sm text-zinc-400">{feedbackModal?.psychologist_name}</p>
 
-            {/* Жұлдыз рейтингін таңдау */}
+            {/* Рейтинг таңдау */}
             <div className="flex justify-center py-1">
               <StarRating score={feedbackScore} onChange={setFeedbackScore} />
             </div>
 
-            {/* Мәтіндік пікір өрісі */}
+            {/* Пікір өрісі */}
             <div className="space-y-1.5">
               <Label>{t('student.appointments.feedbackDialog.comment')}</Label>
               <Textarea
@@ -398,7 +398,7 @@ export default function Appointments() {
         </DialogContent>
       </Dialog>
 
-      {/* Шағым беру диалогы : категория, маңыздылық және сипаттама өрістері */}
+      {/* Шағым диалогы: категория, маңыздылық, сипаттама */}
       <Dialog open={!!complaintModal} onOpenChange={(open) => !open && setComplaintModal(null)}>
         <DialogContent className="max-w-[440px]">
           <DialogHeader>
@@ -414,7 +414,7 @@ export default function Appointments() {
             </p>
             <div className="text-sm text-zinc-300 font-medium">{complaintModal?.psychologist_name}</div>
 
-            {/* Категория таңдау */}
+            {/* Категория */}
             <div className="space-y-1.5">
               <Label>{t('student.appointments.complaintDialog.category')}</Label>
               <Select value={complaintCategory} onValueChange={setComplaintCategory}>
@@ -449,7 +449,7 @@ export default function Appointments() {
               <p className="text-[11px] text-zinc-600">{t('student.appointments.complaintDialog.severityHint')}</p>
             </div>
 
-            {/* Жағдайды сипаттау */}
+            {/* Сипаттама */}
             <div className="space-y-1.5">
               <Label>{t('student.appointments.complaintDialog.details')}</Label>
               <Textarea

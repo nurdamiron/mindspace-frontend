@@ -1,23 +1,23 @@
-// useState, useEffect — компонент күйі мен жанама әсерлер үшін
+// Күй мен эффект
 import { useState, useEffect } from 'react';
-// useParams, Link — URL параметрлері мен ішкі сілтемелер үшін
+// URL параметрлері мен сілтемелер
 import { useParams, Link } from 'react-router-dom';
-// Line — сызықтық диаграмма компоненті
+// Сызықтық диаграмма
 import { Line } from 'react-chartjs-2';
-// ReactMarkdown — AI жиынтығын Markdown форматында шығару үшін
+// Markdown рендері
 import ReactMarkdown from 'react-markdown';
-// Chart.js компоненттері — сызықтық диаграмма үшін
+// Chart.js компоненттері
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
   Title, Tooltip, Filler
 } from 'chart.js';
-// Lucide иконалары — навигация, күнтізбе, растау, ескерту, жарқырау, жүктелу
+// Lucide иконалары
 import { ArrowLeft, CalendarDays, CheckCircle2, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
-// useTranslation — аударма хуктары
+// Аударма хук
 import { useTranslation } from 'react-i18next';
-// api — серверге HTTP сұраныстар жіберу үшін
+// HTTP API клиенті
 import { api } from '../../api/client';
-// shadcn/ui компоненттері — карта, белгі, батырма, қойындылар
+// shadcn/ui компоненттері
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 // Chart.js компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler);
 
-// METRIC_COLORS — метрика сызықтарының түстері мен стильдері
+// Метрика сызықтарының түстері
 const METRIC_COLORS = {
   mood:       { color: '#60a5fa', dash: [] },
   stress:     { color: '#f87171', dash: [] },
@@ -34,27 +34,27 @@ const METRIC_COLORS = {
   energy:     { color: '#fbbf24', dash: [] },
 };
 
-// StudentCard — студент картасы: толық ақпарат, сеанс тарихы және AI талдауы
+// Студент картасы: ақпарат, тарих, AI талдауы
 export default function StudentCard() {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
-  // data — студент туралы толық деректер
+  // Студент деректері
   const [data, setData] = useState(null);
-  // loading — деректер жүктелу күйі
+  // Жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // aiSummary — AI жиынтығы мәтіні
+  // AI жиынтығы мәтіні
   const [aiSummary, setAiSummary] = useState(null);
-  // aiLoading — AI жиынтығы жүктелу күйі
+  // AI жүктелу күйі
   const [aiLoading, setAiLoading] = useState(false);
-  // aiError — AI қатесі хабарламасы
+  // AI қатесі
   const [aiError, setAiError] = useState(null);
 
-  // Студент деректерін идентификатор бойынша жүктеу
+  // Студент деректерін жүктеу
   useEffect(() => {
     api.get(`/psychologist/students/${id}`).then(setData).finally(() => setLoading(false));
   }, [id]);
 
-  // loadAiSummary — AI жиынтығын серверден сұрататын функция
+  // AI жиынтығын серверден сұрау
   async function loadAiSummary() {
     setAiLoading(true);
     setAiError(null);
@@ -68,7 +68,7 @@ export default function StudentCard() {
     }
   }
 
-  // RISK_CONFIG — тәуекел деңгейлерінің белгі конфигурациясы
+  // Тәуекел деңгейі белгілері
   const RISK_CONFIG = {
     low: { label: t('risk.low'), variant: 'success' },
     moderate: { label: t('risk.moderate'), variant: 'warning' },
@@ -82,7 +82,7 @@ export default function StudentCard() {
     </div>
   );
 
-  // Студент табылмаса қате хабарламасы
+  // Студент табылмаған күй
   if (!data) return (
     <div className="flex flex-col items-center justify-center py-20 gap-3">
       <p className="font-medium text-zinc-300">{t('admin.studentDetail.notFound')}</p>
@@ -98,12 +98,12 @@ export default function StudentCard() {
   const { student, checkIns, appointments, surveys } = data;
   const METRIC_KEYS = ['mood', 'stress', 'sleep', 'energy'];
 
-  // labels — графиктің X өсі үшін күн белгілері
+  // X өсінің күн белгілері
   const labels = checkIns.map((c) =>
     new Date(c.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   );
 
-  // chartData — метрика сызықтық диаграммасының деректері
+  // Диаграмма деректері
   const chartData = {
     labels,
     datasets: METRIC_KEYS.map((key) => {
@@ -123,28 +123,28 @@ export default function StudentCard() {
     }),
   };
 
-  // chartOptions — диаграмма стиль баптаулары
+  // Диаграмма баптаулары
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: '#71717a', boxWidth: 12, font: { size: 11 } } },
-      tooltip: { backgroundColor: '#27272a', borderColor: '#3f3f46', borderWidth: 1, cornerRadius: 6 },
+      legend: { labels: { color: '#6b7a90', boxWidth: 12, font: { size: 11 } } },
+      tooltip: { backgroundColor: '#e2e8f0', borderColor: '#cbd5e1', borderWidth: 1, cornerRadius: 6 },
     },
     scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', font: { size: 10 } } },
-      y: { min: 1, max: 5, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', stepSize: 1, font: { size: 10 } } },
+      x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+      y: { min: 1, max: 5, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', stepSize: 1, font: { size: 10 } } },
     },
   };
 
-  // latestSurvey — соңғы сауалнама нәтижесі
+  // Соңғы сауалнама
   const latestSurvey = surveys[0];
-  // completedAppts — аяқталған кездесулер тізімі
+  // Аяқталған кездесулер
   const completedAppts = appointments.filter((a) => a.status === 'completed');
 
   return (
     <div className="fade-in space-y-5">
-      {/* Артқа сілтеме және студент тақырыбы */}
+      {/* Артқа сілтеме мен тақырып */}
       <div className="flex items-center gap-4">
         <Button variant="secondary" size="sm" asChild>
           <Link to="/psychologist/schedule" className="flex items-center gap-1.5">
@@ -164,7 +164,7 @@ export default function StudentCard() {
         </div>
       </div>
 
-      {/* Жиынтық, тарих, сауалнамалар және AI қойындылары */}
+      {/* Қойындылар */}
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">{t('psychologist.studentCard.tabs.checkins')}</TabsTrigger>
@@ -176,7 +176,7 @@ export default function StudentCard() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Жиынтық қойындысы: KPI карточкалары және метрика диаграммасы */}
+        {/* Жиынтық: KPI мен диаграмма */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
@@ -209,7 +209,7 @@ export default function StudentCard() {
             })}
           </div>
 
-          {/* Check-in метрикалары сызықтық диаграммасы */}
+          {/* Check-in диаграммасы */}
           <Card className="border-zinc-800 bg-zinc-900">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-zinc-300">{t('admin.studentDetail.chart')}</CardTitle>
@@ -228,7 +228,7 @@ export default function StudentCard() {
           </Card>
         </TabsContent>
 
-        {/* Кездесу тарихы қойындысы */}
+        {/* Кездесу тарихы */}
         <TabsContent value="history">
           {appointments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 gap-2">
@@ -250,7 +250,7 @@ export default function StudentCard() {
                     {a.reason && (
                       <p className="text-xs text-zinc-600 mb-2">{a.reason}</p>
                     )}
-                    {/* Сеанс жазбасы бар болса, жағдай өзгерісін көрсету */}
+                    {/* Сеанс жазбасы мен жағдай өзгерісі */}
                     {a.session_notes && (
                       <div className="rounded-md bg-zinc-800 p-3 text-xs space-y-1.5 mt-2">
                         <div className="text-zinc-400">
@@ -272,7 +272,7 @@ export default function StudentCard() {
           )}
         </TabsContent>
 
-        {/* Сауалнамалар қойындысы */}
+        {/* Сауалнамалар */}
         <TabsContent value="surveys">
           {surveys.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 gap-2">
@@ -299,7 +299,7 @@ export default function StudentCard() {
           )}
         </TabsContent>
 
-        {/* AI жиынтығы қойындысы */}
+        {/* AI жиынтығы */}
         <TabsContent value="ai" className="space-y-4">
           <Card className="border-zinc-800 bg-zinc-900">
             <CardHeader className="pb-3">
@@ -307,14 +307,14 @@ export default function StudentCard() {
                 <CardTitle className="text-sm font-medium text-zinc-300">
                   {t('psychologist.studentCard.aiSummary.title')}
                 </CardTitle>
-                {/* AI жүктелмеген кезде генерациялау батырмасы */}
+                {/* Генерациялау батырмасы */}
                 {!aiSummary && !aiLoading && (
                   <Button size="sm" variant="secondary" onClick={loadAiSummary} className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
                     {t('psychologist.studentCard.aiSummary.generate')}
                   </Button>
                 )}
-                {/* AI нәтижесі бар кезде қайта жасау батырмасы */}
+                {/* Қайта жасау батырмасы */}
                 {aiSummary && (
                   <Button size="sm" variant="ghost" onClick={loadAiSummary} disabled={aiLoading} className="text-xs text-zinc-500">
                     {t('psychologist.studentCard.aiSummary.generate')}
@@ -323,7 +323,7 @@ export default function StudentCard() {
               </div>
             </CardHeader>
             <CardContent>
-              {/* Генерация басталмаған бастапқы күй */}
+              {/* Бастапқы күй */}
               {!aiSummary && !aiLoading && !aiError && (
                 <p className="text-sm text-zinc-500">
                   {t('psychologist.studentCard.aiSummary.info')}
@@ -340,7 +340,7 @@ export default function StudentCard() {
               {aiError && (
                 <p className="text-sm text-red-400">{aiError}</p>
               )}
-              {/* AI жиынтығын Markdown форматында шығару */}
+              {/* Markdown шығару */}
               {aiSummary && (
                 <div className="prose prose-sm prose-invert max-w-none text-zinc-300 [&_strong]:text-zinc-100 [&_ul]:text-zinc-400 [&_li]:marker:text-zinc-600">
                   <ReactMarkdown>{aiSummary}</ReactMarkdown>

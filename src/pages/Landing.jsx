@@ -1,8 +1,8 @@
-// Link — беттер арасында навигация сілтемелерін жасау үшін
+// Навигация сілтемелері
 import { Link } from 'react-router-dom';
-// useState — ашық FAQ элементін бақылау үшін
+// Ашық FAQ күйі
 import { useState } from 'react';
-// Lucide иконалары — функциялар мен мүмкіндіктерді бейнелеу үшін
+// Lucide иконалары
 import {
   ShieldCheck,
   BrainCircuit,
@@ -17,58 +17,58 @@ import {
   UserCheck,
   ChevronDown,
 } from 'lucide-react';
-// useTranslation, i18n — аударма хуктары және тіл ауыстыру
+// Аударма мен тіл ауыстыру
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/i18n';
-// Button — shadcn/ui батырма компоненті
+// Батырма компоненті
 import { Button } from '@/components/ui/button';
-// Separator — бөлгіш сызық компоненті
+// Бөлгіш сызық
 import { Separator } from '@/components/ui/separator';
 
-// FEATURE_ICONS — әр мүмкіндікке иконаны сәйкестендіретін массив
+// Мүмкіндік иконалары
 const FEATURE_ICONS = [BrainCircuit, CalendarCheck, BarChart3, ShieldCheck, MessageSquare, Clock];
-// PRIVACY_ICONS — құпиялылық блогының иконалары
+// Құпиялылық иконалары
 const PRIVACY_ICONS = [UserCheck, EyeOff, Database, Lock];
-// LANGS — тіл ауыстырғыш параметрлері
+// Тілдер тізімі
 const LANGS = [
   { code: 'ru', label: 'РУС' },
   { code: 'kk', label: 'ҚАЗ' },
   { code: 'en', label: 'ENG' },
 ];
 
-// Landing — қосымшаның қоғамдық басты беті
+// Қоғамдық басты бет
 export default function Landing() {
   const { t } = useTranslation();
-  // openFaq — қазіргі ашық FAQ индексі
+  // Ашық FAQ индексі
   const [openFaq, setOpenFaq] = useState(null);
-  // currentLang — ағымдағы тіл коды
+  // Ағымдағы тіл
   const currentLang = i18n.language?.slice(0, 2) || 'ru';
 
-  // Аудармадан мүмкіндіктер, қадамдар, рөлдер, privacy және faq тізімдерін алу
+  // Аудармадан тізімдерді алу
   const features = t('landing.features.items', { returnObjects: true });
   const steps = t('landing.steps.items', { returnObjects: true });
   const roles = t('landing.roles.items', { returnObjects: true });
   const privacyItems = t('landing.privacy.items', { returnObjects: true });
   const faqItems = t('landing.faq.items', { returnObjects: true });
 
-  // handleLang — тілді ауыстыру
+  // Тілді ауыстыру
   function handleLang(code) {
     i18n.changeLanguage(code);
   }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
-      {/* Жабысқан навигация тақырыбы */}
+      {/* Жабысқан тақырып */}
       <header className="border-b border-zinc-800 sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
-          {/* Логотип және атауы */}
+          {/* Логотип пен атауы */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="w-7 h-7 rounded-md bg-zinc-50 flex items-center justify-center">
               <BrainCircuit className="w-4 h-4 text-zinc-900" />
             </div>
             <span className="font-semibold text-sm tracking-tight">MindSpace</span>
           </div>
-          {/* Тіл ауыстырғыш және навигация батырмалары */}
+          {/* Тіл мен навигация батырмалары */}
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Тіл ауыстырғыш */}
             <div className="flex items-center rounded-md border border-zinc-800 overflow-hidden">
@@ -96,7 +96,7 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero бөлімі — негізгі шақыру блогы */}
+      {/* Hero бөлімі */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-24 pb-12 sm:pb-20">
         <div className="max-w-3xl">
           {/* Белгі жолағы */}
@@ -110,12 +110,12 @@ export default function Landing() {
             {t('landing.hero.title')}
           </h1>
 
-          {/* Сипаттама мәтіні */}
+          {/* Сипаттама */}
           <p className="text-base sm:text-lg text-zinc-400 leading-relaxed mb-7 sm:mb-10 max-w-xl">
             {t('landing.hero.subtitle')}
           </p>
 
-          {/* Негізгі шақыру батырмалары */}
+          {/* Шақыру батырмалары */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Button size="lg" asChild>
               <Link to="/login" className="flex items-center justify-center gap-2">
@@ -129,7 +129,7 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Статистика жолағы — 3 негізгі санауыш */}
+        {/* Статистика жолағы */}
         <div className="mt-12 sm:mt-20 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-zinc-800 max-w-2xl">
           {(t('landing.stats', { returnObjects: true }) || []).map((s) => (
             <div key={s.label} className="bg-zinc-900 px-4 py-4 sm:px-8 sm:py-6">
@@ -150,7 +150,7 @@ export default function Landing() {
           </h2>
         </div>
 
-        {/* Мүмкіндіктер торы — иконамен және сипаттамамен */}
+        {/* Мүмкіндіктер торы */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {(Array.isArray(features) ? features : []).map((f, idx) => {
             const Icon = FEATURE_ICONS[idx] || BrainCircuit;
@@ -172,7 +172,7 @@ export default function Landing() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* Қалай жұмыс істейді бөлімі */}
+      {/* Қадамдар бөлімі */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-50">
@@ -180,16 +180,16 @@ export default function Landing() {
           </h2>
         </div>
 
-        {/* Нөмірленген қадамдар тізімі */}
+        {/* Қадамдар тізімі */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {(Array.isArray(steps) ? steps : []).map((step, i) => (
             <div key={i} className="flex gap-5">
               <div className="flex flex-col items-center">
-                {/* Қадам нөмірі */}
+                {/* Нөмір */}
                 <div className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 flex items-center justify-center text-xs font-bold text-zinc-400 shrink-0">
                   {String(i + 1).padStart(2, '0')}
                 </div>
-                {/* Қадамдар арасындағы тік сызық */}
+                {/* Тік байланыс сызығы */}
                 {i < steps.length - 1 && (
                   <div className="w-px flex-1 bg-zinc-800 mt-3 min-h-[40px]" />
                 )}
@@ -205,7 +205,7 @@ export default function Landing() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* Рөлдер бөлімі — студент, психолог, әкімші */}
+      {/* Рөлдер бөлімі */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-50">
@@ -226,7 +226,7 @@ export default function Landing() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* Құпиялылық бөлімі — деректер қауіпсіздігі */}
+      {/* Құпиялылық бөлімі */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="mb-8 sm:mb-12">
           <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400 mb-4">
@@ -241,7 +241,7 @@ export default function Landing() {
           </p>
         </div>
 
-        {/* Құпиялылық кепілдіктері торы */}
+        {/* Кепілдіктер торы */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(Array.isArray(privacyItems) ? privacyItems : []).map((item, idx) => {
             const Icon = PRIVACY_ICONS[idx] || Lock;
@@ -262,7 +262,7 @@ export default function Landing() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* FAQ бөлімі — жиі қойылатын сұрақтар */}
+      {/* FAQ бөлімі */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-50">
@@ -270,7 +270,7 @@ export default function Landing() {
           </h2>
         </div>
 
-        {/* Аккордеон түріндегі FAQ тізімі */}
+        {/* Аккордеон тізімі */}
         <div className="max-w-2xl space-y-2">
           {(Array.isArray(faqItems) ? faqItems : []).map((item, idx) => (
             <div key={idx} className="rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden">
@@ -297,7 +297,7 @@ export default function Landing() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* Шақыру блогы — тіркелуге шақыру */}
+      {/* Тіркелуге шақыру блогы */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-6 py-10 sm:px-10 sm:py-14 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4 text-zinc-50">
@@ -315,7 +315,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Футер — логотип және сипаттама */}
+      {/* Футер */}
       <footer className="border-t border-zinc-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col sm:flex-row items-center gap-3 sm:justify-between">
           <div className="flex items-center gap-2">

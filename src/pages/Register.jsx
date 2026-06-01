@@ -100,7 +100,7 @@ export default function Register() {
             <CardTitle className="text-lg">{t('auth.register.title')}</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Роль переключатель */}
+            {/* Рөл ауыстырғыш */}
             <div className="mb-5">
               <p className="text-xs text-zinc-500 mb-2">{t('auth.register.roleLabel')}</p>
               <div className="grid grid-cols-2 gap-2">
@@ -203,7 +203,14 @@ export default function Register() {
                 {isSubmitting ? (
                   <><Loader2 className="w-4 h-4 animate-spin" />{t('auth.register.loading')}</>
                 ) : (
-                  <>{t('auth.register.submit')}<ArrowRight className="w-4 h-4" /></>
+                  <>
+                    {t('auth.register.submit')}
+                    {' · '}
+                    {role === 'psychologist'
+                      ? t('auth.register.rolePsychologist')
+                      : t('auth.register.roleStudent')}
+                    <ArrowRight className="w-4 h-4" />
+                  </>
                 )}
               </Button>
             </form>

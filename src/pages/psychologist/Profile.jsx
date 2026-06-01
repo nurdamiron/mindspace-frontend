@@ -1,22 +1,22 @@
-// useEffect, useMemo, useState : жанама әсерлер, мемоизация және күй үшін
+// Әсерлер, мемоизация, күй
 import { useEffect, useMemo, useState } from 'react';
-// useForm : форманы басқару үшін
+// Форманы басқару
 import { useForm } from 'react-hook-form';
-// zodResolver : Zod схемасын react-hook-form-ға байланыстыру үшін
+// Zod схемасын формаға байлау
 import { zodResolver } from '@hookform/resolvers/zod';
-// z : форма валидация схемасын жасау үшін
+// Валидация схемасы
 import { z } from 'zod';
-// toast : хабарлама тостерін көрсету үшін
+// Хабарлама тостері
 import { toast } from 'sonner';
-// Lucide иконалары : жүктелу, пайдаланушы, құлып, көз, верификация, ескерту, файл, плюс
+// Lucide иконалары
 import { Loader2, User, Lock, Eye, EyeOff, ShieldCheck, ShieldAlert, FileText, ExternalLink, Upload } from 'lucide-react';
-// useTranslation : аударма хуктары
+// Аударма хугі
 import { useTranslation } from 'react-i18next';
-// api : серверге HTTP сұраныстар жіберу үшін
+// Серверге HTTP сұраныстар
 import { api } from '../../api/client';
-// useAuth : пайдаланушы деректері мен setUser функциясы үшін
+// Пайдаланушы деректері мен setUser
 import { useAuth } from '../../context/AuthContext';
-// shadcn/ui компоненттері : батырма, енгізу, белгіше, мәтін аймағы, карта, бөлгіш
+// shadcn/ui компоненттері
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,10 +26,10 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
-// DOCUMENT_TYPES : backend енумымен сәйкес құжат түрлері
+// Құжат түрлері (backend енумымен сәйкес)
 const DOCUMENT_TYPES = ['diploma', 'license', 'certificate', 'id_card', 'other'];
 
-// STATUS_BADGE : статусқа сәйкес badge стилі
+// Статусқа сәйкес badge стилі
 const STATUS_BADGE = {
   active: { variant: 'success', icon: ShieldCheck },
   approved: { variant: 'success', icon: ShieldCheck },
@@ -40,18 +40,18 @@ const STATUS_BADGE = {
   revoked: { variant: 'destructive', icon: ShieldAlert },
 };
 
-// VerificationSection : психолог верификация бөлімі (статус + құжат тізімі + жіберу формасы)
+// Верификация бөлімі: статус, құжаттар, жіберу формасы
 function VerificationSection() {
   const { t, i18n } = useTranslation();
-  // status : сервердегі ағымдағы верификация күйі
+  // Ағымдағы верификация күйі
   const [status, setStatus] = useState(null);
-  // documents : жіберілген құжаттар тізімі
+  // Жіберілген құжаттар
   const [documents, setDocuments] = useState([]);
-  // loading : бастапқы жүктелу күйі
+  // Бастапқы жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // submitting : жаңа құжат жіберу күйі
+  // Құжат жіберу күйі
   const [submitting, setSubmitting] = useState(false);
-  // form : жаңа құжат формасының өрістері
+  // Жаңа құжат формасы
   const [form, setForm] = useState({
     document_type: '',
     document_number: '',
@@ -60,7 +60,7 @@ function VerificationSection() {
     file_url: '',
   });
 
-  // Бет жүктелуінде статус пен құжаттарды параллель алу
+  // Статус пен құжаттарды параллель жүктеу
   useEffect(() => {
     Promise.all([
       api.get('/psychologist/verification/status'),
@@ -73,7 +73,7 @@ function VerificationSection() {
       .finally(() => setLoading(false));
   }, []);
 
-  // submit : жаңа құжатты POST /api/psychologist/verification/documents-ке жіберу
+  // Жаңа құжатты серверге жіберу
   async function submit(e) {
     e.preventDefault();
     if (!form.document_type || !form.file_url) {
@@ -129,7 +129,7 @@ function VerificationSection() {
         <p className="text-xs text-zinc-500 mt-1">{t('psychologist.verification.subtitle')}</p>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Ағымдағы статус және сенім балы */}
+        {/* Ағымдағы статус пен сенім балы */}
         <div className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-800/40 p-3">
           <div className="flex items-center gap-2">
             <span className="text-xs text-zinc-500">{t('psychologist.verification.status')}:</span>
@@ -152,7 +152,7 @@ function VerificationSection() {
           )}
         </div>
 
-        {/* Жіберілген құжаттар тізімі */}
+        {/* Жіберілген құжаттар */}
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
             {t('psychologist.verification.documentsTitle')}
@@ -211,7 +211,7 @@ function VerificationSection() {
 
         <Separator className="bg-zinc-800" />
 
-        {/* Жаңа құжат жіберу формасы */}
+        {/* Жаңа құжат формасы */}
         <form onSubmit={submit} className="space-y-4">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
@@ -301,9 +301,9 @@ function VerificationSection() {
   );
 }
 
-// PasswordField : құпия сөз өрісі: көрсету/жасыру мүмкіндігімен
+// Құпия сөз өрісі: көрсету/жасыру
 function PasswordField({ id, label, registration, error }) {
-  // show : құпия сөздің көрінуін басқару күйі
+  // Құпия сөздің көрінуі
   const [show, setShow] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -315,7 +315,7 @@ function PasswordField({ id, label, registration, error }) {
           className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 pr-10"
           {...registration}
         />
-        {/* Көрсету/жасыру ауыстырғышы */}
+        {/* Көрсету/жасыру батырмасы */}
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
@@ -330,11 +330,11 @@ function PasswordField({ id, label, registration, error }) {
   );
 }
 
-// PasswordSection : құпия сөзді өзгерту бөлімі
+// Құпия сөзді өзгерту бөлімі
 function PasswordSection() {
   const { t } = useTranslation();
 
-  // pwSchema : құпия сөз валидация схемасы: сәйкестік тексеруімен
+  // Құпия сөз схемасы: сәйкестік тексерумен
   const pwSchema = useMemo(() => z.object({
     current_password: z.string().min(1, t('common.errors.required')),
     new_password: z.string().min(6, t('common.errors.minPassword')),
@@ -344,13 +344,13 @@ function PasswordSection() {
     path: ['confirm_password'],
   }), [t]);
 
-  // Форма күйін және валидациясын инициализациялау
+  // Форма күйі мен валидацияны баптау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(pwSchema),
     defaultValues: { current_password: '', new_password: '', confirm_password: '' },
   });
 
-  // onSubmit : құпия сөзді API арқылы жаңартатын функция
+  // Құпия сөзді жаңарту
   async function onSubmit(data) {
     try {
       await api.patch('/auth/password', {
@@ -374,14 +374,14 @@ function PasswordSection() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Ағымдағы құпия сөз өрісі */}
+          {/* Ағымдағы құпия сөз */}
           <PasswordField
             id="pw_current"
             label={t('student.profile.currentPassword')}
             registration={register('current_password')}
             error={errors.current_password}
           />
-          {/* Жаңа және растау құпия сөз өрістері */}
+          {/* Жаңа және растау өрістері */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <PasswordField
               id="pw_new"
@@ -405,12 +405,12 @@ function PasswordSection() {
   );
 }
 
-// PsychProfile : психолог профилі беті
+// Психолог профилі беті
 export default function PsychProfile() {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
 
-  // schema : профиль формасының валидация схемасы
+  // Профиль формасының схемасы
   const schema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     specialization: z.string().optional(),
@@ -419,13 +419,13 @@ export default function PsychProfile() {
     bio: z.string().optional(),
   }), [t]);
 
-  // Форма күйін және валидациясын инициализациялау
+  // Форма күйі мен валидацияны баптау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting, isDirty } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { name: '', specialization: '', languages: '', experience_years: '', bio: '' },
   });
 
-  // Профиль деректерін API-дан жүктеп, форманы толтыру
+  // Профиль деректерін жүктеп, форманы толтыру
   useEffect(() => {
     api.get('/psychologist/profile').then((data) => {
       reset({
@@ -438,7 +438,7 @@ export default function PsychProfile() {
     });
   }, [reset]);
 
-  // onSubmit : профильді жаңартатын функция
+  // Профильді жаңарту
   async function onSubmit(data) {
     try {
       const updated = await api.patch('/psychologist/profile', {
@@ -448,7 +448,7 @@ export default function PsychProfile() {
         experience_years: data.experience_years ? Number(data.experience_years) : null,
         bio: data.bio || null,
       });
-      // Контекстегі пайдаланушы атын да жаңарту
+      // Контекстегі атты да жаңарту
       if (setUser) setUser((u) => ({ ...u, name: updated.name }));
       toast.success(t('psychologist.profile.success'));
       reset(data);
@@ -457,18 +457,18 @@ export default function PsychProfile() {
     }
   }
 
-  // initials : аватар үшін аты-жөн бастапқы әріптерін алу
+  // Аватар үшін аты-жөн бас әріптері
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (
     <div className="fade-in space-y-6">
-      {/* Бет тақырыбы */}
+      {/* Тақырып */}
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">{t('psychologist.profile.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">{t('psychologist.profile.subtitle')}</p>
       </div>
 
-      {/* Аватар және пайдаланушы ақпараты */}
+      {/* Аватар мен пайдаланушы ақпараты */}
       <div className="flex items-center gap-4">
         <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center text-xl font-bold text-zinc-300">
           {initials}
@@ -481,9 +481,9 @@ export default function PsychProfile() {
 
       <Separator className="bg-zinc-800" />
 
-      {/* Десктопта 2 баған: профиль формасы | құпия сөз */}
+      {/* Десктопта 2 баған: профиль | құпия сөз */}
       <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-8 space-y-6 lg:space-y-0">
-        {/* Профиль редакциялау формасы */}
+        {/* Профильді өңдеу формасы */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <Card className="border-zinc-800 bg-zinc-900">
             <CardHeader className="pb-3">
@@ -526,11 +526,11 @@ export default function PsychProfile() {
           </Card>
         </form>
 
-        {/* Құпия сөз өзгерту бөлімі */}
+        {/* Құпия сөз бөлімі */}
         <PasswordSection />
       </div>
 
-      {/* Маманды растау бөлімі (толық ені) */}
+      {/* Верификация бөлімі (толық ені) */}
       <VerificationSection />
     </div>
   );

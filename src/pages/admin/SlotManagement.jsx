@@ -69,7 +69,7 @@ export default function SlotManagement() {
     }
   }
 
-  // generateFullDay — таңдалған күнге толық жұмыс күні слоттарын автоматты жасау
+  // generateFullDay — күнге толық жұмыс күнінің слоттарын жасау
   async function generateFullDay() {
     if (!form.psychologist_id || !form.date) {
       toast.error(t('admin.slotMgmt.selectPsychDate'));
@@ -77,7 +77,7 @@ export default function SlotManagement() {
     }
     setSaving(true);
     try {
-      // 09:00–17:00 аралығында сағаттық слоттар (түскі үзіліссіз)
+      // 09:00–17:00 сағаттық слоттар (түскі үзіліссіз)
       const times = [
         ['09:00', '10:00'], ['10:00', '11:00'], ['11:00', '12:00'],
         ['13:00', '14:00'], ['14:00', '15:00'], ['15:00', '16:00'], ['16:00', '17:00'],
@@ -233,7 +233,7 @@ export default function SlotManagement() {
           {Object.values(grouped).map((g) => (
             <Card key={`${g.name}__${g.date}`} className="border-zinc-800 bg-zinc-900">
               <CardContent className="p-5">
-                {/* Психолог аты, күні және бос/броньдалған санаулары */}
+                {/* Психолог, күні, бос/броньдалған саны */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="font-medium text-zinc-100 text-sm">{g.name}</div>
@@ -250,7 +250,7 @@ export default function SlotManagement() {
                     </Badge>
                   </div>
                 </div>
-                {/* Уақыт слоттары: бос (жасыл) немесе броньдалған (қызыл) */}
+                {/* Слоттар: бос (жасыл), броньдалған (қызыл) */}
                 <div className="flex flex-wrap gap-1.5">
                   {g.slots.map((slot) => (
                     <div

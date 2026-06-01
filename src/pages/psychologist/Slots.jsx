@@ -37,7 +37,7 @@ export default function PsychSlots() {
     api.get('/psychologist/slots').then(setSlots).finally(() => setLoading(false));
   }, []);
 
-  // createSlot — жеке слот жасайтын функция
+  // createSlot — жеке слот жасау
   async function createSlot(e) {
     e.preventDefault();
     if (!form.date) { toast.error(t('psychologist.slots.selectDate')); return; }
@@ -47,7 +47,7 @@ export default function PsychSlots() {
         date: form.date,
         slots: [{ start_time: form.start_time, end_time: form.end_time }],
       });
-      // Жаңа слотты тізімге қосып, күні мен уақыты бойынша сұрыптау
+      // Слотты қосып, күні мен уақыты бойынша сұрыптау
       setSlots((s) => [...s, ...res].sort((a, b) => a.date > b.date ? 1 : a.start_time > b.start_time ? 1 : -1));
       toast.success(t('psychologist.slots.slotAdded'));
     } catch (err) {
@@ -57,12 +57,12 @@ export default function PsychSlots() {
     }
   }
 
-  // generateFullDay — таңдалған күнге толық жұмыс күні слоттарын жасайтын функция
+  // generateFullDay — күнге толық жұмыс күнінің слоттарын жасау
   async function generateFullDay() {
     if (!form.date) { toast.error(t('psychologist.slots.selectDate')); return; }
     setSaving(true);
     try {
-      // Сағат 09:00–17:00 аралығындағы барлық сағаттық слоттар
+      // 09:00–17:00 сағаттық слоттар
       const times = [
         ['09:00', '10:00'], ['10:00', '11:00'], ['11:00', '12:00'],
         ['13:00', '14:00'], ['14:00', '15:00'], ['15:00', '16:00'], ['16:00', '17:00'],
@@ -80,7 +80,7 @@ export default function PsychSlots() {
     }
   }
 
-  // deleteSlot — слотты жоятын функция
+  // deleteSlot — слотты жою
   async function deleteSlot(id) {
     setDeletingSlot(id);
     try {
@@ -188,7 +188,7 @@ export default function PsychSlots() {
           {Object.values(grouped).map((g) => (
             <Card key={g.date} className="border-zinc-800 bg-zinc-900">
               <CardContent className="p-5">
-                {/* Күн тақырыбы және бос/брондалған санауыштар */}
+                {/* Күн және бос/брондалған саны */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-sm font-medium text-zinc-100">
                     {new Date(g.date).toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -202,7 +202,7 @@ export default function PsychSlots() {
                     </Badge>
                   </div>
                 </div>
-                {/* Слоттарды жапсырма түрінде көрсету */}
+                {/* Слоттар жапсырма түрінде */}
                 <div className="flex flex-wrap gap-1.5">
                   {g.slots.map((slot) => (
                     <div

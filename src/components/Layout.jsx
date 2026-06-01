@@ -1,8 +1,8 @@
-// useState : мобильді мәзір күйін басқару үшін
+// useState — мобильді мәзір күйі
 import { useState } from 'react';
-// Outlet, NavLink, useNavigate, useLocation : маршруттау және навигация үшін
+// react-router — маршруттау және навигация
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
-// Lucide иконалары : навигация элементтері үшін иконалар
+// Lucide иконалары — навигация үшін
 import {
   BarChart2,
   CheckSquare,
@@ -22,13 +22,13 @@ import {
   Flag,
   AlertTriangle,
 } from 'lucide-react';
-// useTranslation : аударма хуктары
+// useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
-// useAuth : пайдаланушы және logout функциясы үшін
+// useAuth — пайдаланушы және logout
 import { useAuth } from '../context/AuthContext';
-// Separator : бөлгіш сызық компоненті
+// Separator — бөлгіш сызық
 import { Separator } from '@/components/ui/separator';
-// cn : шартты CSS класстарды біріктіру утилитасы
+// cn — CSS класстарды біріктіру
 import { cn } from '@/lib/utils';
 
 const BANNER_STYLES = {
@@ -61,18 +61,18 @@ function VerificationBanner({ status, t }) {
   );
 }
 
-// Layout : барлық рөлдерге ортақ бүйірлік панель орналасуы
+// Layout — рөлдерге ортақ бүйірлік панель
 export default function Layout() {
-  // Аударма және аутентификация контекстін алу
+  // Аударма мен аутентификация контексті
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  // mobileOpen : мобильді мәзірдің ашық/жабық күйі
+  // mobileOpen — мобильді мәзірдің ашық/жабық күйі
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const isChatPage = location.pathname === '/student/chat';
 
-  // navConfig : әр рөлге арналған навигация элементтері
+  // navConfig — әр рөлдің навигация элементтері
   const navConfig = {
     student: [
       { to: '/student/dashboard', icon: BarChart2, label: t('nav.student.dashboard') },
@@ -99,37 +99,44 @@ export default function Layout() {
     ],
   };
 
-  // roleLabels : рөл атауларының аудармалары
+  // roleLabels — рөл атауларының аудармасы
   const roleLabels = {
     student: t('nav.roles.student'),
     psychologist: t('nav.roles.psychologist'),
     admin: t('nav.roles.admin'),
   };
 
-  // handleLogout : жүйеден шығу және логин бетіне бағыттау
+  // handleLogout — шығу және логин бетіне бағыттау
   function handleLogout() {
     logout();
     navigate('/login');
   }
 
-  // closeMobile : мобильді мәзірді жабу
+  // closeMobile — мобильді мәзірді жабу
   function closeMobile() {
     setMobileOpen(false);
   }
 
-  // navItems : ағымдағы рөлге сәйкес навигация элементтерін алу
-  const navItems = navConfig[user?.role] || [];
-  // initials : пайдаланушы атының бас әріптерін алу
+  // navItems — ағымдағы рөлдің навигация элементтері
+  let navItems = navConfig[user?.role] || [];
+  // Верификацияланбаған психолог тек профильді көреді
+  if (
+    user?.role === 'psychologist' &&
+    !['active', 'probation'].includes(user?.verification_status)
+  ) {
+    navItems = navItems.filter((item) => item.to === '/psychologist/profile');
+  }
+  // initials — пайдаланушы атының бас әріптері
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
     : '?';
 
-  // SidebarContent : бүйірлік панельдің ішкі мазмұны: лого, навигация, тіл, пайдаланушы
+  // SidebarContent — лого, навигация, тіл, пайдаланушы блоктары
   const SidebarContent = () => (
     <>
       {/* Логотип блогы */}
       <div className="px-5 h-14 flex items-center gap-3 border-b border-zinc-800 shrink-0">
-        <div className="w-7 h-7 rounded-md bg-[#3d8a68] flex items-center justify-center shrink-0">
+        <div className="w-7 h-7 rounded-md bg-[#6366f1] flex items-center justify-center shrink-0">
           <BrainCircuit className="w-4 h-4 text-white" />
         </div>
         <div>
@@ -255,14 +262,14 @@ export default function Layout() {
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#3d8a68] flex items-center justify-center">
+          <div className="w-6 h-6 rounded bg-[#6366f1] flex items-center justify-center">
             <BrainCircuit className="w-3.5 h-3.5 text-white" />
           </div>
           <span className="text-sm font-semibold text-zinc-100">MindSpace</span>
         </div>
       </div>
 
-      {/* Мобильді фондық қабат : жабу үшін басу */}
+      {/* Мобильді фон — басқанда жабылады */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black/60"

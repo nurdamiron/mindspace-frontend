@@ -893,6 +893,29 @@
       "conditionChange": "Жағдай",
       "surveyScore": "Балл: {{score}}/25"
     },
+    "psychologistDetail": {
+      "back": "Психологтар тізіміне",
+      "notFound": "Психолог табылмады",
+      "completedSessions": "Аяқталған сеанстар",
+      "totalStudents": "Студенттер",
+      "openComplaints": "Ашық шағымдар",
+      "registered": "Тіркелуі",
+      "verifiedAt": "Верификацияланды",
+      "profile": "Профиль",
+      "specialization": "Мамандану",
+      "languages": "Тілдер",
+      "experience": "Тәжірибе (жыл)",
+      "bio": "Өзі туралы",
+      "history": "Верификация тарихы",
+      "noHistory": "Оқиғалар жоқ",
+      "events": {
+        "created_by_admin": "Әкімші жасады",
+        "document_submitted": "Құжат жүктелді",
+        "document_reviewed": "Құжат тексерілді",
+        "status_updated": "Статус өзгертілді",
+        "status_changed": "Статус өзгертілді"
+      }
+    },
     "psychologistMgmt": {
       "title": "Психологтарды басқару",
       "count": "Жүйеде {{count}} маман",

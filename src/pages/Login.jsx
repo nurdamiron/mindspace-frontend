@@ -10,11 +10,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 // toast — хабарлама тостерін көрсету үшін
 import { toast } from 'sonner';
-// Lucide иконалары — email, құпиясөз және интерфейс элементтері үшін
+// Lucide иконалары — email, құпиясөз, интерфейс
 import { Mail, Lock, BrainCircuit, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 // useTranslation — аударма хуктары
 import { useTranslation } from 'react-i18next';
-// useAuth — аутентификация контекстінен login функциясын алу үшін
+// useAuth — контексттен login функциясын алу
 import { useAuth } from '../context/AuthContext';
 // shadcn/ui компоненттері — UI элементтері
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-// DEMO_ACCOUNTS — тест жүйеге кіру үшін демо аккаунттар тізімі
+// DEMO_ACCOUNTS — тест кіру үшін демо аккаунттар
 const DEMO_ACCOUNTS = [
   { role: 'student', email: 'student1@university.kz' },
   { role: 'psychologist', email: 'psych1@university.kz' },
@@ -35,18 +35,18 @@ export default function Login() {
   const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
-  // error — кіру қатесін сақтайтын күй
+  // error — кіру қатесінің күйі
   const [error, setError] = useState('');
-  // showPassword — құпиясөздің көрінуін басқаратын күй
+  // showPassword — құпиясөз көрінуінің күйі
   const [showPassword, setShowPassword] = useState(false);
 
-  // Кіру формасының валидациясы — email форматы мен құпиясөз ұзындығы
+  // Валидация — email форматы, құпиясөз ұзындығы
   const loginSchema = z.object({
     email: z.string().email(t('auth.login.errors.email')).min(1, t('auth.login.errors.email')),
     password: z.string().min(6, t('auth.login.errors.password')),
   });
 
-  // React Hook Form инициализациясы Zod валидациясымен
+  // React Hook Form Zod валидациясымен
   const {
     register,
     handleSubmit,
@@ -54,7 +54,7 @@ export default function Login() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(loginSchema) });
 
-  // onSubmit — форманы жіберу және рөлге қарай бағыттау функциясы
+  // onSubmit — кіру және рөлге қарай бағыттау
   async function onSubmit(data) {
     setError('');
     try {
@@ -68,7 +68,7 @@ export default function Login() {
     }
   }
 
-  // fillDemo — демо аккаунт деректерін форма өрістеріне автоматты толтыру
+  // fillDemo — демо деректерін формаға толтыру
   function fillDemo(role) {
     const account = DEMO_ACCOUNTS.find((d) => d.role === role);
     if (account) {
@@ -125,7 +125,7 @@ export default function Login() {
                 )}
               </div>
 
-              {/* Құпиясөз өрісі — көрсету/жасыру түймесімен */}
+              {/* Құпиясөз өрісі — көрсету/жасырумен */}
               <div className="space-y-1.5">
                 <Label htmlFor="login-password">{t('auth.login.password')}</Label>
                 <div className="relative">
@@ -152,7 +152,7 @@ export default function Login() {
                 )}
               </div>
 
-              {/* Жіберу түймесі — жүктелу жағдайын көрсетеді */}
+              {/* Жіберу түймесі — жүктелуді көрсетеді */}
               <Button
                 id="login-submit"
                 type="submit"
@@ -181,7 +181,7 @@ export default function Login() {
                 <Separator className="flex-1" />
               </div>
 
-              {/* Әр рөл үшін жылдам кіру түймелері */}
+              {/* Рөл бойынша жылдам кіру түймелері */}
               <div className="space-y-2">
                 {DEMO_ACCOUNTS.map((d) => (
                   <button
@@ -198,7 +198,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Тіркелу және басты бетке сілтемелер */}
+            {/* Тіркелу мен басты бет сілтемелері */}
             <div className="mt-5 text-center space-y-2">
               <p className="text-xs text-zinc-500">
                 {t('auth.login.noAccount')}{' '}

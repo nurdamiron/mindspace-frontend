@@ -24,7 +24,7 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 
-// checkInSchema — Check-in формасының валидация схемасы: барлық метрикалар 1-5 аралығында
+// checkInSchema — Check-in валидациясы: метрикалар 1-5
 const checkInSchema = z.object({
   mood: z.number().min(1).max(5),
   stress: z.number().min(1).max(5),
@@ -46,7 +46,7 @@ export default function CheckIn() {
   // alreadyDone — бүгін check-in жасалды күйі
   const [alreadyDone, setAlreadyDone] = useState(false);
 
-  // Бүгін check-in жасалған-жасалмағанын тексереді
+  // Бүгін check-in жасалғанын тексеру
   useEffect(() => {
     api.get('/student/check-ins?days=1').then((data) => {
       const today = new Date().toISOString().split('T')[0];
@@ -54,7 +54,7 @@ export default function CheckIn() {
     }).catch(() => {});
   }, []);
 
-  // React Hook Form инициализациясы, барлық метрика үшін 3 әдепкі мән
+  // React Hook Form, әр метрикаға әдепкі мән 3
   const {
     register,
     handleSubmit,
@@ -66,10 +66,10 @@ export default function CheckIn() {
     defaultValues: { mood: 3, stress: 3, sleep: 3, energy: 3, productivity: 3, notes: '' },
   });
 
-  // watchValues — слайдер мәндерін нақты уақытта қадағалайды
+  // watchValues — слайдер мәндерін қадағалау
   const watchValues = watch();
 
-  // SCALE_LABELS — шкала белгілерін аудармадан алады
+  // SCALE_LABELS — шкала белгілерінің аудармасы
   const SCALE_LABELS = {
     1: t('student.checkIn.scale.1'),
     2: t('student.checkIn.scale.2'),
@@ -78,7 +78,7 @@ export default function CheckIn() {
     5: t('student.checkIn.scale.5'),
   };
 
-  // onSubmit — форманы жіберу: деректерді серверге жазады
+  // onSubmit — деректерді серверге жіберу
   async function onSubmit(data) {
     try {
       await api.post('/student/check-ins', data);
@@ -90,7 +90,7 @@ export default function CheckIn() {
     }
   }
 
-  // Бүгін check-in жасалса — хабарлама көрсетіп, бетті блоктайды
+  // Бүгін жасалса — хабарлама, бет блокталады
   if (alreadyDone) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
@@ -131,7 +131,7 @@ export default function CheckIn() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="border-zinc-800 bg-zinc-900">
           <CardContent className="p-6 space-y-6">
-            {/* Әрбір метрика үшін слайдер блогы */}
+            {/* Әр метрикаға слайдер блогы */}
             {METRIC_KEYS.map((key, i) => {
               const val = watchValues[key] ?? 3;
               return (
@@ -141,7 +141,7 @@ export default function CheckIn() {
                       <div className="text-sm font-medium text-zinc-200">{t(`student.checkIn.metrics.${key}.label`)}</div>
                       <div className="text-xs text-zinc-500 mt-0.5">{t(`student.checkIn.metrics.${key}.desc`)}</div>
                     </div>
-                    {/* Ағымдағы мән және оның белгісі */}
+                    {/* Ағымдағы мән мен белгісі */}
                     <div className="text-right">
                       <span className="text-xl font-bold text-zinc-100">{val}</span>
                       <div className="text-xs text-zinc-500">{SCALE_LABELS[val]}</div>
@@ -159,7 +159,7 @@ export default function CheckIn() {
                   />
                   <input type="hidden" {...register(key, { valueAsNumber: true })} />
 
-                  {/* Шкала нүктелерінің белгілері */}
+                  {/* Шкала нүктелері */}
                   <div className="flex justify-between text-[10px] text-zinc-600 px-0.5">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <span key={n} className={val === n ? 'text-zinc-400 font-medium' : ''}>{n}</span>

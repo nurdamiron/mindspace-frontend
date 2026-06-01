@@ -1,56 +1,56 @@
-// useState, useEffect, useRef : күй, жанама әсерлер және DOM сілтемесі үшін
+// Күй, әсер, DOM сілтемесі
 import { useState, useEffect, useRef } from 'react';
-// ReactMarkdown : ИИ жауаптарын markdown форматында көрсету үшін
+// ИИ жауабын markdown көрсету
 import ReactMarkdown from 'react-markdown';
-// Lucide иконалары : жіберу, қосу, жою, хабарлама, артқа, дағдарыс ескертуі
+// Иконалар
 import { Send, Plus, Trash2, MessageSquare, ArrowLeft, LifeBuoy } from 'lucide-react';
-// useTranslation : аударма хуктары
+// Аударма хук
 import { useTranslation } from 'react-i18next';
-// Link : дағдарыс CTA арқылы психологтар каталогіне өту
+// Психолог каталогіне сілтеме
 import { Link } from 'react-router-dom';
-// api : серверге HTTP сұраныстар жіберу үшін
+// HTTP сұраныстар
 import { api } from '../../api/client';
-// shadcn/ui компоненттері : батырма, енгізу, диалог
+// shadcn/ui компоненттері
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-// cn : шартты CSS класстарды біріктіру утилитасы
+// Шартты CSS класс утилитасы
 import { cn } from '@/lib/utils';
 
-// AIChat : ИИ-мен көп сессиялы чат беті (ChatGPT стиліндегі)
+// Көп сессиялы ИИ чат беті
 export default function AIChat() {
   const { t, i18n } = useTranslation();
 
-  // conversations : студенттің барлық чат тарихы тізімі
+  // Барлық чат тарихы
   const [conversations, setConversations] = useState([]);
-  // activeConvId : қазір ашық тұрған чат сессиясының ID-і
+  // Ашық чат ID-і
   const [activeConvId, setActiveConvId] = useState(null);
-  // messages : ағымдағы чаттың хабарламалары
+  // Ағымдағы чат хабарламалары
   const [messages, setMessages] = useState([]);
-  // input : хабарлама жазу өрісінің мәні
+  // Енгізу өрісінің мәні
   const [input, setInput] = useState('');
-  // loading : ИИ жауабын күту жағдайы
+  // ИИ жауабын күту
   const [loading, setLoading] = useState(false);
-  // convLoading : чат тізімін жүктеу жағдайы
+  // Чат тізімін жүктеу
   const [convLoading, setConvLoading] = useState(true);
-  // confirmDelete : жойылатын чатты растау диалогы үшін
+  // Жоюды растау диалогы
   const [confirmDelete, setConfirmDelete] = useState(null);
-  // mobileView : мобайлда 'list' (тізім) немесе 'chat' (чат) беті
+  // Мобайл көрінісі: тізім не чат
   const [mobileView, setMobileView] = useState('list');
-  // crisisActive : соңғы хабарламада дағдарыс сигналы анықталды ма (CTA banner үшін)
+  // Дағдарыс сигналы анықталды ма (CTA үшін)
   const [crisisActive, setCrisisActive] = useState(false);
-  // bottomRef : жаңа хабарлама келгенде төменге авто-айналдыру үшін
+  // Төменге авто-айналдыру маркері
   const bottomRef = useRef(null);
 
-  // quickMessages : жылдам сұрақ батырмалары үшін аударма тізімі
+  // Жылдам сұрақтар аудармасы
   const quickMessages = t('student.aiChat.quickMessages', { returnObjects: true });
 
-  // Бет ашылғанда барлық чат тізімін жүктеу
+  // Бет ашылғанда чат тізімін жүктеу
   useEffect(() => {
     api.get('/student/conversations')
       .then(data => {
         setConversations(data);
-        // Бар чат болса : бірінші чатты автоматты ашу
+        // Чат бар болса бірінішісін ашу
         if (data.length > 0) {
           setActiveConvId(data[0].id);
           setMobileView('chat');
@@ -59,7 +59,7 @@ export default function AIChat() {
       .finally(() => setConvLoading(false));
   }, []);
 
-  // Белсенді чат ауысқанда : сол чаттың хабарламаларын жүктеу, дағдарыс белгісін тазалау
+  // Чат ауысқанда: хабарламаларды жүктеу, дағдарыс белгісін тазалау
   useEffect(() => {
     setCrisisActive(false);
     if (!activeConvId) { setMessages([]); return; }
@@ -68,18 +68,18 @@ export default function AIChat() {
       .catch(() => {});
   }, [activeConvId]);
 
-  // Жаңа хабарлама келген сайын : чаттың төменіне айналдыру
+  // Жаңа хабарламада төменге айналдыру
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // sendMessage : хабарламаны серверге жіберу және ИИ жауабын алу
+  // Хабарламаны жіберіп, ИИ жауабын алу
   async function sendMessage(e) {
     e.preventDefault();
     if (!input.trim() || loading) return;
     const text = input.trim();
     setInput('');
-    // Студент хабарламасын бірден экранда көрсету (оптимистік жаңарту)
+    // Хабарламаны бірден көрсету (оптимистік)
     setMessages(prev => [...prev, { role: 'user', content: text }]);
     setLoading(true);
     try {
@@ -87,11 +87,11 @@ export default function AIChat() {
         content: text,
         conversation_id: activeConvId,
       });
-      // ИИ жауабын хабарламалар тізіміне қосу
+      // ИИ жауабын қосу
       setMessages(prev => [...prev, { role: 'assistant', content: res.reply }]);
-      // Backend дағдарыс сигналын тапса : CTA banner көрсету
+      // Дағдарыс табылса CTA көрсету
       if (res.crisis_detected) setCrisisActive(true);
-      // Чат тізімін жаңарту : атауы автоматты орнатылған болуы мүмкін
+      // Тізімді жаңарту (атауы авто орнатылуы мүмкін)
       api.get('/student/conversations').then(data => {
         setConversations(data);
         if (!activeConvId && res.conversation_id) {
@@ -99,27 +99,27 @@ export default function AIChat() {
         }
       });
     } catch {
-      // Қате болса : сәтсіздік хабарламасын көрсету
+      // Қате кезінде сәтсіздік хабары
       setMessages(prev => [...prev, { role: 'assistant', content: t('student.aiChat.greeting') }]);
     } finally {
       setLoading(false);
     }
   }
 
-  // startNewConversation : жаңа бос чат ашу
+  // Жаңа бос чат ашу
   async function startNewConversation() {
     setActiveConvId(null);
     setMessages([]);
     setMobileView('chat');
   }
 
-  // deleteConversation : чатты жойып, тізімді жаңарту
+  // Чатты жойып, тізімді жаңарту
   async function deleteConversation(conv) {
     try {
       await api.delete(`/student/conversations/${conv.id}`);
       const updated = conversations.filter(c => c.id !== conv.id);
       setConversations(updated);
-      // Жойылған чат белсенді болса : келесі чатқа ауысу
+      // Белсенді чат жойылса келесісіне ауысу
       if (activeConvId === conv.id) {
         if (updated.length > 0) {
           setActiveConvId(updated[0].id);
@@ -133,7 +133,7 @@ export default function AIChat() {
     setConfirmDelete(null);
   }
 
-  // groupConversations : чаттарды уақыт бойынша топтастыру: бүгін / кеше / апта / ескі
+  // Чаттарды уақыт бойынша топтау: бүгін/кеше/апта/ескі
   function groupConversations(convs) {
     const now = new Date();
     const todayStr = now.toDateString();
@@ -148,11 +148,11 @@ export default function AIChat() {
     }, {});
   }
 
-  // Топтастырылған чаттар және белсенді чат объектісі
+  // Топтар мен белсенді чат
   const grouped = groupConversations(conversations);
   const activeConv = conversations.find(c => c.id === activeConvId);
 
-  // GROUP_LABELS : топ атауларының аудармалары
+  // Топ атауларының аудармасы
   const GROUP_LABELS = {
     today: t('student.aiChat.groups.today'),
     yesterday: t('student.aiChat.groups.yesterday'),
@@ -160,7 +160,7 @@ export default function AIChat() {
     older: t('student.aiChat.groups.older'),
   };
 
-  // ConversationsList : сол жақ сайдбар: чат тізімі және «Жаңа чат» батырмасы
+  // Сол сайдбар: чат тізімі мен «Жаңа чат»
   const ConversationsList = (
     <div className="flex flex-col h-full bg-zinc-900">
       {/* Жаңа чат батырмасы */}
@@ -174,7 +174,7 @@ export default function AIChat() {
         </button>
       </div>
 
-      {/* Чат тізімі : жүктелу, бос күй немесе топтастырылған тізім */}
+      {/* Чат тізімі: жүктелу, бос күй не топтар */}
       <div className="flex-1 overflow-y-auto py-1">
         {convLoading ? (
           // Жүктелу спиннері
@@ -182,12 +182,12 @@ export default function AIChat() {
             <div className="w-4 h-4 border-2 border-zinc-700 border-t-zinc-400 rounded-full animate-spin" />
           </div>
         ) : conversations.length === 0 ? (
-          // Чат жоқ : бос күй хабары
+          // Чат жоқ: бос күй
           <div className="text-xs text-zinc-600 text-center py-10 px-4 leading-relaxed">
             {t('student.aiChat.noConversations')}
           </div>
         ) : (
-          // Топ бойынша чаттар: бүгін → кеше → апта → ескі
+          // Топ бойынша чаттар
           ['today', 'yesterday', 'week', 'older'].map(g => {
             const items = grouped[g];
             if (!items?.length) return null;
@@ -198,7 +198,7 @@ export default function AIChat() {
                   {GROUP_LABELS[g]}
                 </div>
                 {items.map(conv => (
-                  // Чат элементі : басқанда белсенді чатқа ауысу
+                  // Чат элементі: басқанда ауысу
                   <div
                     key={conv.id}
                     onClick={() => { setActiveConvId(conv.id); setMobileView('chat'); }}
@@ -211,7 +211,7 @@ export default function AIChat() {
                   >
                     <MessageSquare className="w-3 h-3 shrink-0 text-zinc-600" />
                     <span className="flex-1 truncate text-xs leading-relaxed">{conv.title}</span>
-                    {/* Жою батырмасы : hover кезінде ғана көрінеді */}
+                    {/* Жою батырмасы: тек hover кезінде */}
                     <button
                       onClick={e => { e.stopPropagation(); setConfirmDelete(conv); }}
                       className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-zinc-600 hover:text-red-400 transition-all shrink-0"
@@ -228,10 +228,10 @@ export default function AIChat() {
     </div>
   );
 
-  // ChatArea : оң жақ чат аймағы: хабарламалар және енгізу формасы
+  // Оң чат аймағы: хабарламалар мен енгізу формасы
   const ChatArea = (
     <div className="flex flex-col h-full">
-      {/* Чат тақырыбы : атауы және мобайлда артқа батырмасы */}
+      {/* Чат тақырыбы: атауы мен артқа батырмасы */}
       <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-3 shrink-0">
         <button
           className="lg:hidden p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
@@ -247,7 +247,7 @@ export default function AIChat() {
 
       {/* Хабарламалар аймағы */}
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        {/* Чат бос болса : сәлемдесу хабары және жылдам сұрақтар */}
+        {/* Чат бос болса: сәлемдесу мен жылдам сұрақтар */}
         {messages.length === 0 && (
           <div className="space-y-4">
             <div className="max-w-[85%] bg-zinc-800 border border-zinc-700 rounded-lg rounded-tl-sm px-4 py-3 text-sm text-zinc-200 leading-relaxed">
@@ -268,7 +268,7 @@ export default function AIChat() {
           </div>
         )}
 
-        {/* Хабарламалар тізімі : пайдаланушы оң жақта, ИИ сол жақта */}
+        {/* Хабарламалар: қолданушы оңда, ИИ солда */}
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={cn(
@@ -277,7 +277,7 @@ export default function AIChat() {
                 ? 'bg-zinc-100 text-zinc-900 rounded-br-sm'
                 : 'bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-tl-sm'
             )}>
-              {/* ИИ жауабын markdown форматында рендерлеу */}
+              {/* ИИ жауабын markdown көрсету */}
               {m.role === 'assistant' ? (
                 <div className="prose-chat">
                   <ReactMarkdown>{m.content}</ReactMarkdown>
@@ -287,7 +287,7 @@ export default function AIChat() {
           </div>
         ))}
 
-        {/* ИИ жауабын күту : үш нүктелі анимация */}
+        {/* Күту: үш нүкте анимациясы */}
         {loading && (
           <div className="flex justify-start">
             <div className="bg-zinc-800 border border-zinc-700 rounded-lg rounded-tl-sm px-4 py-3 flex gap-1.5 items-center">
@@ -297,12 +297,11 @@ export default function AIChat() {
             </div>
           </div>
         )}
-        {/* Авто-айналдыру үшін көрінбейтін маркер */}
+        {/* Авто-айналдыру маркері */}
         <div ref={bottomRef} />
       </div>
 
-      {/* Дағдарыс CTA banner : суицид/өзіне зиян сигналы анықталғанда көрінеді.
-          AI тек көмекші — негізгі жауапкершілік адам мамандада, сол үшін психолог каталогіне бағыттаймыз */}
+      {/* Дағдарыс CTA: суицид/зиян сигналында психолог каталогіне бағыттайды */}
       {crisisActive && (
         <div className="shrink-0 mx-4 mb-3 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 fade-in">
           <div className="flex items-start gap-2.5">
@@ -351,7 +350,7 @@ export default function AIChat() {
 
   return (
     <div className="fade-in flex flex-col flex-1 min-h-0">
-      {/* Бет тақырыбы және ескерту мәтіні */}
+      {/* Бет тақырыбы мен ескерту */}
       <div className="mb-4 shrink-0">
         <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">
           {t('student.aiChat.title')}
@@ -359,9 +358,9 @@ export default function AIChat() {
         <p className="text-sm text-zinc-500 mt-1">{t('student.aiChat.disclaimer')}</p>
       </div>
 
-      {/* Негізгі контейнер: сайдбар + чат аймағы */}
+      {/* Негізгі контейнер: сайдбар + чат */}
       <div className="flex-1 min-h-0 flex rounded-lg border border-zinc-800 overflow-hidden">
-        {/* Сол жақ сайдбар : десктопта әрдайым, мобайлда тек 'list' күйінде */}
+        {/* Сол сайдбар: десктопта әрдайым, мобайлда 'list' күйінде */}
         <div className={cn(
           'w-full lg:w-[240px] lg:flex lg:flex-col border-r border-zinc-800 shrink-0',
           mobileView === 'list' ? 'flex flex-col' : 'hidden lg:flex lg:flex-col'
@@ -369,7 +368,7 @@ export default function AIChat() {
           {ConversationsList}
         </div>
 
-        {/* Оң жақ чат аймағы : десктопта әрдайым, мобайлда тек 'chat' күйінде */}
+        {/* Оң чат аймағы: десктопта әрдайым, мобайлда 'chat' күйінде */}
         <div className={cn(
           'flex-1 min-w-0',
           mobileView === 'chat' ? 'flex flex-col' : 'hidden lg:flex lg:flex-col'

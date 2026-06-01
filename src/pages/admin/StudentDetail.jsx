@@ -25,7 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 // Chart.js сызықтық диаграмма компоненттерін тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler);
 
-// AdminStudentDetail — әкімші студент толық ақпараты беті
+// AdminStudentDetail — студенттің толық ақпарат беті
 export default function AdminStudentDetail() {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
@@ -34,19 +34,19 @@ export default function AdminStudentDetail() {
   // loading — деректер жүктелу күйі
   const [loading, setLoading] = useState(true);
 
-  // RISK_CONFIG — тәуекел деңгейлерінің белгі конфигурациясы
+  // RISK_CONFIG — тәуекел деңгейінің белгілері
   const RISK_CONFIG = {
     low: { label: t('risk.low'), variant: 'success' },
     moderate: { label: t('risk.moderate'), variant: 'warning' },
     high: { label: t('risk.high'), variant: 'destructive' },
   };
 
-  // METRICS — диаграммада көрсетілетін метрикалар және олардың стильдері
+  // METRICS — диаграмма метрикалары мен стильдері
   const METRICS = [
-    { key: 'mood', label: t('metrics.mood'), color: '#e4e4e7', dash: [] },
-    { key: 'stress', label: t('metrics.stress'), color: '#a1a1aa', dash: [6, 3] },
-    { key: 'sleep', label: t('metrics.sleep'), color: '#71717a', dash: [3, 3] },
-    { key: 'energy', label: t('metrics.energy'), color: '#d4d4d8', dash: [8, 4, 2, 4] },
+    { key: 'mood', label: t('metrics.mood'), color: '#334155', dash: [] },
+    { key: 'stress', label: t('metrics.stress'), color: '#64748b', dash: [6, 3] },
+    { key: 'sleep', label: t('metrics.sleep'), color: '#6b7a90', dash: [3, 3] },
+    { key: 'energy', label: t('metrics.energy'), color: '#475569', dash: [8, 4, 2, 4] },
   ];
 
   // Студент деректерін ID бойынша жүктеу
@@ -81,17 +81,17 @@ export default function AdminStudentDetail() {
     </div>
   );
 
-  // API жауабынан деректерді шығарып алу
+  // API жауабынан деректерді ажырату
   const { student, checkIns, appointments, surveys } = data;
   const latestSurvey = surveys[0];
   const completedAppts = appointments.filter(a => a.status === 'completed');
 
-  // labels — диаграмма X-осі үшін күн белгілері
+  // labels — диаграмма X-осінің күн белгілері
   const labels = checkIns.map(c =>
     new Date(c.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   );
 
-  // chartData — метрика диаграммасының деректер жиыны
+  // chartData — диаграмма деректер жиыны
   const chartData = {
     labels,
     datasets: METRICS.map(m => ({
@@ -109,18 +109,18 @@ export default function AdminStudentDetail() {
   const chartOptions = {
     responsive: true, maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: '#71717a', boxWidth: 12, font: { size: 11 } } },
-      tooltip: { backgroundColor: '#27272a', borderColor: '#3f3f46', borderWidth: 1, cornerRadius: 6 },
+      legend: { labels: { color: '#6b7a90', boxWidth: 12, font: { size: 11 } } },
+      tooltip: { backgroundColor: '#e2e8f0', borderColor: '#cbd5e1', borderWidth: 1, cornerRadius: 6 },
     },
     scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', font: { size: 10 } } },
-      y: { min: 1, max: 5, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', stepSize: 1, font: { size: 10 } } },
+      x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+      y: { min: 1, max: 5, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', stepSize: 1, font: { size: 10 } } },
     },
   };
 
   return (
     <div className="fade-in space-y-5">
-      {/* Артқа батырмасы және студент туралы негізгі ақпарат */}
+      {/* Артқа батырмасы және студент ақпараты */}
       <div className="flex items-center gap-4">
         <Button variant="secondary" size="sm" asChild>
           <Link to="/admin/students" className="flex items-center gap-1.5">
@@ -146,7 +146,7 @@ export default function AdminStudentDetail() {
           <TabsTrigger value="surveys">{t('admin.studentDetail.tabs.surveys')}</TabsTrigger>
         </TabsList>
 
-        {/* Шолу қойындысы: KPI карточкалары және метрика диаграммасы */}
+        {/* Шолу: KPI карталары мен диаграмма */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
@@ -178,7 +178,7 @@ export default function AdminStudentDetail() {
             })}
           </div>
 
-          {/* Чекин динамикасының сызықтық диаграммасы */}
+          {/* Чекин динамикасының диаграммасы */}
           <Card className="border-zinc-800 bg-zinc-900">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-zinc-300">{t('admin.studentDetail.chart')}</CardTitle>
@@ -205,7 +205,7 @@ export default function AdminStudentDetail() {
               {appointments.map(a => (
                 <Card key={a.id} className="border-zinc-800 bg-zinc-900">
                   <CardContent className="p-4">
-                    {/* Сессия күні, психолог аты және мәртебесі */}
+                    {/* Сессия күні, психолог, мәртебесі */}
                     <div className="flex items-center justify-between mb-1.5">
                       <div>
                         <span className="font-medium text-sm text-zinc-100">
@@ -220,7 +220,7 @@ export default function AdminStudentDetail() {
                       </Badge>
                     </div>
                     {a.reason && <p className="text-xs text-zinc-600">{a.reason}</p>}
-                    {/* Сессия жазбалары және жағдай өзгерісі */}
+                    {/* Сессия жазбалары мен жағдай өзгерісі */}
                     {a.session_notes && (
                       <div className="rounded-md bg-zinc-800 p-3 text-xs space-y-1 mt-2">
                         <div className="text-zinc-400">

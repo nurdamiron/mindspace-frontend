@@ -1,20 +1,22 @@
-// useState, useEffect, useMemo : күй, жанама әсерлер және мемоизация үшін
+// Күй, эффект, мемоизация
 import { useState, useEffect, useMemo } from 'react';
-// useForm : форманы басқару үшін
+// Форманы басқару
 import { useForm } from 'react-hook-form';
-// zodResolver : Zod схемасын react-hook-form-ға байланыстыру үшін
+// Zod-ты формаға жалғау
 import { zodResolver } from '@hookform/resolvers/zod';
-// z : форма валидация схемасын жасау үшін
+// Валидация схемасы
 import { z } from 'zod';
-// toast : хабарлама тостерін көрсету үшін
+// Тост хабарламалары
 import { toast } from 'sonner';
-// Lucide иконалары : қосу, жою, пайдаланушылар, жүктелу, жабу, верификация
+// Lucide иконалары
 import { Plus, Trash2, Users, Loader2, X, ShieldCheck, ShieldAlert, FileText, ExternalLink, Check, Ban, Flag } from 'lucide-react';
-// useTranslation : аударма хуктары
+// Аударма хук
 import { useTranslation } from 'react-i18next';
-// api : серверге HTTP сұраныстар жіберу үшін
+// Бетке өту навигациясы
+import { useNavigate } from 'react-router-dom';
+// HTTP API клиенті
 import { api } from '../../api/client';
-// shadcn/ui компоненттері : батырма, енгізу, белгіше, мәтін аймағы, белгі, карта
+// shadcn/ui компоненттері
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,7 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
-// VERIFICATION_STATUS_STYLES : статус → badge стилі
+// Статус badge стильдері
 const VERIFICATION_STATUS_STYLES = {
   active:    { variant: 'success',     icon: ShieldCheck },
   pending:   { variant: 'secondary',   icon: null },
@@ -37,27 +39,28 @@ const VERIFICATION_STATUS_STYLES = {
 
 const ALL_STATUSES = ['active', 'pending', 'probation', 'suspended', 'rejected', 'revoked'];
 
-// PsychologistManagement : психологтарды басқару беті
+// Психологтарды басқару беті
 export default function PsychologistManagement() {
   const { t } = useTranslation();
-  // psychologists : психологтар тізімі
+  const navigate = useNavigate();
+  // Психологтар тізімі
   const [psychologists, setPsychologists] = useState([]);
-  // loading : деректер жүктелу күйі
+  // Жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // showForm : психолог қосу формасының көрінуі
+  // Қосу формасының көрінуі
   const [showForm, setShowForm] = useState(false);
-  // verifying : верификация диалогында ашылған психолог
+  // Верификация диалогындағы психолог
   const [verifying, setVerifying] = useState(null);
-  // documents : verifying психологтың құжаттар тізімі
+  // Психолог құжаттары
   const [documents, setDocuments] = useState([]);
-  // docsLoading : құжаттар жүктелу күйі
+  // Құжаттар жүктелу күйі
   const [docsLoading, setDocsLoading] = useState(false);
-  // statusForm : жаңа статус, trust_score, reason өрістері
+  // Статус формасының өрістері
   const [statusForm, setStatusForm] = useState({ status: 'active', trust_score: 0, reason: '' });
-  // savingStatus : статусты сақтау күйі
+  // Статусты сақтау күйі
   const [savingStatus, setSavingStatus] = useState(false);
 
-  // psychSchema : психолог қосу формасының валидация схемасы
+  // Қосу формасының валидация схемасы
   const psychSchema = useMemo(() => z.object({
     name: z.string().min(2, t('common.errors.required')),
     email: z.string().email(t('common.errors.invalidEmail')),
@@ -68,7 +71,7 @@ export default function PsychologistManagement() {
     bio: z.string().optional(),
   }), [t]);
 
-  // Форма күйін және валидациясын инициализациялау
+  // Форманы баптау
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(psychSchema),
     defaultValues: { password: 'password123' },
@@ -79,7 +82,7 @@ export default function PsychologistManagement() {
     api.get('/admin/psychologists').then(setPsychologists).finally(() => setLoading(false));
   }, []);
 
-  // addPsychologist : жаңа психолог қосу және тізімді жаңарту
+  // Жаңа психолог қосу
   async function addPsychologist(data) {
     try {
       const added = await api.post('/admin/psychologists', data);
@@ -92,7 +95,7 @@ export default function PsychologistManagement() {
     }
   }
 
-  // openVerification : бір психологтың верификация панелін ашу + құжаттарын жүктеу
+  // Верификация панелін ашу әрі құжаттарды жүктеу
   async function openVerification(p) {
     setVerifying(p);
     setStatusForm({
@@ -112,10 +115,10 @@ export default function PsychologistManagement() {
     }
   }
 
-  // reviewDocument : құжатты approve немесе reject ету
+  // Құжатты мақұлдау не қабылдамау
   async function reviewDocument(docId, status) {
     const note = status === 'rejected' ? window.prompt(t('admin.psychologistMgmt.verify.rejectNotePrompt')) : '';
-    if (status === 'rejected' && note === null) return; // болдырмау
+    if (status === 'rejected' && note === null) return; // бас тарту
     try {
       const updated = await api.patch(`/admin/documents/${docId}/review`, {
         status,
@@ -130,7 +133,7 @@ export default function PsychologistManagement() {
     }
   }
 
-  // saveStatus : психологтың верификация статусын жаңарту
+  // Верификация статусын сақтау
   async function saveStatus() {
     setSavingStatus(true);
     try {
@@ -154,7 +157,7 @@ export default function PsychologistManagement() {
     }
   }
 
-  // deletePsych : психологты растаудан кейін жою
+  // Психологты жою
   async function deletePsych(id) {
     if (!window.confirm(t('admin.psychologistMgmt.deleteConfirm'))) return;
     try {
@@ -175,7 +178,7 @@ export default function PsychologistManagement() {
 
   return (
     <div className="fade-in space-y-5">
-      {/* Тақырып және форманы ашу/жабу батырмасы */}
+      {/* Тақырып пен форма батырмасы */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">{t('admin.psychologistMgmt.title')}</h1>
@@ -196,13 +199,13 @@ export default function PsychologistManagement() {
         </Button>
       </div>
 
-      {/* Психолог қосу формасы (showForm = true болғанда ғана) */}
+      {/* Психолог қосу формасы */}
       {showForm && (
         <Card className="border-zinc-800 bg-zinc-900 fade-in">
           <CardContent className="p-6">
             <h2 className="text-sm font-semibold text-zinc-200 mb-5">{t('admin.psychologistMgmt.formTitle')}</h2>
             <form onSubmit={handleSubmit(addPsychologist)}>
-              {/* Форма өрістерін динамикалық рендерлеу */}
+              {/* Форма өрістері */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {[
                   { name: 'name', label: t('admin.psychologistMgmt.fields.name'), placeholder: t('admin.psychologistMgmt.fields.namePlaceholder'), required: true },
@@ -229,7 +232,7 @@ export default function PsychologistManagement() {
                   </div>
                 ))}
 
-                {/* Биография өрісі толық ені бойынша */}
+                {/* Биография өрісі */}
                 <div className="col-span-2 space-y-1.5">
                   <Label htmlFor="bio">{t('admin.psychologistMgmt.fields.bio')}</Label>
                   <Textarea id="bio" placeholder={t('admin.psychologistMgmt.fields.bioPlaceholder')} {...register('bio')} />
@@ -264,16 +267,22 @@ export default function PsychologistManagement() {
           {psychologists.map((p) => (
             <Card key={p.id} className="border-zinc-800 bg-zinc-900 hover:border-zinc-700 transition-colors">
               <CardContent className="p-4 flex items-center gap-4">
-                {/* Психолог аватары (аттың бастапқы әріптері) */}
+                {/* Психолог аватары */}
                 <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-semibold text-zinc-300 shrink-0">
                   {p.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
 
-                {/* Психолог аты, email және статистика белгілері */}
-                <div className="flex-1 min-w-0">
+                {/* Аты, email, статистика — басқанда детальдарға өту */}
+                <div
+                  className="flex-1 min-w-0 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/admin/psychologists/${p.id}`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/admin/psychologists/${p.id}`); }}
+                >
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="font-medium text-zinc-100 text-sm">{p.name}</div>
-                    {/* Верификация статус белгісі */}
+                    {/* Статус белгісі */}
                     {(() => {
                       const cfg = VERIFICATION_STATUS_STYLES[p.verification_status] || VERIFICATION_STATUS_STYLES.pending;
                       const Icon = cfg.icon;
@@ -284,7 +293,7 @@ export default function PsychologistManagement() {
                         </Badge>
                       );
                     })()}
-                    {/* Ашық шағымдар саны (бар болса) */}
+                    {/* Ашық шағымдар саны */}
                     {Number(p.open_complaints) > 0 && (
                       <Badge variant="destructive" className="gap-1 text-[10px]">
                         <Flag className="w-2.5 h-2.5" />
@@ -322,7 +331,7 @@ export default function PsychologistManagement() {
                     <ShieldCheck className="w-3.5 h-3.5" />
                     {t('admin.psychologistMgmt.verify.openBtn')}
                   </Button>
-                  {/* Психологты жою батырмасы */}
+                  {/* Жою батырмасы */}
                   <Button
                     variant="destructive"
                     size="sm"
@@ -337,7 +346,7 @@ export default function PsychologistManagement() {
         </div>
       )}
 
-      {/* Верификация диалогы : құжат тексеру + статус өзгерту */}
+      {/* Верификация диалогы: құжат пен статус */}
       <Dialog open={!!verifying} onOpenChange={(open) => !open && setVerifying(null)}>
         <DialogContent className="max-w-[560px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -348,7 +357,7 @@ export default function PsychologistManagement() {
           </DialogHeader>
 
           <div className="space-y-5 py-1">
-            {/* Құжаттар тізімі + approve/reject */}
+            {/* Құжаттар тізімі мен тексеру */}
             <div className="space-y-2">
               <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
                 {t('admin.psychologistMgmt.verify.documentsTitle')}

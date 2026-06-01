@@ -1,61 +1,61 @@
-// useState, useEffect, useCallback — күй, жанама әсерлер және мемоизацияланған функция үшін
+// Күй, эффект, мемоизация
 import { useState, useEffect, useCallback } from 'react';
-// useNavigate — бағдарламалық навигация үшін
+// Навигация
 import { useNavigate } from 'react-router-dom';
-// Lucide иконалары — іздеу, пайдаланушылар, беттеу
+// Lucide иконалары
 import { Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
-// useTranslation — аударма хуктары
+// Аударма хук
 import { useTranslation } from 'react-i18next';
-// api — серверге HTTP сұраныстар жіберу үшін
+// HTTP API клиенті
 import { api } from '../../api/client';
-// shadcn/ui компоненттері — белгі, батырма, карта, енгізу, тізім, скелет
+// shadcn/ui компоненттері
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-// cn — шартты CSS класстарды біріктіру утилитасы
+// CSS класстарды біріктіру
 import { cn } from '@/lib/utils';
 
-// daysSince — соңғы белсенділіктен өткен күн санын есептеу
+// Өткен күн санын есептеу
 function daysSince(dateStr) {
   if (!dateStr) return null;
   return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
 }
 
-// PAGE_SIZE — бір беттегі студенттер саны
+// Бір беттегі студент саны
 const PAGE_SIZE = 25;
 
-// AdminStudents — әкімші студенттер тізімі беті
+// Әкімші студенттер тізімі беті
 export default function AdminStudents() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  // students — студенттер тізімі
+  // Студенттер тізімі
   const [students, setStudents] = useState([]);
-  // faculties — факультеттер тізімі
+  // Факультеттер тізімі
   const [faculties, setFaculties] = useState([]);
-  // total — жалпы студент саны
+  // Жалпы студент саны
   const [total, setTotal] = useState(0);
-  // page — ағымдағы бет нөмірі
+  // Ағымдағы бет
   const [page, setPage] = useState(1);
-  // loading — деректер жүктелу күйі
+  // Жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // search — іздеу жолы
+  // Іздеу жолы
   const [search, setSearch] = useState('');
-  // faculty — таңдалған факультет сүзгісі
+  // Факультет сүзгісі
   const [faculty, setFaculty] = useState('');
-  // risk — таңдалған тәуекел деңгейі сүзгісі
+  // Тәуекел сүзгісі
   const [risk, setRisk] = useState('');
 
-  // RISK_CONFIG — тәуекел деңгейлерінің белгі конфигурациясы
+  // Тәуекел деңгейі белгілері
   const RISK_CONFIG = {
     low: { label: t('risk.low'), variant: 'success' },
     moderate: { label: t('risk.moderate'), variant: 'warning' },
     high: { label: t('risk.high'), variant: 'destructive' },
   };
 
-  // loadStudents — сүзгі параметрлері бойынша студенттер тізімін API-дан жүктеу
+  // Сүзгі бойынша студенттерді жүктеу
   const loadStudents = useCallback(async () => {
     setLoading(true);
     try {
@@ -76,23 +76,23 @@ export default function AdminStudents() {
     }
   }, [search, faculty, risk, page]);
 
-  // Сүзгі өзгергенде беттеуді бастапқыға қайтару
+  // Сүзгі өзгергенде бірінші бетке қайту
   useEffect(() => {
     setPage(1);
   }, [search, faculty, risk]);
 
-  // Іздеу кезінде debounce қолданып жүктеу
+  // Іздеуде debounce
   useEffect(() => {
     const timer = setTimeout(loadStudents, search ? 400 : 0);
     return () => clearTimeout(timer);
   }, [loadStudents]);
 
-  // totalPages — жалпы бет санын есептеу
+  // Жалпы бет саны
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="fade-in space-y-5">
-      {/* Тақырып және жалпы студент саны */}
+      {/* Тақырып пен студент саны */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-50 tracking-tight">{t('admin.students.title')}</h1>
         <p className="text-sm text-zinc-500 mt-1">
@@ -100,7 +100,7 @@ export default function AdminStudents() {
         </p>
       </div>
 
-      {/* Іздеу, факультет және тәуекел сүзгілері */}
+      {/* Сүзгілер */}
       <Card className="border-zinc-800 bg-zinc-900">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -114,7 +114,7 @@ export default function AdminStudents() {
               />
             </div>
 
-            {/* Факультет бойынша сүзгі */}
+            {/* Факультет сүзгісі */}
             <Select value={faculty || 'all'} onValueChange={(v) => setFaculty(v === 'all' ? '' : v)}>
               <SelectTrigger>
                 <SelectValue placeholder={t('admin.students.allFaculties')} />
@@ -127,7 +127,7 @@ export default function AdminStudents() {
               </SelectContent>
             </Select>
 
-            {/* Тәуекел деңгейі бойынша сүзгі */}
+            {/* Тәуекел сүзгісі */}
             <Select value={risk || 'all'} onValueChange={(v) => setRisk(v === 'all' ? '' : v)}>
               <SelectTrigger>
                 <SelectValue placeholder={t('admin.students.allRisks')} />
@@ -143,7 +143,7 @@ export default function AdminStudents() {
         </CardContent>
       </Card>
 
-      {/* Студенттер кестесі немесе бос күй */}
+      {/* Кесте немесе бос күй */}
       {loading ? (
         <div className="space-y-2">
           {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-14" />)}
@@ -174,7 +174,7 @@ export default function AdminStudents() {
                 {students.map((s) => {
                   const riskConfig = RISK_CONFIG[s.last_risk];
                   const days = daysSince(s.last_checkin);
-                  // initials — студент атынан бастапқы әріптерді шығарып алу
+                  // Аватар инициалдары
                   const initials = s.name?.split(' ').map((n) => n[0]).join('').slice(0, 2) || '?';
                   return (
                     <tr
@@ -182,7 +182,7 @@ export default function AdminStudents() {
                       onClick={() => navigate(`/admin/students/${s.id}`)}
                       className="border-b border-zinc-800 last:border-b-0 hover:bg-zinc-800/40 transition-colors cursor-pointer"
                     >
-                      {/* Аты және email бағаны */}
+                      {/* Аты мен email */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-semibold text-zinc-300 shrink-0">
@@ -194,7 +194,7 @@ export default function AdminStudents() {
                           </div>
                         </div>
                       </td>
-                      {/* Факультет және курс */}
+                      {/* Факультет пен курс */}
                       <td className="px-4 py-3 hidden sm:table-cell">
                         <div className="text-sm text-zinc-300">{s.faculty || '—'}</div>
                         {s.course && <div className="text-xs text-zinc-600">{s.course} {t('common.course')}</div>}
@@ -202,7 +202,7 @@ export default function AdminStudents() {
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span className="text-sm text-zinc-300">{s.checkin_count}</span>
                       </td>
-                      {/* Стресс/көңіл-күй орташа мәндері */}
+                      {/* Стресс/көңіл-күй орташасы */}
                       <td className="px-4 py-3 hidden lg:table-cell">
                         {s.checkin_count > 0 ? (
                           <div className="text-sm text-zinc-300">
@@ -219,7 +219,7 @@ export default function AdminStudents() {
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span className="text-sm text-zinc-300">{s.session_count}</span>
                       </td>
-                      {/* Тәуекел белгісі */}
+                      {/* Тәуекел */}
                       <td className="px-4 py-3">
                         {riskConfig ? (
                           <Badge variant={riskConfig.variant}>{riskConfig.label}</Badge>
@@ -227,7 +227,7 @@ export default function AdminStudents() {
                           <span className="text-xs text-zinc-600">{t('risk.unknown')}</span>
                         )}
                       </td>
-                      {/* Соңғы чекин уақыты */}
+                      {/* Соңғы чекин */}
                       <td className="px-4 py-3 hidden lg:table-cell">
                         {days === null ? (
                           <span className="text-xs text-zinc-600">{t('admin.students.noCheckins')}</span>
@@ -248,7 +248,7 @@ export default function AdminStudents() {
         </Card>
       )}
 
-      {/* Беттеу навигациясы */}
+      {/* Беттеу */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-1">
           <p className="text-xs text-zinc-500">

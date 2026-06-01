@@ -1,50 +1,50 @@
-// useState, useEffect : компонент күйі мен жанама әсерлер үшін
+// Компонент күйі мен әсерлер
 import { useState, useEffect } from 'react';
-// Link : ішкі сілтемелер үшін
+// Ішкі сілтемелер
 import { Link } from 'react-router-dom';
-// ReactMarkdown : Markdown мәтінін HTML форматында көрсету үшін
+// Markdown көрсету
 import ReactMarkdown from 'react-markdown';
-// Chart.js компоненттері : сызықтық диаграмма үшін
+// Сызба үшін Chart.js
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
   Title, Tooltip, Legend, Filler
 } from 'chart.js';
-// Line : сызықтық диаграмма компоненті
+// Сызықтық диаграмма
 import { Line } from 'react-chartjs-2';
-// Lucide иконалары : метрикалар, іс-әрекеттер және интерфейс үшін
+// Иконалар
 import {
   Smile, Zap, Moon, Battery, Target,
   CheckSquare, Brain, MessageSquare, Users,
   ArrowRight, CalendarDays, Sparkles, AlertTriangle, Loader2, X,
   Star, ShieldCheck, ChevronRight,
 } from 'lucide-react';
-// formatDate : локализацияланған күн форматтағышы
+// Локализацияланған күн форматтағыш
 import { formatDate } from '@/lib/dateUtils';
-// useTranslation : аударма хуктары
+// Аударма хук
 import { useTranslation } from 'react-i18next';
-// api : серверге HTTP сұраныстар жіберу үшін
+// HTTP сұраныстар
 import { api } from '../../api/client';
-// useAuth : ағымдағы пайдаланушы деректерін алу үшін
+// Ағымдағы қолданушы
 import { useAuth } from '../../context/AuthContext';
-// shadcn/ui компоненттері : карта, батырма, бөлгіш, скелет
+// shadcn/ui компоненттері
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Chart.js компоненттерін тіркеу
+// Chart.js тіркеу
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-// METRIC_ICONS : метрика атауын иконаға сәйкестендіретін объект
+// Метрика → икона
 const METRIC_ICONS = { mood: Smile, stress: Zap, sleep: Moon, energy: Battery, productivity: Target };
-// METRIC_COLORS : метрика атауын диаграмма түсіне сәйкестендіретін объект
-const METRIC_COLORS = { mood: '#60a5fa', stress: '#f87171', sleep: '#a78bfa', energy: '#fbbf24', productivity: '#34d399' };
-// CHART_COLORS : диаграмма жолдарының реттелген түстер массиві
-const CHART_COLORS = ['#60a5fa', '#f87171', '#a78bfa', '#fbbf24', '#34d399'];
-// CHART_DASH : диаграмма жолдарының штрих үлгілері
+// Метрика → түс
+const METRIC_COLORS = { mood: '#60a5fa', stress: '#f87171', sleep: '#a78bfa', energy: '#fbbf24', productivity: '#818cf8' };
+// Сызба жол түстері
+const CHART_COLORS = ['#60a5fa', '#f87171', '#a78bfa', '#fbbf24', '#818cf8'];
+// Сызба штрих үлгілері
 const CHART_DASH = [[], [], [], [], []];
 
-// computeAlerts : стресс, көңіл-күй және ұйқы деңгейіне байланысты ескертулерді есептейді
+// Стресс, көңіл-күй, ұйқы бойынша ескертулерді есептейді
 function computeAlerts(checkIns, weeklyAverages) {
   const alerts = [];
   if (!checkIns || checkIns.length === 0) return alerts;
@@ -52,19 +52,19 @@ function computeAlerts(checkIns, weeklyAverages) {
   const lastDate = new Date(checkIns[checkIns.length - 1]?.date);
   const daysSinceLast = Math.floor((Date.now() - lastDate) / 86400000);
 
-  // Соңғы 3 check-in де жоғары стресс болса ескертеді
+  // Соңғы 3 check-in жоғары стресс болса ескерту
   const recent = [...checkIns].reverse().slice(0, 3);
   if (recent.length >= 3 && recent.every(c => c.stress >= 4)) {
     alerts.push({ type: 'highStress' });
   }
 
-  // Апталық орташа көңіл-күй төмен болса ескертеді
+  // Апталық орташа көңіл-күй төмен болса ескерту
   const avgMood = parseFloat(weeklyAverages?.avg_mood || 0);
   if (avgMood > 0 && avgMood < 2.5) {
     alerts.push({ type: 'lowMood' });
   }
 
-  // Апталық орташа ұйқы төмен болса ескертеді
+  // Апталық орташа ұйқы төмен болса ескерту
   const avgSleep = parseFloat(weeklyAverages?.avg_sleep || 0);
   if (avgSleep > 0 && avgSleep < 2.5) {
     alerts.push({ type: 'lowSleep' });
@@ -73,37 +73,37 @@ function computeAlerts(checkIns, weeklyAverages) {
   return alerts;
 }
 
-// StudentDashboard : студент бақылау тақтасының негізгі компоненті
+// Студент бақылау тақтасы
 export default function StudentDashboard() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  // stats : серверден алынған статистика деректері
+  // Серверден алынған статистика
   const [stats, setStats] = useState(null);
-  // loading : деректер жүктелу күйі
+  // Жүктелу күйі
   const [loading, setLoading] = useState(true);
-  // activeMetrics : диаграммада көрсетілетін белсенді метрикалар
+  // Сызбада белсенді метрикалар
   const [activeMetrics, setActiveMetrics] = useState(['mood', 'stress', 'sleep']);
-  // insight : AI-инсайт мәтіні
+  // AI-инсайт мәтіні
   const [insight, setInsight] = useState(null);
-  // insightLoading : AI инсайт жүктелу күйі
+  // Инсайт жүктелу күйі
   const [insightLoading, setInsightLoading] = useState(false);
-  // insightError : AI инсайт қате хабарламасы
+  // Инсайт қатесі
   const [insightError, setInsightError] = useState(null);
-  // recommendations : matchingEngine қайтаратын top-3 ұсынылған психологтар
+  // Ұсынылған top-3 психолог
   const [recommendations, setRecommendations] = useState([]);
 
   const METRIC_KEYS = ['mood', 'stress', 'sleep', 'energy', 'productivity'];
 
-  // Бет жүктелгенде студент статистикасын серверден алады
+  // Бет жүктелгенде статистиканы алу
   useEffect(() => {
     api.get('/student/stats').then(setStats).finally(() => setLoading(false));
-    // Параллель түрде ұсыныстарды жүктеу (UI тілін аргумент ретінде беру)
+    // Ұсыныстарды қатар жүктеу (UI тілін беру)
     api.get(`/student/recommendations?lang=${i18n.language}`)
       .then((data) => setRecommendations(data?.recommendations || []))
       .catch(() => {});
   }, [i18n.language]);
 
-  // loadInsight : AI-инсайт жүктеу функциясы
+  // AI-инсайт жүктеу
   async function loadInsight() {
     setInsightLoading(true);
     setInsightError(null);
@@ -117,7 +117,7 @@ export default function StudentDashboard() {
     }
   }
 
-  // Деректер жүктелу кезінде скелет жүктеу экранын көрсетеді
+  // Жүктелу кезінде скелет экраны
   if (loading) return (
     <div className="fade-in space-y-6">
       <div className="space-y-2"><Skeleton className="h-7 w-48" /><Skeleton className="h-4 w-64" /></div>
@@ -131,14 +131,14 @@ export default function StudentDashboard() {
     </div>
   );
 
-  // checkIns : check-in тізімін дайындайды
+  // Check-in тізімі
   const checkIns = stats?.checkIns || [];
-  // labels : диаграмма X осіндегі күн белгілері
+  // X осіндегі күн белгілері
   const labels = checkIns.map((c) =>
     formatDate(c.date, i18n.language, { month: 'short', day: 'numeric' })
   );
 
-  // chartData : сызба үшін деректер жиынын белсенді метрикалар бойынша құрады
+  // Белсенді метрикалар бойынша сызба деректері
   const chartData = {
     labels,
     datasets: activeMetrics.map((key, i) => {
@@ -158,36 +158,36 @@ export default function StudentDashboard() {
     }),
   };
 
-  // chartOptions : сызбаның визуалды параметрлері
+  // Сызба визуал параметрлері
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#f0f4f2',
-        borderColor: '#c4d6ca',
+        backgroundColor: '#f8fafc',
+        borderColor: '#e2e8f0',
         borderWidth: 1,
-        titleColor: '#1a2d22',
-        bodyColor: '#4a6657',
+        titleColor: '#0f172a',
+        bodyColor: '#475569',
         padding: 10,
         cornerRadius: 6,
       },
     },
     scales: {
-      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#4a6657', font: { size: 11 } } },
-      y: { min: 1, max: 5, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#4a6657', stepSize: 1, font: { size: 11 } } },
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#475569', font: { size: 11 } } },
+      y: { min: 1, max: 5, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#475569', stepSize: 1, font: { size: 11 } } },
     },
   };
 
-  // avgs : апталық орташа мәндер
+  // Апталық орташа мәндер
   const avgs = stats?.weeklyAverages || {};
-  // appts : кездесу санақтары
+  // Кездесу санақтары
   const appts = stats?.appointments || {};
-  // alerts : есептелген ескертулер тізімі
+  // Есептелген ескертулер
   const alerts = computeAlerts(checkIns, avgs);
 
-  // QUICK_ACTIONS : жылдам сілтемелер тізімі
+  // Жылдам сілтемелер
   const QUICK_ACTIONS = [
     { label: t('student.dashboard.actions.checkin'), href: '/student/checkin', icon: CheckSquare, primary: true },
     { label: t('student.dashboard.actions.screening'), href: '/student/screening', icon: Brain },
@@ -197,7 +197,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="fade-in space-y-6">
-      {/* Бет тақырыбы мен сәлемдесу */}
+      {/* Тақырып пен сәлемдесу */}
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">
           {user?.name?.split(' ')[0] || t('nav.roles.student')}
@@ -205,7 +205,7 @@ export default function StudentDashboard() {
         <p className="text-sm text-zinc-500 mt-1">{t('student.dashboard.subtitle')}</p>
       </div>
 
-      {/* Ақылды ескертулер блогы */}
+      {/* Ескертулер блогы */}
       {alerts.length > 0 && (
         <div className="space-y-2">
           {alerts.map((alert, i) => (
@@ -223,7 +223,7 @@ export default function StudentDashboard() {
         </div>
       )}
 
-      {/* Апталық орташа метрика карталары */}
+      {/* Апталық орташа метрикалар */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {['mood', 'stress', 'sleep', 'energy'].map((key) => {
           const Icon = METRIC_ICONS[key];
@@ -240,7 +240,7 @@ export default function StudentDashboard() {
                     <Icon className="w-3.5 h-3.5 text-zinc-400" />
                   </div>
                 </div>
-                {/* Орташа мән және прогресс жолағы */}
+                {/* Орташа мән мен прогресс жолағы */}
                 <div className="text-2xl font-bold text-zinc-50 mb-3">
                   {val || '—'}
                   <span className="text-xs text-zinc-600 font-normal ml-1">/5</span>
@@ -257,12 +257,12 @@ export default function StudentDashboard() {
         })}
       </div>
 
-      {/* Динамика сызбасы картасы */}
+      {/* Динамика сызбасы */}
       <Card className="border-zinc-800 bg-zinc-900">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <CardTitle className="text-sm font-medium text-zinc-300">{t('student.dashboard.moodChart')}</CardTitle>
-            {/* Белсенді метрикаларды қосу/өшіру батырмалары */}
+            {/* Метрика қосу/өшіру батырмалары */}
             <div className="flex gap-1.5 flex-wrap">
               {METRIC_KEYS.map((key) => (
                 <button
@@ -287,7 +287,7 @@ export default function StudentDashboard() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Check-in деректері болса сызба, болмаса бос күй */}
+          {/* Check-in болса сызба, болмаса бос күй */}
           <div className="chart-container h-64">
             {checkIns.length > 0 ? (
               <Line data={chartData} options={chartOptions} />
@@ -303,7 +303,7 @@ export default function StudentDashboard() {
         </CardContent>
       </Card>
 
-      {/* AI инсайт картасы */}
+      {/* AI инсайт */}
       <Card className="border-zinc-800 bg-zinc-900">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -311,7 +311,7 @@ export default function StudentDashboard() {
               <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
               {t('student.dashboard.aiInsight')}
             </CardTitle>
-            {/* Инсайтты жабу батырмасы */}
+            {/* Жабу батырмасы */}
             {insight && (
               <button
                 onClick={() => setInsight(null)}
@@ -323,7 +323,7 @@ export default function StudentDashboard() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Инсайт жүктелмеген кезде сұрау батырмасы */}
+          {/* Инсайт жоқ кезде сұрау батырмасы */}
           {!insight && !insightLoading && (
             <div className="flex flex-col items-start gap-3">
               <p className="text-sm text-zinc-500">
@@ -355,7 +355,7 @@ export default function StudentDashboard() {
           {insightError && (
             <p className="text-sm text-red-400">{insightError}</p>
           )}
-          {/* Markdown форматында AI инсайт мәтіні */}
+          {/* AI инсайт мәтіні (markdown) */}
           {insight && (
             <div className="prose prose-sm prose-invert max-w-none text-zinc-300 [&_strong]:text-zinc-100 [&_ul]:text-zinc-400 [&_li]:marker:text-zinc-600">
               <ReactMarkdown>{insight}</ReactMarkdown>
@@ -364,7 +364,7 @@ export default function StudentDashboard() {
         </CardContent>
       </Card>
 
-      {/* Сізге ұсынылады : matchingEngine талдауы бойынша top-3 маман */}
+      {/* Ұсынылған top-3 маман */}
       {recommendations.length > 0 && (
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
@@ -436,9 +436,9 @@ export default function StudentDashboard() {
         </Card>
       )}
 
-      {/* Төменгі қатар: жылдам әрекеттер және сеанс статистикасы */}
+      {/* Төменгі қатар: жылдам әрекеттер мен статистика */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Жылдам сілтемелер картасы */}
+        {/* Жылдам сілтемелер */}
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-zinc-300">{t('student.dashboard.quickActions')}</CardTitle>
@@ -467,7 +467,7 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
 
-        {/* Кездесу және check-in санақтары картасы */}
+        {/* Кездесу мен check-in санақтары */}
         <Card className="border-zinc-800 bg-zinc-900">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-zinc-300">{t('student.appointments.title')}</CardTitle>
